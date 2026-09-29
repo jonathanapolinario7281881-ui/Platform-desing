@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System Health — v4 settled</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.content{flex-direction:column}
+.band{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:0 12px;height:44px;border-radius:8px;border:1px solid #1F6B45;background:#0F2119}
+.band .lvl{font-size:16px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.cap{height:26px;display:flex;align-items:center;gap:5px;padding:0 8px;border-radius:5px;border:1px solid #2A4A3A;background:#0B1A13;font-size:11px;white-space:nowrap}
+.cap small{font-size:9.5px;color:var(--muted);letter-spacing:.06em;font-weight:700}
+.cols{flex-grow:1;min-height:0;display:flex;gap:8px}
+.ck{display:flex;gap:7px;align-items:baseline;font-size:11.5px;line-height:1.25;padding:1px 0;border-bottom:1px solid var(--row)}
+.ck i{font-style:normal;color:var(--green);font-weight:700;width:12px;flex-shrink:0}
+.ck small{color:var(--dim);font-size:10px}
+.sub{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-top:4px}
+.crow{display:grid;grid-template-columns:168px 92px 70px 46px 1fr;column-gap:8px;align-items:center;min-height:33px;border-bottom:1px solid var(--row);padding:0 6px;font-size:11.5px}
+.two{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.two small{font-size:9.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{display:inline-block;width:7px;height:7px;border-radius:4px;background:var(--green);margin-right:5px;vertical-align:1px}
+.lv{font-size:9.5px;font-weight:700;letter-spacing:.05em}
+.lvR{color:#FF9EA1}.lvA{color:var(--amber)}
+.bar{flex-grow:1;height:6px;border-radius:3px;background:#1F2733}
+.bar div{height:6px;border-radius:3px;background:#5AA2FF}
+.sp{display:flex;align-items:center;gap:10px;font-size:11px;height:18px}
+.sp span:first-child{width:196px;white-space:nowrap;color:var(--soft)}
+.sp span:last-child{width:52px;text-align:right}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);row-gap:6px;column-gap:10px}
+.tl .l{font-size:9.5px;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+.tl .v{font-family:'IBM Plex Mono',monospace;font-size:13.5px;white-space:nowrap}
+.kv2{display:grid;grid-template-columns:158px 1fr;column-gap:8px;row-gap:4px;font-size:11.5px;align-items:center}
+.kv2 .k{font-size:9.5px;font-weight:700;letter-spacing:.07em;color:var(--muted)}
+.lrow{display:grid;grid-template-columns:62px 34px 118px 1fr;column-gap:8px;align-items:center;height:24px;border-bottom:1px solid var(--row);font-size:11px}
+.inc{font-size:11px;line-height:1.3;color:var(--soft);display:flex;gap:7px}
+.inc .mono{color:var(--dim);font-size:10.5px;flex-shrink:0}
+.slot{height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;border-radius:5px;border:1px solid #2E3A4A;background:#161D28;font-size:11px;white-space:nowrap}
+.lg{font-size:11px;line-height:1.35;color:var(--soft)}
+.lg b{letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const H = [];
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">System Health</span><span class="env">PAPER</span><span class="autop">AUTO OFF — YOU TRADE</span>
+<div style="flex-grow:1"></div>
+<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span>
+<span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono g nw" style="font-size:12.5px">+$233.00 · +4.66%</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>
+<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:42:18</span><span class="ell so" style="font-size:11px">ABCD BUY partly filled · 300 of 521 @ $2.15 · still working, no higher than $2.24 · size limited by cash</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (15) ▸</span></div>`);
+
+const band = `<div class="band"><span class="dot" style="width:10px;height:10px;border-radius:5px;margin:0"></span><span class="lvl g">HEALTHY</span><span class="so nw" style="font-size:12px">— everything is working · all checks passed <span class="mono">07:42:30</span></span>
+ <div style="flex-grow:1"></div><span class="lab" style="margin-right:2px">WHAT WORKS NOW</span>
+ <span class="cap"><small>AUTO CAN START</small><b class="g">yes</b></span>
+ <span class="cap"><small>YOUR BUY / SHORT</small><b class="g">allowed</b></span>
+ <span class="cap"><small>EXITS</small><b class="g">available</b></span>
+ <span class="cap"><small>STRATEGIES</small><b class="g">all available</b></span>
+ <span class="btn" style="height:28px;margin-left:4px">↻ Run all checks now</span></div>`;
+
+// column 1 — checks + levels + source map
+const must = [
+ ['Approved versions loaded','v0.3.1 · r12 · p4'],
+ ['PAPER / LIVE clearly set','PAPER settings loaded'],
+ ['Alpaca connected, correct account','cash and BP read'],
+ ['Leverage 1× at Alpaca = platform','long-only · Phase 1'],
+ ['Positions and orders match Alpaca','IN SYNC'],
+ ['No intraday margin call',''],
+ ['Market data (Massive) live, not stale',''],
+ ['Clock synchronized','drift 0.4 ms'],
+ ['Market calendar and session correct','pre-market'],
+ ['Risk engine and loss limits loaded',''],
+ ['Journal and database writing',''],
+ ['STOP AUTO and FLATTEN ALL path working','tested 04:00'],
+];
+const should = [
+ ['IBKR Level 2 logged in','Level 2 strategies need it'],
+ ['News & filings sources fresh','Benzinga · SEC · FDA'],
+ ['AI service ready','Ask AI + AI context check'],
+];
+const ck = a => a.map(x=>`<div class="ck"><i>✓</i><span>${x[0]}${x[1]?` <small>· ${x[1]}</small>`:''}</span></div>`).join('');
+const col1 = `<div class="col" style="flex:0 0 352px">
+<section class="panel" style="gap:2px">
+ <div class="ptitle"><b>START-UP &amp; SAFETY CHECKS</b><span>15 of 15 passed · <span class="mono">07:42:30</span></span></div>
+ <div class="sub">MUST PASS — ONE FAILURE BLOCKS AUTO AND GOING LIVE</div>${ck(must)}
+ <div class="sub" style="margin-top:3px">SHOULD PASS — IF NOT: DEGRADED, STILL SAFE TO TRADE</div>${ck(should)}
+ <div class="note" style="margin-top:5px">Runs from 4:00 a.m. and all session. Already LIVE: a failure blocks new risk per its rule, exits stay available — never switched back to PAPER by itself.</div>
+</section>
+<section class="panel" style="gap:4px">
+ <div class="ptitle"><b>THE THREE HEALTH WORDS</b><span>same word in the top bar</span></div>
+ <div class="lg"><b class="g">HEALTHY</b> — every check passes.</div>
+ <div class="lg"><b class="am">DEGRADED</b> — something is missing, trading still safe; the band says what is off.</div>
+ <div class="lg"><b style="color:#FF9EA1">NOT SAFE TO TRADE</b> — new entries blocked; exits available whenever Alpaca can be reached.</div>
+</section>
+<section class="panel" style="flex-grow:1;gap:3px">
+ <div class="ptitle"><b>STRATEGIES · WHAT EACH NEEDS</b><span>example</span></div>
+ ${[['Long engine','Alpaca · Massive','available','g'],['Level 2 strategies','+ IBKR Level 2','available','g'],['AI context check','+ AI service','available','g'],['Short engine','PAPER ONLY · Phase 3','locked','mu']].map(r=>`<div style="display:grid;grid-template-columns:128px 1fr 64px;column-gap:6px;font-size:11px;padding:2px 0;border-bottom:1px solid var(--row)"><span>${r[0]}</span><span class="dm">${r[1]}</span><span class="${r[3]} r">${r[2]}</span></div>`).join('')}
+ <div class="note">Each strategy declares its sources (news, SEC, FDA too); a missing one turns off only the strategies that need it — the band names them.</div>
+</section>
+</div>`;
+
+// column 2 — connections, speed, data quality, source map
+const C = [
+ ['ORDERS · ALPACA','paper PA3••••9F2 · orders, fills, cash','connected','0.3 s ago','38 ms','R','NOT SAFE TO TRADE','AUTO and new entries blocked · Critical'],
+ ['LEVEL 2 · IBKR','logged in · 3 of 3 slots','connected','0.03 s ago','24 ms','A','DEGRADED','Level 2 strategies off · Attention'],
+ ['MARKET DATA · MASSIVE','trades · whole market','connected','0.02 s ago','18 ms','R','NOT SAFE TO TRADE','new entries blocked · exits work · Critical'],
+ ['MARKET DATA · MASSIVE','quotes · whole market','connected','0.01 s ago','16 ms','R','NOT SAFE TO TRADE','new entries blocked · exits work · Critical'],
+ ['NEWS · BENZINGA','headlines','live','8 s ago','—','A','DEGRADED','strategies that need it: off · NEWS UNKNOWN'],
+ ['FILINGS · SEC EDGAR','S-1, S-3, 424B, 8-K','checked','07:41','—','A','DEGRADED','strategies that need it: off · SEC CHECK UNAVAILABLE'],
+ ['FDA · openFDA','approvals, clearances','checked','06:00','—','A','DEGRADED','strategies that need it: off · FDA CHECK UNAVAILABLE'],
+ ['AI SERVICE','~3 s per answer · est. $0.21 today','ready','07:42:41','—','A','DEGRADED','AI context check off · trading not affected'],
+];
+const conns = C.map((c,i)=>`<div class="crow"><span class="two"><b style="font-size:11px;letter-spacing:.03em">${c[0]}</b><small>${c[1]}</small></span>
+ <span class="g"><span class="dot"></span>${c[2]}</span><span class="mono so" style="font-size:10.5px">${c[3]}</span><span class="mono r" style="font-size:10.5px">${c[4]}</span>
+ <span class="two"><span class="lv lv${c[5]}">${c[6]}</span><small>${c[7]}</small></span></div>${i===0?`<div style="display:flex;gap:6px;align-items:center;padding:3px 6px 4px 12px;border-bottom:1px solid var(--row);font-size:10.5px;color:var(--dim);white-space:nowrap"><span style="color:var(--muted)">↳ checked 5 ways:</span><span class="g">✓</span>stream<span class="g">✓</span>API heartbeat<span class="g">✓</span>order endpoint<span class="g">✓</span>account endpoint<span class="g">✓</span>network · <span>status page: operational <i>(1 signal only)</i></span></div>`:''}`).join('');
+const S = [['Market event → our server (Massive)',21],['Level 2 update (IBKR) → our server',24],['Update → engine signal',4],['Signal → risk and margin check',2],['Check → order sent',3],['Order → Alpaca confirms',38],['Alpaca → first fill',120]];
+const speed = S.map(s=>`<div class="sp"><span>${s[0]}</span><div class="bar"><div style="width:${Math.min(100,s[1]/1.3)}%"></div></div><span class="mono">${s[1]} ms</span></div>`).join('');
+const col2 = `<div class="col" style="flex:1.62">
+<section class="panel" style="gap:0">
+ <div class="ptitle" style="margin-bottom:5px"><b>CONNECTIONS</b><span>status in words · last message time · what happens if it fails</span></div>
+ <div class="th" style="grid-template-columns:168px 92px 70px 46px 1fr;column-gap:8px;padding:0 6px"><span>CONNECTION</span><span>STATUS</span><span>LAST SEEN</span><span class="r">DELAY</span><span>IF IT FAILS</span></div>
+ ${conns}
+</section>
+<section class="panel" style="gap:3px">
+ <div class="ptitle"><b>SPEED OF EACH STEP</b><span class="am">sample values — real measured times replace these</span></div>
+ ${speed}
+ <div class="sp" style="border-top:1px solid var(--row);padding-top:2px;height:20px"><span><b>Signal → fill, total</b></span><div style="flex-grow:1"></div><span class="mono"><b>167 ms</b></span></div>
+</section>
+<section class="panel" style="flex-grow:1;gap:6px">
+ <div class="ptitle"><b>DATA QUALITY</b><span>today</span></div>
+ <div class="tiles">
+  <div class="tl"><div class="l">STOCKS WATCHED</div><div class="v">8,012</div></div>
+  <div class="tl"><div class="l">RANKED LIST</div><div class="v">every 1 s</div></div>
+  <div class="tl"><div class="l">STALE SYMBOLS</div><div class="v g">0</div></div>
+  <div class="tl"><div class="l">GAPS REPAIRED</div><div class="v">1 today</div></div>
+  <div class="tl"><div class="l">HALTED NOW</div><div class="v">1 (MNOP)</div></div>
+  <div class="tl"><div class="l">ORDERS REJECTED</div><div class="v">1</div></div>
+  <div class="tl"><div class="l">ALERTS TODAY</div><div class="v">15</div></div>
+  <div class="tl"><div class="l">AI CHECK AGE</div><div class="v g">under 60 s</div></div>
+ </div>
+ <div class="note" style="margin-top:auto;border-top:1px solid var(--row);padding-top:5px"><b class="mu" style="letter-spacing:.06em">WHERE EACH NUMBER COMES FROM</b> — quotes and trades: Massive · Level 2 book: IBKR · orders, fills, positions, cash, buying power, borrow: Alpaca · news: Benzinga · filings: SEC EDGAR · FDA: openFDA. Every event keeps its source and three times (provider, received, processed) for Review and Replay.</div>
+</section>
+</div>`;
+
+// column 3 — account safety, L2 slots, incidents, server
+const L = [['07:17:50','3','WXYZ → QRST','QRST (#2) more urgent'],['06:55:10','3','EFGH → WXYZ','engine entry setup'],['06:40:12','2','KLMN → NOPQ','FDA news, rank jump'],['06:05:30','1','CDEF → ABCD','highest urgency']];
+const I = [['07:12:03','Massive reconnect (1.2 s) · resynced, no gaps left'],['06:05:40','Alpaca rejected an order: symbol halted (expected)'],['05:30:11','News feed slow (4 s) · recovered on its own'],['04:00:02','Session start · all 15 checks passed'],['03:58:40','IB Gateway daily restart · logged back in']];
+const col3 = `<div class="col" style="flex:1">
+<section class="panel" style="gap:5px">
+ <div class="ptitle"><b>ACCOUNT SAFETY · ALPACA</b><span>checked <span class="mono">07:42:30</span></span></div>
+ <div class="kv2">
+  <span class="k">INTRADAY MARGIN CALLS</span><span class="mono g" style="font-size:12.5px"><b>0 — TARGET 0</b></span>
+  <span class="k">MARGIN STAGE</span><span><b class="g">NORMAL</b> <span class="dm">· then HEADROOM LOW · then CALL</span></span>
+  <span class="k">LEVERAGE</span><span>1× at Alpaca <span class="g">=</span> 1× in the platform <span class="g">✓ match</span></span>
+  <span class="k">SHORTING</span><span>OFF at Alpaca (long-only) · Phase 1 of 4</span>
+  <span class="k">BROKER CHECK</span><span style="display:flex;gap:8px;align-items:center"><b class="g">IN SYNC</b><span class="mono dm" style="font-size:10.5px">07:42:30</span><span class="btn" style="height:22px;font-size:10.5px">check now</span></span>
+  <span class="k">CLOSED BY ALPACA</span><span>none today</span>
+ </div>
+</section>
+<section class="panel" style="gap:4px">
+ <div class="ptitle"><b>LEVEL 2 SLOTS · IBKR</b><span>3 of 3 in use</span></div>
+ <div style="display:flex;gap:6px"><span class="slot"><b>1</b> ABCD <span class="chip you" style="height:15px;font-size:8.5px;padding:0 3px">YOURS</span></span><span class="slot"><b>2</b> NOPQ</span><span class="slot"><b>3</b> QRST</span></div>
+ <div class="th" style="grid-template-columns:62px 34px 118px 1fr;column-gap:8px;padding:0"><span style="padding-left:4px">TIME</span><span>SLOT</span><span>CHANGE</span><span>WHY</span></div>
+ ${L.map(l=>`<div class="lrow"><span class="mono so" style="font-size:10.5px;padding-left:4px">${l[0]}</span><span>${l[1]}</span><span class="nw">${l[2]}</span><span class="dm ell">${l[3]}</span></div>`).join('')}
+</section>
+<section class="panel" style="flex-grow:1;gap:4px">
+ <div class="ptitle"><b>INCIDENTS TODAY</b><span>reconnects and errors · also in Review</span></div>
+ ${I.map(i=>`<div class="inc"><span class="mono">${i[0]}</span><span>${i[1]}</span></div>`).join('')}
+ <div class="note" style="margin-top:auto">Every incident is saved in the audit log and listed in Review's Day events (connection incidents in Performance).</div>
+</section>
+<section class="panel" style="gap:5px">
+ <div class="ptitle"><b>SERVER &amp; CONTROL PANELS</b><span>the engine runs on the cloud server</span></div>
+ <div class="tiles" style="grid-template-columns:repeat(4,1fr)">
+  <div class="tl"><div class="l">CPU</div><div class="v">34%</div></div><div class="tl"><div class="l">MEMORY</div><div class="v">41%</div></div>
+  <div class="tl"><div class="l">EVENT BACKLOG</div><div class="v g">0</div></div><div class="tl"><div class="l">DISK</div><div class="v">22% used</div></div>
+ </div>
+ <div style="font-size:11px;color:var(--soft)">This laptop <span class="g"><span class="dot"></span>connected</span> · Phone <span class="g"><span class="dot"></span>last seen 07:40</span></div><div style="font-size:10.5px;color:var(--soft);margin-top:-2px">PHONE NOTIFICATIONS · <span class="g">OS PERMISSION ALLOWED</span> <span class="dm">(verified 07:40)</span></div>
+ <div class="note">If the laptop goes offline nothing stops; the phone shows "Control panel offline · AUTO ON".</div>
+</section>
+</div>`;
+
+H.push(`<div class="content">${band}<div class="cols">${col1}${col2}${col3}</div></div>`);
+document.getElementById('win').innerHTML = H.join('');
+</script>
+</body>
+</html>

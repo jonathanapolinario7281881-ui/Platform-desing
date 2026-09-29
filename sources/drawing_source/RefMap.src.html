@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Windows map</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:20px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.c{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
+.c.main{border-color:#5AA2FF;grid-row:span 2}
+.c.x{border-color:#3E5470;background:#111A28}
+.h{display:flex;align-items:baseline;gap:8px}
+.h b{font-size:15px}
+.h .st{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--green);border:1px solid #1F6B45;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.from{font-size:11px;color:var(--muted)}
+ul{margin:2px 0 0 16px;padding:0;font-size:11.5px;line-height:1.45;color:var(--soft)}
+.dr{font-size:10px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-top:auto;padding-top:4px;border-top:1px solid var(--row)}
+</style>
+</head>
+<body>
+<h1>Windows map — where everything lives (v4, updates File 9 v3 Figure 9)</h1>
+<p class="sub">The main window never closes and holds only what you need to act in seconds; anything you read gets its own window, one click away in Windows ▾ (7 windows). Every separate window has the same thin top bar (← MAIN WINDOW / F2, PAPER/LIVE, AUTO + STOP AUTO, clock, blink chips, Day P&amp;L, health, Windows ▾, FLATTEN ALL) and the 22 px alert line. A planning map, not a window of the platform. Section numbers refer to the decision log; drawing IDs refer to the mockups folder.</p>
+<div class="grid">
+ <div class="c main"><div class="h"><b>Main window</b><span class="st">SETTLED · 1–5h</span></div><div class="from">Always open · 1536 × 864</div>
+  <ul><li>Full top bar: PAPER/LIVE (red frame in LIVE), AUTO block (Turn AUTO on · hold 2 s / STOP AUTO / Resume AUTO), session clock, equity, Day P&amp;L, cash / total BP, loss meter, health, Ask AI, Windows ▾, FLATTEN ALL</li>
+  <li>22 px alert line (Critical &gt; Attention &gt; Info) → today's alert history</li>
+  <li>My list on top + Ranked 50 below, 14 columns, re-sort ~1/s, hover freeze</li>
+  <li>Order size bar: 10% · 25% · 50% · $2,000 · FULL CAP (one size everywhere)</li>
+  <li>Three Level 2 panels (IBKR) with the four fixed buttons, pin in AUTO OFF</li>
+  <li>Strip "SELECTED STOCK + OPEN POSITIONS": Selected → YOURS → ENGINE'S, exits one click, + STOP, order status, CANCEL ALL ENTRIES</li>
+  <li>Click = Selected card · double-click = Stock detail · no pop-up card from the main list</li>
+  <li>Turning AUTO on and Resume AUTO happen only here</li></ul>
+  <div class="dr">M1 · M2 · M3 · M4 · M5 · M6</div></div>
+ <div class="c"><div class="h"><b>1 · Stock detail</b><span class="st">SETTLED · 7d</span></div><div class="from">Double-click a ticker · Windows ▾ · "Full page" on the trade card · ⌕ search any of ~8,000</div>
+  <ul><li>Big chart, Level 2 (slot or "NO LEVEL 2 SLOT" + the true trading line), Time &amp; Sales</li><li>Engine view, AI analysis with age, news, SEC dilution line with check time</li><li>The four buttons + PIN TO LEVEL 2, same states as the cards</li></ul>
+  <div class="dr">SD1 · SD2 · SD3</div></div>
+ <div class="c"><div class="h"><b>2 · AI Assistant</b><span class="st">SETTLED · 7e</span></div><div class="from">Ask AI · Windows ▾ · "Ask AI about XXXX" · "Ask AI about this trade"</div>
+  <ul><li>Read-only: explains, never places or cancels orders</li><li>Sources with times on every answer; SOURCE CONFLICT shown</li><li>Tickers open the trade card; historical context never looks live</li></ul>
+  <div class="dr">AI1</div></div>
+ <div class="c"><div class="h"><b>3 · Positions &amp; Orders</b><span class="st">SETTLED · 7b</span></div><div class="from">Windows ▾ · "Positions &amp; Orders ↗" on the strip</div>
+  <ul><li>Every position by owner, working orders, fills, reallocations</li><li>Broker check vs Alpaca (IN SYNC / MISMATCH, two levels)</li><li>CANCEL ALL ENTRIES, OVERRIDE EXIT, CANCEL ENGINE ENTRY, FLATTEN report</li></ul>
+  <div class="dr">PO1 · PO2 · PO3</div></div>
+ <div class="c"><div class="h"><b>4 · Review</b><span class="st">SETTLED · 7a</span></div><div class="from">Windows ▾ · "why" links · "Ask AI about this trade"</div>
+  <ul><li>Journal · Replay (read-only, ms event timeline) · Performance</li><li>You vs Engine, would-have trades, incidents, margin calls 0 — TARGET 0</li><li>PAPER / LIVE / RESEARCH results filter, never added together</li></ul>
+  <div class="dr">RV1 · RV2 · RV3 · RV4</div></div>
+ <div class="c"><div class="h"><b>5 · News &amp; Catalysts</b><span class="st">SETTLED · 7f</span></div><div class="from">Windows ▾ · a headline click in Stock detail</div>
+  <ul><li>Ranked 50 + My list + all open positions by default; All market / search</li><li>A–D grades, MOVE SINCE (from receipt), grouped events, RELATED rows</li><li>Dilution and filing watch (90 days, TEST)</li></ul>
+  <div class="dr">NW1</div></div>
+ <div class="c"><div class="h"><b>6 · System Health</b><span class="st">SETTLED · 7g</span></div><div class="from">The health word in any top bar · Windows ▾</div>
+  <ul><li>Status band + WHAT WORKS NOW; must-pass / should-pass checks</li><li>Connections with "if it fails"; account safety; recovery checks</li><li>Speed, data quality, incidents, server and control panels</li></ul>
+  <div class="dr">SH1 · SH2</div></div>
+ <div class="c"><div class="h"><b>7 · Settings</b><span class="st">SETTLED · 7c</span></div><div class="from">Windows ▾ · every change logged</div>
+  <ul><li>PAPER and LIVE setting sets; NOW / RISKIER → NEXT DAY (+ PIN) / LOCKED / TEST</li><li>Risk, leverage 1×, sizes, execution, strategies, versions, connections, broker setup</li><li>Screen &amp; sounds, change history</li></ul>
+  <div class="dr">SET1 · SET2 · SET3</div></div>
+ <div class="c x"><div class="h"><b>Pop-up trade card</b><span class="st">SETTLED · 7h</span></div><div class="from">Any ticker in any window · a top-bar blink chip</div>
+  <ul><li>The same card as the strip card; the buy is the second click</li><li>Closing it never cancels an order; brief opening lock (TEST)</li><li>"LIVE CARD · CURRENT MARKET" from Review / historical AI</li></ul>
+  <div class="dr">C1 · C2</div></div>
+ <div class="c x"><div class="h"><b>Thin top bar</b><span class="st">SETTLED · 7h</span></div><div class="from">Every separate window · ← MAIN WINDOW or F2 goes back instantly</div>
+  <ul><li>STOP AUTO everywhere; AUTO on / Resume only in the main window</li><li>Chips for stocks that matter (incl. all positions), EXIT? first</li><li>Fit-tested at 1536 px; FLATTEN ALL never pushed out</li></ul>
+  <div class="dr">T1</div></div>
+ <div class="c x"><div class="h"><b>Phone view</b><span class="st">SETTLED · 7h</span></div><div class="from">Your phone · for when the laptop is closed</div>
+  <ul><li>State, P&amp;L, alerts, positions; STOP AUTO and FLATTEN ALL (hold)</li><li>Sell your own positions (hold, protected, locks when stale)</li><li>Never buys, never turns AUTO on, never switches PAPER/LIVE; SERVER UNREACHABLE comes from the outside watchdog</li></ul>
+  <div class="dr">PH1</div></div>
+ <div class="c x"><div class="h"><b>Reference pages</b><span class="st">SETTLED · 7h</span></div><div class="from">For you and the coder</div>
+  <ul><li>Who owns a position (replaces v3 §7)</li><li>Signals, colors, sounds and alerts (replaces v3 §8)</li><li>This windows map (replaces v3 Figure 9)</li></ul>
+  <div class="dr">REF1 · REF2 · REF3</div></div>
+</div>
+</body>
+</html>

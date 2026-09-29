@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signals, colors, sounds and alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:20px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:16px 0 8px;font-weight:700}
+.rule{border:1px solid #5AA2FF;background:#111A28;border-radius:9px;padding:10px 14px;font-size:14.5px;font-weight:600}
+.sw{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.s{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.4;color:var(--soft)}
+.s .c{height:8px;border-radius:4px;margin-bottom:6px}
+.s b{color:var(--text)}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--panel);border:1px solid var(--line)}
+th{font-size:9.5px;letter-spacing:.07em;color:var(--muted);text-align:left;font-weight:700;background:#161D28;padding:6px 10px}
+td{padding:6px 10px;border-top:1px solid var(--row);vertical-align:top;line-height:1.4;color:var(--soft)}
+td b{color:var(--text)}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--soft)}
+.box b{color:var(--text)}
+.grid{display:grid;gap:10px}
+.lv{font-size:10px;font-weight:700;letter-spacing:.07em;padding:2px 7px;border-radius:4px;display:inline-block}
+.tkb{display:inline-block;font-weight:700;padding:1px 6px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>Signals, colors, sounds and alerts — reference page (v4, replaces File 9 v3 §8)</h1>
+<p class="sub">From the settled decision log (sections 5, 5b, 5c, 5f, 5h, 7d, 7f, 7g). Times and thresholds are starting values (TEST), tuned in paper testing.</p>
+<div class="rule">If it blinks, it comes from the engine. A badge that doesn't blink comes from the AI. Every color also has a word or symbol, so color is never the only clue. Problems never blink — they use steady banners and sound.</div>
+
+<h2>COLORS — ONE JOB EACH</h2>
+<div class="sw">
+ <div class="s"><div class="c" style="background:#34C77B"></div><b>Green</b> — up, buy, profit</div>
+ <div class="s"><div class="c" style="background:#F0555A"></div><b>Red</b> — down, sell, loss, danger</div>
+ <div class="s"><div class="c" style="background:#8B6AD8"></div><b>Purple</b> — short</div>
+ <div class="s"><div class="c" style="background:#F472B6"></div><b>Pink</b> — EXIT? only</div>
+ <div class="s"><div class="c" style="background:#5CE0D2"></div><b>Teal</b> — the engine's positions (and would-have trades, dashed)</div>
+ <div class="s"><div class="c" style="background:#5AA2FF"></div><b>Blue</b> — selection and navigation</div>
+ <div class="s"><div class="c" style="background:#7D8899"></div><b>Grey</b> — halted, unavailable, disabled</div>
+ <div class="s"><div class="c" style="background:#F2A93B"></div><b>Amber</b> — "be careful", always with a word: AI CAUTION, SPR box, SIZE LIMITED, FULL CAP, soft limit, give-back, DEGRADED</div>
+ <div class="s"><div class="c" style="background:#F2C94C"></div><b>Yellow</b> — things you set: My list ★, PINNED, your STOP line</div>
+ <div class="s"><div class="c" style="background:#E7EAEE"></div><b>White box</b> — big order showing in the Level 2 book (information, not support)</div>
+</div>
+
+<h2>SIGNALS AND MARKERS</h2>
+<table>
+<tr><th style="width:250px">LOOKS LIKE</th><th>MEANS</th><th style="width:360px">WHERE</th></tr>
+<tr><td><span class="tkb" style="background:#16784A;border:1px solid #34C77B">ABCD</span> <b class="g">▲ strong up</b></td><td>Engine sees a high-confidence upward condition now — not a guarantee. The whole ticker box pulses about 1×/s for ~5 s, stays solid green while the signal lasts, turns plain when it ends; blinks again only on a genuinely new trigger (anti-flicker).</td><td>List row, Level 2 panel, cards, top-bar chip</td></tr>
+<tr><td><span class="tkb" style="background:#A8262B;border:1px solid #F0555A">LMNO</span> <b class="rd">▼ strong down</b></td><td>Same for a downward (short) condition.</td><td>Same</td></tr>
+<tr><td><b style="color:#FBCFE8">EXIT?</b> (pink)</td><td>On a stock you hold: momentum fading, the engine would exit if it had the trigger. Information only in AUTO OFF.</td><td>Your card, edge marker, top-bar chip, phone</td></tr>
+<tr><td><span class="chip" style="color:#34C77B;border-color:#1F6B45">AI GO · 40 s</span> CAUTION · NO-GO</td><td>The AI's context verdict with its age; marked OLD after 3 min (display only). Never blinks.</td><td>List, panels, cards, Stock detail</td></tr>
+<tr><td><span class="chip" style="color:#34C77B;border-color:#1F6B45">NEWS A · 11m</span></td><td>Grade of the newest headline (A very good … D bad), bright ~1 h then dim (display only). NEWS UNKNOWN when the news source is down — never read as "no news".</td><td>NEWS column, panels, cards, News &amp; Catalysts</td></tr>
+<tr><td><b class="mu">HALTED · 2:40 elapsed</b></td><td>Trading paused; an official resume time only when the exchange publishes one.</td><td>Row, card, panel, phone</td></tr>
+<tr><td>▲28 · <span class="chip" style="color:var(--blue);border-color:#3E5470">NEW</span> · ★</td><td>Rank jump · just entered the Top 50 (20–60 s) · also on My list.</td><td>List</td></tr>
+<tr><td><span class="chip" style="color:var(--amber);border-color:#F2A93B">$0.04</span> <span class="chip" style="background:#F0555A;color:#fff;border-color:#F0555A">$0.015</span></td><td>Spread (SPR) wide / very wide for the price (starting 1% / 2%).</td><td>List, panels, cards</td></tr>
+</table>
+
+<div class="grid" style="grid-template-columns:1.25fr 1fr;margin-top:16px">
+<div>
+<h2 style="margin-top:0">ALERT LEVELS</h2>
+<table>
+<tr><th style="width:120px">LEVEL</th><th>EVENTS</th></tr>
+<tr><td><span class="lv" style="background:#232B38;color:#C9D1DB">INFO</span><br><span class="dm" style="font-size:11px">quiet line</span></td><td>Fills (short one-time sound for yours, a softer one for the engine's), rank jumps, Level 2 swaps.</td></tr>
+<tr><td><span class="lv" style="background:#6B4A16;color:#FFE2B0">ATTENTION</span><br><span class="dm" style="font-size:11px">sound + amber/pink line</span></td><td>EXIT?, soft limit, give-back, partial fill, AI turns NO-GO on a stock you hold, BUY/SHORT rejected, IBKR needs login / Level 2 down (DEGRADED), news / SEC / FDA / AI source down.</td></tr>
+<tr><td><span class="lv" style="background:#A8262B;color:#fff">CRITICAL</span><br><span class="dm" style="font-size:11px">own sound every ~10 s until SEEN; red line</span></td><td>Exit rejected, EXIT NOT FILLED, FLATTEN INCOMPLETE, hard limit, NOT SAFE TO TRADE (Alpaca, Massive, clock), halt on a stock you hold, intraday margin call, broker sync mismatch, AUTO BLOCKED — ORDER LIMIT (order circuit breaker tripped).</td></tr>
+</table>
+<div class="box" style="margin-top:8px">SEEN stops the repeating sound only — the line stays red until the problem is really resolved. Priority Critical &gt; Attention &gt; Info; a lower alert never covers an unresolved critical one ("+1 more"). In LIVE, critical sounds can be turned down but not off. The alert line never moves anything on screen; clicking it opens today's alert history (time, ticker, event, seen / resolved).</div>
+</div>
+<div>
+<h2 style="margin-top:0">SOUNDS</h2>
+<div class="box">A different sound per event, each on/off in Settings:<br>
+green ▲ · red ▼ (only for stocks that matter to you: My list, the Level 2 slots, the Selected stock, open positions — other blinks are visual) · EXIT? · your fill · the engine's fill (softer) · position closed · order rejected · EXIT NOT FILLED · stop triggered · halt / resume on a held stock · soft / hard limit · FLATTEN COMPLETE / INCOMPLETE · connection problem / AUTO blocked.<br><br>
+<b>Anti-spam:</b> the same stock + signal sounds at most about once a minute; critical sounds always play. Sounds and blinks are drawn from events the engine already produced — they never delay it.</div>
+<h2>HEALTH WORDS</h2>
+<div class="box"><b class="g">HEALTHY</b> — every check passes · <b class="am">DEGRADED</b> — something is missing, trading still safe · <b style="color:#FF9EA1">NOT SAFE TO TRADE</b> — new entries blocked; exits available whenever Alpaca can be reached. Word + dot in every top bar and on the phone.</div>
+<h2>LATER</h2>
+<div class="box">Reduced Motion setting: a glow or border instead of pulsing.</div>
+</div>
+</div>
+</body>
+</html>

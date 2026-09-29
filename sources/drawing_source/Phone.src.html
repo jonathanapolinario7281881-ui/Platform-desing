@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone view</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 24px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+.row4{display:flex;gap:26px;justify-content:center}
+.pw{display:flex;flex-direction:column;align-items:center;gap:8px}
+.pt{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.phone{width:340px;height:736px;border-radius:40px;border:9px solid #04060A;outline:1px solid #2A3340;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.phone.live{box-shadow:inset 0 0 0 3px #E5484D}
+.sb{height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:600}
+.notch{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#000}
+.ph{padding:4px 12px 8px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);background:var(--panel)}
+.phr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pill{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.pP{border:1px solid #3E5470;background:#1B2433;color:#A9C7FF}.pL{border:1px solid #E5484D;background:#5A1216;color:#FFB3B5}
+.pOn{border:1px solid #1FA79B;background:#0D3533;color:var(--teal)}.pOff{border:1px solid #3A4556;background:#1A212C}.pBl{border:1px solid #A8262B;background:#2A1114;color:#FF9EA1}
+.hG{border:1px solid #1F6B45;background:#0F2119}.hGr{border:1px solid #3A4556;background:#161D28;color:var(--muted)}.hR{border:1px solid #A8262B;background:#2A1114;color:#FF9EA1}
+.dot{display:inline-block;width:7px;height:7px;border-radius:4px;margin-right:5px}
+.body{flex-grow:1;overflow:hidden;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+.bn{border-radius:7px;border:1px solid;padding:6px 9px;font-size:11px;line-height:1.35}
+.bnI{border-color:#3E5470;background:#111A28;color:#C9D8F0}.bnC{border-color:#A8262B;background:#3A1216;color:#FFD2D3}.bnA{border-color:#6B4A16;background:#231B0C;color:#FFE2B0}.bnG{border-color:#3A4556;background:#161D28;color:var(--soft)}
+.big{display:flex;align-items:flex-end;justify-content:space-between}
+.big .v{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600}
+.lab2{font-size:9.5px;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.meter{height:5px;border-radius:3px;background:#1F2733;position:relative}
+.sec2{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;margin-top:2px}
+.pos{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:6px 8px;display:flex;flex-direction:column;gap:4px}
+.pos .l1{display:flex;align-items:center;gap:6px;font-size:12px}
+.pos .l1 b{font-size:13.5px}
+.hb{height:30px;border-radius:6px;border:1px solid;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;position:relative;overflow:hidden;white-space:nowrap}
+.hb small{font-weight:500;font-size:9.5px;opacity:.9}
+.hSell{background:#A8262B;border-color:#D0454A;color:#fff}.hDis{background:#19202A;border-color:#2A3340;color:#7C8898}
+.foot{flex-shrink:0;padding:8px 10px 14px;border-top:1px solid var(--line);background:var(--panel);display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bigb{height:46px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:12.5px;font-weight:700;letter-spacing:.03em}
+.bigb small{font-size:9.5px;font-weight:500;opacity:.85}
+.al{display:flex;gap:6px;font-size:10.5px;line-height:1.3;color:var(--soft)}
+.al .mono{color:var(--dim);font-size:10px;flex-shrink:0}
+.notif{position:absolute;top:34px;left:8px;right:8px;border-radius:14px;background:rgba(40,44,52,.97);border:1px solid #4A5160;padding:8px 10px;font-size:11px;line-height:1.35;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.45;color:var(--soft)}
+.box b{color:var(--text)}
+</style>
+</head>
+<body>
+<h1>Phone view — watch and stop from anywhere</h1>
+<p class="sub">For when the laptop is closed: the engine runs on the cloud server, so trading continues without the laptop. The phone shows the state and can stop it; it never buys. Numbers are examples (same day as the other drawings); timings are TEST values.</p>
+<div class="row4" id="phones"></div>
+<div class="notes" style="grid-template-columns:repeat(4,1fr)">
+ <div class="box"><b>The phone can:</b> see PAPER / LIVE, AUTO, health, Day P&amp;L, equity, the loss meter, alerts and every open position · <b>STOP AUTO</b> (hold 1 s) · <b>FLATTEN ALL</b> (hold 1 s) · <b>SELL/EXIT your own positions</b> (hold 1 s, the same protected exit as the desk; SELL LOWER TO $x also needs the hold). Every phone action is logged "from phone".</div>
+ <div class="box"><b>The phone never:</b> buys or shorts · turns AUTO on or resumes it · switches PAPER ↔ LIVE (display only) · changes settings · OVERRIDE EXIT or CANCEL ENGINE ENTRY (engine positions only through FLATTEN ALL). Exits lock, with the reason, when the phone's data is old or offline, when execution isn't healthy, or when that stock has an UNKNOWN order.</div>
+ <div class="box" style="padding:8px 10px"><div style="border-radius:12px;background:rgba(40,44,52,.97);border:1px solid #4A5160;padding:8px 10px;font-size:11px;line-height:1.35;margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#AEB6C2"><b>PLATFORM WATCHDOG</b><span>now</span></div><b style="color:#FFB3B5">SERVER UNREACHABLE</b><br>No heartbeat from the trading server since 10:31:05. The platform can't be reached — if you must act, use Alpaca directly.</div><b>Outside watchdog</b> — a separate service outside the server's failure domain; notification authority only, no trading keys.</div>
+ <div class="box"><b>Notifications:</b> Critical always sent — can't be turned off inside the platform while LIVE; Attention your choice; Info never. The platform can't override the phone's own settings, so if notifications are blocked there the phone view (and System Health) says so. Tapping a notification opens the item. Sign-in with a PIN or Face ID. How the phone page is built is a build decision.</div>
+</div>
+<script>
+const sb=(t)=>`<div class="notch"></div><div class="sb"><span>${t}</span><span style="font-size:10.5px">●●● ▰</span></div>`;
+const head=(o)=>`<div class="ph"><div class="phr"><span class="pill ${o.live?'pL':'pP'}">${o.live?'LIVE — REAL MONEY':'PAPER'}</span><span class="pill ${o.autoC}">${o.auto}</span></div>
+ <div class="phr" style="justify-content:space-between"><span class="pill ${o.hC}"><span class="dot" style="background:${o.hDot}"></span>${o.health}</span><span style="font-size:10.5px;white-space:nowrap"><b class="am" style="font-size:9px;letter-spacing:.06em">${o.sess}</b> <span class="mono">${o.clock}</span></span></div></div>`;
+const money=(pl,neg,eq,used,lim)=>`<div class="big"><div><div class="lab2">DAY P&amp;L</div><div class="v ${neg?'rd':'g'}">${pl}</div></div><div style="text-align:right"><div class="lab2">EQUITY</div><div class="mono" style="font-size:13px">${eq}</div></div></div>
+ <div style="display:flex;align-items:center;gap:8px;font-size:10px"><span class="lab2">LOSS LIMIT</span><div class="meter" style="flex-grow:1"><div style="width:${used}%;height:5px;border-radius:3px;background:${used>=100?'#F0555A':used>50?'#F2A93B':'#5AA2FF'}"></div><div style="position:absolute;left:50%;top:-2px;width:1px;height:9px;background:#C9D1DB"></div></div><span class="mono">${lim}</span></div>`;
+const pos=(o)=>`<div class="pos"><div class="l1"><b>${o.tk}</b><span class="chip ${o.eng?'eng':'you'}" style="height:16px;font-size:9px">${o.eng?"ENGINE'S":'YOURS'}</span>${o.flag||''}<span style="margin-left:auto" class="mono ${o.neg?'rd':'g'}">${o.pl}</span></div>
+ <div style="font-size:10.5px;color:var(--dim)" class="mono">${o.line}</div>${o.btn||''}</div>`;
+const sell=(t,s,fill)=>`<div class="hb hSell">${fill?`<div style="position:absolute;left:0;top:0;bottom:0;width:${fill}%;background:rgba(255,255,255,.22)"></div>`:''}<span style="position:relative">${t}</span><small style="position:relative">${s}</small></div>`;
+const lock=(t)=>`<div class="hb hDis">🔒 ${t}</div>`;
+const foot=(stop)=>`<div class="foot"><div class="bigb" style="${stop?'background:#A8262B;border:1px solid #D0454A;color:#fff':'background:#19202A;border:1px solid #2A3340;color:#7C8898'}">STOP AUTO<small>${stop?'hold 1 s':'AUTO is off'}</small></div><div class="bigb" style="background:#2A1114;border:1px solid #E5484D;color:#FFB3B5">FLATTEN ALL<small>hold 1 s · everything</small></div></div>`;
+
+const P1 = `<div class="phone">${sb('7:42')}${head({auto:'AUTO ON — ENGINE CAN TRADE',autoC:'pOn',health:'HEALTHY',hC:'hG',hDot:'#34C77B',sess:'PRE-MARKET',clock:'07:42 ET'})}
+<div class="body">
+ <div class="bn bnI"><b>Control panel offline · AUTO ON</b> — laptop closed at 07:30; the engine keeps trading on the server.</div>
+ ${money('+$233.00 · +4.66%',false,'$5,233',0,'$0 / $600')}
+ <div class="sec2"><span>LATEST ALERTS</span><span class="bl">all 15 ▸</span></div>
+ <div class="al"><span class="mono">07:42:40</span><span>Engine bought NOPQ 200 of 500 @ $2.29 · entry still working</span></div>
+ <div class="al"><span class="mono">07:41:02</span><span><b style="color:#FBCFE8">EXIT?</b> GHIJ — engine would exit (information)</span></div>
+ <div class="sec2"><span>OPEN POSITIONS · 5 · scroll ▾</span><span>tap = details</span></div>
+ ${pos({tk:'GHIJ',flag:'<span class="chip" style="height:16px;font-size:9px;color:#FBCFE8;border-color:#9D4B7C;background:rgba(244,114,182,.18)">EXIT?</span>',pl:'+$53.00',line:'100 @ $12.40 · now $12.93',btn:sell('SELL/EXIT 100','hold 1 s')})}
+ ${pos({tk:'IJKL',pl:'+$36.12',line:'172 @ $7.60 · now $7.81',btn:sell('SELL/EXIT 172','hold 1 s')})}
+ ${pos({tk:'WXYZ',eng:1,pl:'+$56.00',line:'700 @ $1.79 · RISK LINE $1.72',btn:lock("engine's · FLATTEN ALL only")})}
+ ${pos({tk:'NOPQ',eng:1,pl:'+$4.00',line:'200 @ $2.29 · entry working ≤ $2.31',btn:lock("engine's · FLATTEN ALL only")})}
+</div>${foot(true)}</div>`;
+
+const P2 = `<div class="phone">${sb('10:16')}${head({auto:'AUTO OFF — YOU TRADE',autoC:'pOff',health:'HEALTHY',hC:'hG',hDot:'#34C77B',sess:'REGULAR',clock:'10:16 ET'})}
+<div class="body">
+ <div class="phr" style="gap:8px"><span class="bl" style="font-size:12px">‹ Positions</span><b style="font-size:18px;margin-left:6px">IJKL</b><span class="chip you" style="height:17px;font-size:9.5px">YOURS</span></div>
+ <div class="big"><div><div class="lab2">PRICE</div><div class="v">$7.49</div></div><div style="text-align:right"><div class="lab2">P&amp;L</div><div class="mono rd" style="font-size:14px">−$18.92 · −1.4%</div></div></div>
+ <svg width="300" height="84" style="background:#0E141D;border-radius:6px"><polyline fill="none" stroke="#D8484D" stroke-width="1.6" points="4,20 30,24 56,18 82,26 108,30 134,28 160,40 186,46 212,52 238,58 264,66 296,70"/><line x1="4" x2="296" y1="30" y2="30" stroke="#E7EAEE" stroke-dasharray="5 3"/><text x="8" y="27" fill="#E7EAEE" style="font:600 9px sans-serif">YOUR ENTRY $7.60</text></svg>
+ <div class="mono dm" style="font-size:10.5px">172 @ $7.60 · no stop · read-only details</div>
+ <div class="bn bnC"><b>EXIT NOT FILLED</b> · bid below $7.52 · 172 sh left<br><span style="opacity:.85">Protected exit stepped down to its boundary — nothing sells lower without you.</span></div>
+ ${sell('SELL LOWER TO $7.48','holding… 0.6 s',60)}
+ <div style="font-size:10.5px;color:var(--dim);line-height:1.4">Same protected exit logic as the desk. Release early = nothing happens. Works only with fresh Alpaca data and healthy execution. Logged "from phone".</div>
+ <div class="sec2" style="margin-top:4px"><span>AFTER THE HOLD</span></div>
+ <div class="bn bnG">WORKING · sell 172 @ ≥ $7.48 → FILLED · alert + sound on the phone and the desk</div>
+</div>${foot(false)}</div>`;
+
+const P3 = `<div class="phone live">${sb('10:31')}
+<div class="notif"><div style="display:flex;justify-content:space-between;font-size:10px;color:#AEB6C2"><b>TRADING PLATFORM</b><span>now</span></div><b style="color:#FFB3B5">CRITICAL · NOT SAFE TO TRADE</b><br>Alpaca connectivity issue · cause unknown · new entries blocked · AUTO blocked</div>
+${head({live:1,auto:'AUTO BLOCKED — ALPACA',autoC:'pBl',health:'NOT SAFE TO TRADE',hC:'hR',hDot:'#F0555A',sess:'REGULAR',clock:'10:31 ET'})}
+<div class="body">
+ <div class="bn bnC" style="display:flex;gap:8px;align-items:flex-start"><span><b>ALPACA CONNECTIVITY ISSUE · CAUSE UNKNOWN</b><br>Execution uncertain · new entries blocked · exits may not reach Alpaca</span><span class="pill" style="margin-left:auto;border:1px solid #FFB3B5;color:#fff;background:#A8262B">SEEN</span></div>
+ ${money('−$212.30 · −4.06%',true,'$5,021',35,'$212 / $600')}
+ <div class="sec2"><span>OPEN POSITIONS · 3</span><span></span></div>
+ ${pos({tk:'ABCD',pl:'−$32.00',neg:1,line:'400 @ $2.20 · now $2.12',btn:lock('exits locked · execution uncertain')})}
+ ${pos({tk:'QRST',pl:'+$24.00',line:'300 @ $1.40 · now $1.48',btn:lock('exits locked · execution uncertain')})}
+ ${pos({tk:'WXYZ',eng:1,pl:'−$15.00',neg:1,line:'500 @ $1.81 · RISK LINE $1.74',btn:lock("engine's · FLATTEN ALL only")})}
+ <div style="font-size:10.5px;color:var(--dim);line-height:1.4">SEEN stops the repeating sound; the banner stays until the problem is fixed. "Manual backup: use Alpaca directly" shows only when only our link failed.</div>
+</div>${foot(false)}</div>`;
+
+const P4 = `<div class="phone">${sb('7:44')}${head({auto:'AUTO ON · as of 07:40',autoC:'pOff',health:'HEALTHY · as of 07:40',hC:'hGr',hDot:'#7D8899',sess:'LAST UPDATE',clock:'07:40 ET'})}
+<div class="body">
+ <div class="bn bnA"><b>PHONE OFFLINE · last update 07:40</b> — numbers may be old · exits locked until the phone reconnects</div>
+ <div class="bn bnA"><b>NOTIFICATIONS OFF IN PHONE SETTINGS</b> — you won't get Critical alerts. Turn them on in the phone's settings.</div>
+ ${money('+$233.00 · +4.66%',false,'$5,233',0,'$0 / $600')}
+ <div class="sec2"><span>OPEN POSITIONS · as of 07:40</span><span></span></div>
+ ${pos({tk:'IJKL',pl:'+$36.12',line:'172 @ $7.60',btn:lock('exit locked · phone offline')})}
+ ${pos({tk:'ABCD',pl:'+$0.00',line:'300 @ $2.15 · sell 100: UNKNOWN',btn:lock('exit locked · order UNKNOWN, checking')})}
+ ${pos({tk:'MNOP',flag:'<span class="chip" style="height:16px;font-size:9px;color:var(--muted);border-color:#3A4556">HALTED · 2:40</span>',pl:'+$28.00',line:'SHORT 400 @ $3.12',btn:`<div class="hb hDis">COVER PENDING · sends when trading resumes</div>`})}
+ <div style="font-size:10.5px;color:var(--dim);line-height:1.4">Old numbers never look live. Exits unlock by themselves when the phone has fresh Alpaca data and execution is healthy.</div>
+</div>${foot(true)}</div>`;
+
+const T=['1 · LAPTOP CLOSED · AUTO ON','2 · SELLING YOUR POSITION (HOLD)','3 · LIVE · CRITICAL ALERT','4 · LOCKED: OFFLINE · UNKNOWN · HALTED'];
+document.getElementById('phones').innerHTML=[P1,P2,P3,P4].map((p,i)=>`<div class="pw"><div class="pt">${T[i]}</div>${p}</div>`).join('');
+</script>
+</body>
+</html>

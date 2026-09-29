@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System Health — states</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:16px 0 8px;font-weight:700}
+.grid{display:grid;gap:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.cap2{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.35}
+.band{border-radius:8px;border:1px solid;padding:8px 11px;display:flex;flex-direction:column;gap:6px}
+.band .t{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.band .lvl{font-size:14px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.band .why{font-size:12.5px;font-weight:600}
+.bG{border-color:#1F6B45;background:#0F2119}.bB{border-color:#3E5470;background:#111A28}.aI{color:#A9C7FF;border-color:#3E5470}.bA{border-color:#6B4A16;background:#1F180C}.bR{border-color:#A8262B;background:#240F12}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.cp{height:22px;display:flex;align-items:center;gap:5px;padding:0 7px;border-radius:4px;border:1px solid #2E3A4A;background:#10151D;font-size:10.5px;white-space:nowrap}
+.cp small{font-size:9px;color:var(--muted);letter-spacing:.06em;font-weight:700}
+.fix{font-size:11px;color:var(--soft);line-height:1.35}
+.fix b{color:var(--text)}
+.alv{font-size:9px;font-weight:700;letter-spacing:.06em;padding:1px 5px;border-radius:3px;border:1px solid}
+.aC{color:#FF9EA1;border-color:#7A3035}.aA{color:var(--amber);border-color:#6B4A16}
+table{border-collapse:collapse;width:100%;font-size:11.5px}
+th{font-size:9.5px;letter-spacing:.07em;color:var(--muted);text-align:left;font-weight:600;background:#161D28;padding:5px 8px}
+td{padding:5px 8px;border-bottom:1px solid var(--row);vertical-align:top}
+.x{color:#FF9EA1;font-weight:700}.v{color:var(--green);font-weight:700}.q{color:var(--amber);font-weight:700}
+.rowst{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid #2E3A4A;background:#10151D;white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:4px}
+.pill{height:30px;padding:0 10px;border-radius:6px;border:1px solid;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.ck{display:flex;gap:7px;align-items:baseline;font-size:12px;line-height:1.3;padding:4px 0;border-bottom:1px solid var(--row)}
+.tlx{display:grid;grid-template-columns:70px 1fr;column-gap:8px;row-gap:3px;font-size:11.5px;line-height:1.35}
+.tlx .mono{color:var(--dim);font-size:10.5px}
+</style>
+</head>
+<body>
+<h1>System Health — states and examples</h1>
+<p class="sub">Companion to the System Health drawing. Every state is a word, never color alone. The band always says what still works. Times and amounts are examples; limits marked TEST are set by testing.</p>
+<div id="bands"></div>
+
+<h2>2 · ALPACA — HOW THE CAUSE IS DECIDED (several signals, never the status page alone)</h2>
+<div class="grid" style="grid-template-columns:1.6fr 1fr">
+ <div class="box" style="padding:0;overflow:hidden">
+ <table>
+  <tr><th style="width:190px">SIGNAL</th><th>OUR ALPACA CONNECTION LOST</th><th>ALPACA OUTAGE</th><th>CONNECTIVITY ISSUE · CAUSE UNKNOWN</th></tr>
+  <tr><td>Our stream (order updates)</td><td class="x">✗ down</td><td class="x">✗ down</td><td class="x">✗ down</td></tr>
+  <tr><td>API heartbeat / login</td><td class="x">✗ no answer</td><td class="x">✗ errors</td><td class="q">~ slow, timeouts</td></tr>
+  <tr><td>Order and account endpoints</td><td class="v">✓ answer (other route)</td><td class="x">✗ errors</td><td class="q">~ some answer</td></tr>
+  <tr><td>Our server's network</td><td class="q">~ problem on our side</td><td class="v">✓ fine</td><td class="v">✓ fine</td></tr>
+  <tr><td>Alpaca status page</td><td>operational</td><td>incident reported</td><td>operational</td></tr>
+  <tr><td>Extra line on the band</td><td><b>"Manual backup: use Alpaca directly"</b></td><td class="dm">none</td><td class="dm">none</td></tr>
+ </table></div>
+ <div class="box"><div class="fix">In all three: <b>NOT SAFE TO TRADE</b>, new AUTO entries blocked, pending engine entries cancelled where possible, Critical alert. "Manual backup" shows only when the evidence says Alpaca itself is up and only our link failed. The platform never assumes Alpaca is healthy because its status page says so (settled 5h). The exact rules are set when the Alpaca connector is built and tested.</div></div>
+</div>
+
+<h2>3 · CONNECTION ROW STATES</h2>
+<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+ <div class="box"><span class="rowst"><span class="dot" style="background:#34C77B"></span><b class="g">connected</b><span class="mono dm">0.3 s ago</span></span><div class="cap2">Normal. Last message time always shown — never an "OK" without a time.</div></div>
+ <div class="box"><span class="rowst" style="border-color:#6B4A16"><span class="dot" style="background:#F2A93B"></span><b class="am">SLOW · 4.2 s delay</b></span><div class="cap2">Delay above the limit (TEST). Health unchanged until it becomes stale.</div></div>
+ <div class="box"><span class="rowst" style="border-color:#6B4A16"><span class="dot" style="background:#F2A93B"></span><b class="am">RECONNECTING… attempt 2 · 3 s</b></span><div class="cap2">Automatic retries; each attempt logged. Data gaps are repaired after.</div></div>
+ <div class="box"><span class="rowst" style="border-color:#6B4A16"><span class="dot" style="background:#F2A93B"></span><b class="am">NEEDS LOGIN since 07:44:10</b></span><div class="cap2">IBKR asks for a fresh login about once a week. Only Level 2 is affected.</div></div>
+ <div class="box"><span class="rowst" style="border-color:#A8262B"><span class="dot" style="background:#F0555A"></span><b style="color:#FF9EA1">STALE since 07:44:02</b></span><div class="cap2">Connected but no fresh data — treated like down for new entries.</div></div>
+ <div class="box"><span class="rowst" style="border-color:#A8262B"><span class="dot" style="background:#F0555A"></span><b style="color:#FF9EA1">DOWN since 07:41:05</b></span><div class="cap2">No connection. The band and the alert line say what it blocks.</div></div>
+ <div class="box" style="grid-column:span 2"><span class="rowst" style="border-color:#6B4A16;display:inline-flex"><span class="mu" style="font-size:11px">Settings · Level 2 strategies</span><b class="am">ON · UNAVAILABLE — IBKR L2 DOWN</b></span><div class="cap2">A failure never changes your settings (S6): the setting stays ON and shows it can't run; it runs again when the connection is back.</div></div>
+</div>
+
+<h2>4 · A FAILED CHECK · THE HEALTH WORD IN THE TOP BAR</h2>
+<div class="grid" style="grid-template-columns:1.1fr 1fr">
+ <div class="box">
+  <div class="ck"><span class="x">✗</span><span><b>Clock synchronized</b> <span class="dm">· drift 1.8 s · limit 0.5 s (TEST) · since 07:44:10</span> → <b style="color:#FF9EA1">AUTO blocked</b></span></div>
+  <div class="ck"><span class="q">!</span><span><b>IBKR Level 2 logged in</b> <span class="dm">· NEEDS LOGIN since 07:44:10</span> → <b class="am">DEGRADED</b> · Level 2 strategies off</span></div>
+  <div class="ck" style="border:0"><span class="v">✓</span><span>Every other check <span class="dm">· 13 of 15 passed · 07:44:30</span></span></div>
+  <div class="cap2">A failed "must pass" check shows ✗ with the reason, its time and what it blocks; a failed "should pass" check shows ! and DEGRADED. Already LIVE: a failure blocks new risk as its rule says, exits stay available — LIVE never switches back to PAPER by itself; LIVE just can't be newly switched on.</div>
+ </div>
+ <div class="box">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+   <span class="pill" style="border-color:#1F6B45;background:#0F2119"><span class="dot" style="background:#34C77B"></span>HEALTHY</span>
+   <span class="pill" style="border-color:#6B4A16;background:#1F180C;color:var(--amber)"><span class="dot" style="background:#F2A93B"></span>DEGRADED</span>
+   <span class="pill" style="border-color:#A8262B;background:#2A1114;color:#FF9EA1"><span class="dot" style="background:#F0555A"></span>NOT SAFE TO TRADE</span>
+  </div>
+  <div style="margin-top:8px;display:inline-block;border:1px solid #3A4556;background:#0F141C;border-radius:6px;padding:6px 10px;font-size:11px;line-height:1.55">
+   <b class="mu" style="font-size:9.5px;letter-spacing:.07em">HOVER ON THE HEALTH WORD</b><br>
+   ORDERS · ALPACA <b class="g">connected</b><br>LEVEL 2 · IBKR <b class="am">NEEDS LOGIN</b><br>MARKET DATA · MASSIVE <b class="g">connected</b><br><span class="bl">click → System Health</span></div>
+  <div class="cap2">Word + dot in every window's top bar and on the phone. The hover shows the three main connections separately (settled 5h).</div>
+ </div>
+</div>
+
+<h2>5 · WHEN A PROBLEM CLEARS — AUTO CONTINUES ONLY AFTER VERIFIED RECOVERY</h2>
+<div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+ <div class="box"><div class="tlx"><span class="mono">07:44:10</span><span>Massive stale → <b style="color:#FF9EA1">NOT SAFE TO TRADE</b></span><span class="mono">07:44:13</span><span>data back → <b style="color:#8BBEFF">RECOVERING</b> · checks run</span><span class="mono">07:44:15</span><span>all checks pass → <b class="g">HEALTHY · AUTO CONTINUES</b></span></div>
+  <div class="cap2">Checks: connection/data healthy · positions and orders match Alpaca · no UNKNOWN order · no unresolved gap affecting an active strategy, open position or pending order · clock and risk valid.</div></div>
+ <div class="box"><div class="tlx"><span class="mono">07:50:00</span><span>Alpaca connection lost → <b style="color:#FF9EA1">NOT SAFE TO TRADE</b></span><span class="mono">07:52:05</span><span>back → <b style="color:#8BBEFF">RECOVERING</b> · 1 UNKNOWN order (ABCD sell 100)</span><span class="mono">07:52:08</span><span><b class="am">AUTO STAYS BLOCKED — press Resume AUTO</b> · reason: order status uncertain</span></div>
+  <div class="cap2">Anything uncertain → you resume (hold 2 s). Repeated drops (e.g. 3 in 15 minutes, TEST) also need your Resume AUTO.</div></div>
+ <div class="box"><div class="fix"><b>Never resumes by itself, however short:</b> intraday margin call · hard daily limit · FLATTEN ALL · your STOP AUTO · an unresolved broker mismatch · the soft-limit and give-back pauses (settled). Your positions are never sold because of a disconnect. What the engine does with its own positions during a long outage is decided in reliability testing (OPEN).</div></div>
+</div>
+
+<script>
+const B = [
+ ['A','DEGRADED','IBKR NEEDS LOGIN · LEVEL 2 PAUSED','since 07:44:10',[['AUTO CAN START','yes · without Level 2 strategies','am'],['YOUR BUY / SHORT','allowed','g'],['EXITS','available','g'],['STRATEGIES OFF','Level 2 strategies · need IBKR','am']],'<b>Fix:</b> log in to IBKR again — Level 2 and its strategies come back by themselves. Panels show "LEVEL 2 UNAVAILABLE"; Settings shows "ON · UNAVAILABLE — IBKR L2 DOWN".','A'],
+ ['R','NOT SAFE TO TRADE','OUR ALPACA CONNECTION LOST','ALPACA EXECUTION UNAVAILABLE · PLATFORM CANNOT RELIABLY CONTROL ORDERS',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','can\'t be sent from the platform','rd']],'<b>Manual backup: use Alpaca directly</b> (only in this case — Alpaca itself answers, our link failed).','C'],
+ ['R','NOT SAFE TO TRADE','ALPACA OUTAGE','broker side confirmed',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','can\'t be sent from the platform','rd']],'No manual-backup line: Alpaca itself is down. The platform keeps trying and runs a broker check when it is back.','C'],
+ ['R','NOT SAFE TO TRADE','ALPACA CONNECTIVITY ISSUE · CAUSE UNKNOWN','signals disagree',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','uncertain — may not reach Alpaca','am']],'Execution is uncertain, so new entries are blocked until the cause is clear or the connection is back.','C'],
+ ['R','NOT SAFE TO TRADE','MASSIVE DATA STALE','since 07:44:02',[['AUTO','no new entries','rd'],['YOUR BUY / SHORT','refused while data is stale','rd'],['EXITS','available','g']],'Open positions are still watched and exited with whatever healthy data remains; exits are never blocked because Massive is down.','C'],
+ ['R','NOT SAFE TO TRADE','INTRADAY MARGIN CALL · $412 · CURE REQUIRED','Alpaca deadline Wed Sep 30',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','available','g']],'Suggested cure <b>EST. SELL 200 ABCD TO CURE MARGIN</b> (runs only on your click). Lifts by itself when Alpaca confirms it cleared; AUTO stays OFF until you turn it on.','C'],
+ ['R','NOT SAFE TO TRADE','CLOCK OUT OF SYNC','drift 1.8 s · limit 0.5 s (TEST)',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','available','g']],'Times on every event would be wrong, so no new entries until the clock is back in sync.','C'],
+ ['R','NOT SAFE TO TRADE','AUTO BLOCKED — BROKER SYNC','account level · cash $2,112 vs Alpaca $1,864',[['AUTO','BLOCKED','rd'],['YOUR BUY / SHORT','blocked','rd'],['EXITS','available','g']],'Cash, buying power, total positions or account state disagree, so sizing can\'t be trusted anywhere: all new entries blocked. Alpaca\'s numbers win (settled 7b P3).','C'],
+ ['A','DEGRADED','ABCD BLOCKED — BROKER SYNC','one stock · ABCD: platform 300 · Alpaca 400',[['AUTO','continues · not ABCD','am'],['YOUR BUY / SHORT','allowed · not ABCD','am'],['EXITS','available','g']],'Only ABCD gets no new entries until it matches again; the platform rebuilds ABCD from Alpaca. Incident logged in Review.','C'],
+ ['A','DEGRADED','NEWS SOURCE DOWN · BENZINGA','since 07:20',[['AUTO CAN START','yes','g'],['YOUR BUY / SHORT','allowed','g'],['EXITS','available','g'],['STRATEGIES OFF','those that need Benzinga','am']],'Only strategies that need Benzinga show "ON · UNAVAILABLE"; the rest continue. News shows NEWS UNKNOWN — never read as "no news". Extra size reduction: a testing question.','A'],
+ ['A','DEGRADED','AI SERVICE UNAVAILABLE','trading and the engine are not affected',[['AUTO CAN START','yes','g'],['YOUR BUY / SHORT','allowed','g'],['EXITS','available','g'],['STRATEGIES OFF','AI context check · needs AI','am']],'The AI context check shows "ON · UNAVAILABLE" (it never holds up a trigger); Ask AI shows "AI ASSISTANT UNAVAILABLE".','A'],
+ ['B','RECOVERING','CHECKING BEFORE AUTO CONTINUES','Massive back at 07:44:13',[['CONNECTION','healthy ✓','g'],['POSITIONS & ORDERS','match Alpaca ✓','g'],['UNKNOWN ORDERS','0 ✓','g'],['DATA GAPS','repairing QRST…','am'],['CLOCK & RISK','valid ✓','g']],'Only gaps that affect an active strategy, open position or pending order count. Then <b>AUTO CONTINUES</b> — or <b>AUTO STAYS BLOCKED — press Resume AUTO</b> with the reason.','I'],
+];
+const lc = {A:'var(--amber)',R:'#FF9EA1',B:'#8BBEFF'};
+document.getElementById('bands').innerHTML = `<h2 style="margin-top:0">1 · THE STATUS BAND IN EACH STATE — WHAT IS WRONG AND WHAT STILL WORKS</h2><div class="grid" style="grid-template-columns:1fr 1fr">` + B.map(b=>`<div class="band b${b[0]}"><div class="t"><span class="lvl" style="color:${lc[b[0]]}">${b[1]}</span><span class="why">— ${b[2]}</span><span class="dm" style="font-size:11px">${b[3]}</span><div style="flex-grow:1"></div><span class="alv ${b[6]==='C'?'aC':b[6]==='I'?'aI':'aA'}">${b[6]==='C'?'CRITICAL':b[6]==='I'?'INFO':'ATTENTION'}</span></div>
+ <div class="chips">${b[4].map(c=>`<span class="cp"><small>${c[0]}</small><b class="${c[2]}">${c[1]}</b></span>`).join('')}</div><div class="fix">${b[5]}</div></div>`).join('') + `</div>`;
+</script>
+</body>
+</html>

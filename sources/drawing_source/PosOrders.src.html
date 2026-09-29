@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Positions and Orders — v4 proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.xbtn{height:28px;padding:0 10px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid}
+.xbtn small{font-size:9px;font-weight:500;opacity:.85}
+.sell{background:#A8262B;border-color:#D0454A;color:#fff}
+.ovr{background:#1C1316;border-color:#7A3035;color:#F0A5A8}
+.dis{background:#19202A;border-color:#2A3340;color:#7C8898}
+.stopb{height:22px;padding:0 7px;border-radius:5px;border:1px dashed #6B5A1E;color:var(--yellow);font-size:10.5px;display:inline-flex;align-items:center;white-space:nowrap}
+.div{height:18px;display:flex;align-items:center;gap:8px;padding:0 8px;font-size:9.5px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
+.div:after{content:'';flex:1;height:1px;background:var(--line)}
+.two{display:flex;flex-direction:column;line-height:1.15}
+.two small{font-size:9.5px;color:var(--dim)}
+.st2{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;white-space:nowrap;border:1px solid}
+.acct{display:flex;gap:8px;flex-shrink:0}
+.acct .tile{padding:6px 10px}
+.acct .v{font-size:14px}
+.mini{display:grid;grid-template-columns:auto auto;column-gap:10px;row-gap:1px;font-size:10.5px;align-items:baseline;margin-top:2px}
+.mini .n{font-family:'IBM Plex Mono',monospace;text-align:right;font-size:11.5px}
+.kr{display:flex;justify-content:space-between;gap:8px;font-size:11px;min-height:19px;align-items:center}
+.banner{border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:10px;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const Q = new URLSearchParams(location.search);
+const state = Q.get('state') || 'normal';
+const FL = state === 'flatten';
+const live = FL;
+const H = [];
+const chip = (cls, t) => `<span class="chip ${cls}">${t}</span>`;
+// ---------- thin top bar ----------
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">Positions &amp; Orders</span>
+${live?'<span class="env" style="border-color:#E5484D;background:#5A1216;color:#FFB3B5">LIVE — REAL MONEY</span>':'<span class="env">PAPER</span>'}
+<span class="autop">${FL?'AUTO OFF — YOU TRADE · stays off':'AUTO OFF — YOU TRADE'}</span>
+<div style="flex-grow:1"></div>
+${FL?'':`<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span>
+<span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>`}
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono ${FL?'g':'g'} nw" style="font-size:12.5px">${FL?'+$113.50 · +2.27%':'+$233.00 · +4.66%'}</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>`);
+if (FL) H.push(`<div class="alert" style="background:#3A1114;border-bottom-color:#A8262B"><span class="atag" style="color:#fff;background:#D0454A">CRITICAL</span><span class="mono mu" style="font-size:10.5px">07:49:20</span><span class="ell" style="font-size:11px;color:#FFD4D5">FLATTEN INCOMPLETE — 2 POSITIONS PENDING · ABCD HALTED · 4:18 elapsed · IJKL bid below the emergency band · AUTO stays off</span><div style="flex-grow:1"></div><span class="nw" style="font-size:10px;font-weight:700;padding:1px 7px;border:1px solid #D0454A;border-radius:3px;color:#FFD4D5">SEEN</span><span class="bl nw" style="font-size:10.5px;margin-left:8px">Today's alerts (19) ▸</span></div>`);
+else H.push(`<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:42:18</span><span class="ell so" style="font-size:11px">ABCD BUY partly filled · 300 of 521 @ $2.15 · still working, no higher than $2.24 · size limited by cash</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (15) ▸</span></div>`);
+
+// ---------- account strip ----------
+const T = (l, body, w) => `<div class="tile" style="flex:${w||1};min-width:0"><div class="l">${l}</div>${body}</div>`;
+const V = (v, c, s) => `<div class="v ${c||''}">${v}</div>${s?`<div class="s">${s}</div>`:''}`;
+const acct = FL ? {eq:'$5,113.50', cash:'$3,216.70', ord:'$0.00', avail:'$3,216.70', longv:'$1,896.80', open:'−$55.40', real:'+$174.00', fees:'−$5.10', day:'+$113.50 · +2.27%', loss:'$0 / $600'}
+                : {eq:'$5,233.00', cash:'$522.80', ord:'−$495.04', avail:'$27.76', longv:'$4,710.20', open:'+$265.00', real:'−$27.00', fees:'−$5.00', day:'+$233.00 · +4.66%', loss:'$0 / $600'};
+H.push(`<div class="content" style="flex-direction:column">`);
+H.push(`<div class="acct">
+ ${T('EQUITY', V(acct.eq,'','exact to the cent here'))}
+ ${T('CASH · ORDERS · AVAILABLE', `<div class="mini"><span class="so">Cash</span><span class="n">${acct.cash}</span><span class="so">Held for working orders</span><span class="n ${FL?'':'am'}">${acct.ord}</span><span class="so"><b>Available (account total)</b></span><span class="n"><b>${acct.avail}</b></span></div>`, 1.55)}
+ ${T('LEVERAGE', V('1×','','Alpaca 1× · platform 1× · long-only'), 1.2)}
+ ${T('LONG · SHORT VALUE', V(acct.longv,'','short: — (shorts off)'))}
+ ${T('OPEN P&amp;L', V(acct.open, acct.open.startsWith('−')?'rd':'g', FL?'2 positions still open':'4 open positions'))}
+ ${T('REALIZED · FEES', V(acct.real+' <span class="rd" style="font-size:12px">'+acct.fees+'</span>', acct.real.startsWith('−')?'rd':'g', 'closed trades today · fees'))}
+ ${T('DAY P&amp;L', V(acct.day,'g','same number as the top bar'), 1.1)}
+ ${T('LOSS LIMIT', `<div style="display:flex;align-items:center;gap:7px;margin-top:5px"><div style="position:relative;width:58px;height:6px;border-radius:3px;background:#273142"><div style="position:absolute;left:50%;top:-3px;width:2px;height:12px;background:#F2A93B"></div></div><span class="mono nw" style="font-size:12.5px">${acct.loss}</span></div><div class="s">soft $300 · hard $600</div>`, 1.05)}
+ ${T('MARGIN', V('<span class="g" style="font-size:12px">HEADROOM OK</span>','','margin calls: 0 — TARGET 0'), 1.05)}
+</div>`);
+
+// ---------- positions ----------
+const cols = '66px 44px 82px 46px 62px 62px 76px 62px 150px 76px 1fr 238px 150px';
+const th = `<div class="th" style="grid-template-columns:${cols}"><span>SYMBOL</span><span>SIDE</span><span>OWNER</span><span class="r">SH</span><span class="r">AVG</span><span class="r">LAST</span><span class="r">P&amp;L</span><span class="r">P&amp;L %</span><span>STOP / RISK LINE</span><span>OPENED</span><span>ENGINE'S READ</span><span>ORDER STATUS</span><span>EXIT</span></div>`;
+const row = r => `<div class="tr" style="height:36px;grid-template-columns:${cols};${r.bg||''}">
+ <span style="font-weight:700;font-size:12.5px">${r.sym}</span><span class="g" style="font-size:10.5px">LONG</span><span>${r.own==='Y'?chip('you','YOURS'):chip('eng',"ENGINE'S")}</span>
+ <span class="mono r">${r.sh}</span><span class="mono r">${r.avg}</span><span class="mono r">${r.last}</span>
+ <span class="mono r ${r.pnl.startsWith('−')?'rd':'g'}">${r.pnl}</span><span class="mono r ${r.pct.startsWith('−')?'rd':'g'}">${r.pct}</span>
+ <span>${r.stop}</span><span class="two"><span class="mono" style="font-size:11px">${r.open}</span><small>held ${r.held}</small></span>
+ <span class="ell" style="font-size:11px">${r.read}</span><span style="overflow:visible">${r.status}</span><span style="overflow:visible;display:flex;justify-content:flex-end">${r.btn}</span></div>`;
+const sellBtn = n => `<span class="xbtn sell" style="width:132px">SELL/EXIT<small>${n} sh · one click</small></span>`;
+const ovrBtn = `<span class="xbtn ovr" style="width:132px">🔒 OVERRIDE EXIT<small>hold 1 s · engine's position</small></span>`;
+const noStop = `<span class="stopb" style="border-style:dashed;color:#C9A94A">+ STOP</span>`;
+let posRows, posTitle;
+if (!FL) {
+  posTitle = `<div class="ptitle"><b>OPEN POSITIONS · 4</b><span>yours first, then the engine's · each group in the order opened · ticker click = trade card · closed rows stay ~5 s, then go to Fills and Review</span></div>`;
+  posRows = `<div class="div">YOURS · only you close them (your exit, your stop, FLATTEN ALL, or Alpaca in a margin call)</div>`
+  + row({sym:'GHIJ',own:'Y',sh:'100',avg:'$12.40',last:'$13.99',pnl:'+$159.00',pct:'+12.82%',stop:'<span class="stopb" style="border-style:solid">STOP $13.40 · move · ×</span>',open:'07:21:40',held:'20:51',read:'<span style="color:var(--pink);font-weight:700">EXIT?</span> <span class="so">momentum fading · advice only</span>',status:'<span class="mu">—</span>',btn:sellBtn(100)})
+  + row({sym:'IJKL',own:'Y',sh:'172',avg:'$7.60',last:'$7.85',pnl:'+$43.00',pct:'+3.29%',stop:noStop,open:'07:39:51',held:'2:40',read:'<span class="so">holding · volume steady</span>',status:'<span class="mu">—</span>',btn:sellBtn(172)})
+  + row({sym:'ABCD',own:'Y',sh:'300',avg:'$2.15',last:'$2.15',pnl:'+$0.00',pct:'+0.00%',stop:noStop,open:'07:42:18',held:'0:13',read:'<span class="g" style="font-weight:700">▲ strong up</span> <span class="so">· no Level 2 slot</span>',status:'<span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">BUY WORKING · PARTIAL 300/521 · ≤ $2.24</span>',btn:sellBtn(300)})
+  + `<div class="div" style="margin-top:2px">ENGINE'S · the engine manages and exits them, also after AUTO OFF</div>`
+  + row({sym:'WXYZ',own:'E',sh:'700',avg:'$1.79',last:'$1.88',pnl:'+$63.00',pct:'+5.03%',stop:'<span class="te" style="font-size:10.5px;font-weight:600">RISK LINE $1.72</span>',open:'07:16:12',held:'26:19',read:'<span class="so">healthy pullback · engine manages the exit</span>',status:'<span class="mu">—</span>',btn:ovrBtn});
+} else {
+  posTitle = `<div class="banner" style="background:#2A1114;border:1px solid #A8262B;color:#FFD4D5"><b style="letter-spacing:.04em">FLATTEN INCOMPLETE — 2 POSITIONS PENDING</b><span>held FLATTEN ALL at 07:45:02 · 2 of 4 closed (GHIJ, WXYZ) · entry orders cancelled · your STOP on GHIJ cancelled after its exit filled</span><div style="flex-grow:1"></div><span class="nw">AUTO stays off until you turn it on</span></div>`;
+  posRows = `<div class="div">STILL OPEN — FLATTEN PENDING</div>`
+  + row({sym:'ABCD',own:'Y',sh:'300',avg:'$2.15',last:'$2.08',pnl:'−$21.00',pct:'−3.26%',stop:'<span class="mu">—</span>',open:'07:42:18',held:'7:02',read:'<span class="mu">HALTED · 4:18 elapsed · no resume time published</span>',status:'<span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">FLATTEN PENDING · sells at resume</span>',btn:'<span class="xbtn dis" style="width:132px">HALTED<small>4:18 elapsed</small></span>',bg:'background:rgba(155,166,181,.06)'})
+  + row({sym:'IJKL',own:'Y',sh:'172',avg:'$7.60',last:'$7.40',pnl:'−$34.40',pct:'−2.63%',stop:'<span class="mu">—</span>',open:'07:39:51',held:'9:29',read:'<span class="rd">▼ falling fast · bid below the emergency band ($7.46)</span>',status:'<span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">FLATTEN PENDING · 172 left · last try $7.46</span>',btn:'<span class="xbtn sell" style="width:132px;background:#7A1C20">SELL LOWER TO $7.40<small>hold 0.5 s · past the band</small></span>'})
+  + `<div class="div" style="margin-top:2px">CLOSED BY FLATTEN ALL · listed here until the flatten finishes, then only in Fills and Review</div>`
+  + row({sym:'GHIJ',own:'Y',sh:'100',avg:'$12.40',last:'$13.92',pnl:'+$152.00',pct:'+12.26%',stop:'<span class="mu" style="text-decoration:line-through">STOP $13.40</span>',open:'07:21:40',held:'23:23',read:'<span class="mu">closed</span>',status:'<span class="st2" style="color:#8CE0B0;border-color:#1F6B45;background:#0F2119">CLOSED · FLATTEN ALL · 100 @ $13.92</span>',btn:'<span class="xbtn dis" style="width:132px">CLOSED</span>',bg:'opacity:.6'})
+  + row({sym:'WXYZ',own:'E',sh:'700',avg:'$1.79',last:'$1.86',pnl:'+$49.00',pct:'+3.91%',stop:'<span class="mu">—</span>',open:'07:16:12',held:'28:51',read:'<span class="mu">closed</span>',status:'<span class="st2" style="color:#8CE0B0;border-color:#1F6B45;background:#0F2119">CLOSED · FLATTEN ALL · 700 @ $1.86</span>',btn:'<span class="xbtn dis" style="width:132px">CLOSED</span>',bg:'opacity:.6'});
+}
+H.push(`<section class="panel" style="flex:0 0 ${FL?250:238}px;gap:4px">${posTitle}${th}${posRows}</section>`);
+
+// ---------- lower row ----------
+const ocols = '62px 46px 112px 52px 60px 1fr 70px';
+const oth = `<div class="th" style="grid-template-columns:${ocols}"><span>SENT</span><span>SYMBOL</span><span>ORDER</span><span>OWNER</span><span class="r">FILLED</span><span>STATUS</span><span></span></div>`;
+const orow = (a,b,c,d,e,f,g,extra) => `<div class="tr" style="height:30px;grid-template-columns:${ocols}"><span class="mono" style="font-size:10.5px">${a}</span><span style="font-weight:700">${b}</span><span style="font-size:11px">${c}</span><span>${d}</span><span class="mono r" style="font-size:11px">${e}</span><span style="font-size:11px;overflow:visible">${f}</span><span style="display:flex;justify-content:flex-end">${g}</span></div>${extra||''}`;
+const cancelB = `<span class="btn" style="height:22px;font-size:10.5px">CANCEL</span>`;
+let working;
+if (!FL) {
+  working = `<section class="panel" style="flex:0 0 auto">
+   <div class="ptitle"><b>WORKING ORDERS · 2</b><span>CANCEL ALL ENTRIES (n) appears here with 2+ entries</span></div>${oth}
+   ${orow('07:42:18','ABCD','<span class="g">BUY</span> limit · entry',chip('you','YOU'),'300/521','<span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">PARTIAL · step 3 · limit $2.17 · ≤ $2.24</span>',cancelB,
+   `<div class="mono" style="font-size:10px;color:var(--dim);padding:3px 8px 5px 70px;line-height:1.4">.402 sent 521, limit $2.14 (ask) → .560 raised to $2.15 → .690 filled 300 @ $2.15 → .980 raised to $2.17 · stops at $2.24, then NOT FILLED · <span class="am">LIMITED by cash: 25% = $1,308 → $1,167.80 ÷ $2.24 = 521 sh</span></div>`)}
+   ${orow('07:25:40','GHIJ','<span class="ye">STOP</span> sell · your stop',chip('you','YOU'),'0/100','<span class="st2" style="color:var(--yellow);border-color:#6B5A1E;background:#221D0C">WAITING · triggers at $13.40</span>','<span class="btn" style="height:22px;font-size:10.5px">move · ×</span>')}
+  </section>`;
+} else {
+  working = `<section class="panel" style="flex:0 0 auto">
+   <div class="ptitle"><b>WORKING ORDERS · 2</b><span>flatten exits · no entries left</span></div>${oth}
+   ${orow('07:45:02','ABCD','<span class="rd">SELL</span> · flatten',chip('you','YOU'),'0/300','<span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">HELD · HALTED · sends at resume</span>','')}
+   ${orow('07:45:02','IJKL','<span class="rd">SELL</span> · flatten',chip('you','YOU'),'0/172','<span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">STOPPED AT BAND $7.46 · needs you</span>','')}
+   <div class="note" style="padding:2px 8px">Cancelled by FLATTEN ALL: ABCD BUY (221 unfilled) · GHIJ STOP (after the exit filled).</div>
+  </section>`;
+}
+const ocols2 = '50px 1fr 84px 84px 84px';
+const byOwner = `<section class="panel" style="flex-grow:1;min-width:0">
+  <div class="ptitle"><b>TODAY BY OWNER</b><span>real trades only · would-have trades live in Review</span></div>
+  <div class="th" style="grid-template-columns:70px 44px 1fr 1fr 70px 1fr"><span></span><span class="r">OPEN</span><span class="r">OPEN P&amp;L</span><span class="r">REALIZED</span><span class="r">FEES</span><span class="r">DAY P&amp;L</span></div>
+  ${(FL?[['YOURS','2','−$55.40','+$165.00','−$2.10','+$107.50'],['ENGINE\'S','0','$0.00','+$9.00','−$3.00','+$6.00'],['TOTAL','2','−$55.40','+$174.00','−$5.10','+$113.50']]
+       :[['YOURS','3','+$202.00','+$13.00','−$2.00','+$213.00'],['ENGINE\'S','1','+$63.00','−$40.00','−$3.00','+$20.00'],['TOTAL','4','+$265.00','−$27.00','−$5.00','+$233.00']]).map((r,i)=>`<div class="tr" style="height:27px;grid-template-columns:70px 44px 1fr 1fr 70px 1fr;${i===2?'font-weight:700':''}"><span class="${i===1?'te':''}">${r[0]}</span><span class="mono r">${r[1]}</span><span class="mono r ${r[2].startsWith('−')?'rd':(r[2]==='$0.00'?'':'g')}">${r[2]}</span><span class="mono r ${r[3].startsWith('−')?'rd':'g'}">${r[3]}</span><span class="mono r rd">${r[4]}</span><span class="mono r ${r[5].startsWith('−')?'rd':'g'}">${r[5]}</span></div>`).join('')}
+  <div class="note">ENGINE'S includes 1 OVERRIDE EXIT (NOPQ, +$27) — the engine's trade, closed early by you.</div>
+ </section>`;
+// fills
+const fcols = '74px 50px 42px 48px 62px 64px 1fr';
+const fills = FL ? [
+  ['07:45:03.410','WXYZ','SELL','700','$1.86','ENGINE','FLATTEN ALL'],
+  ['07:45:03.120','GHIJ','SELL','100','$13.92','YOU','FLATTEN ALL'],
+  ['07:42:18.690','ABCD','BUY','300','$2.15','YOU','partial 300/521 · rest cancelled by FLATTEN'],
+  ['07:39:51.230','IJKL','BUY','172','$7.60','YOU',''],
+  ['07:33:12.040','MNOP','SELL','400','$3.19','YOU',''],
+  ['07:25:03.792','MNOP','BUY','400','$3.12','YOU',''],
+  ['07:21:40.515','GHIJ','BUY','100','$12.40','YOU',''],
+  ['07:16:12.300','WXYZ','BUY','700','$1.79','ENGINE',''],
+  ['07:13:04.300','BCDE','SELL','600','$0.81','ENGINE',''],
+] : [
+  ['07:42:18.690','ABCD','BUY','300','$2.15','YOU','partial · 221 still working'],
+  ['07:39:51.230','IJKL','BUY','172','$7.60','YOU',''],
+  ['07:33:12.040','MNOP','SELL','400','$3.19','YOU','your exit'],
+  ['07:25:03.792','MNOP','BUY','400','$3.12','YOU',''],
+  ['07:21:40.515','GHIJ','BUY','100','$12.40','YOU',''],
+  ['07:16:12.300','WXYZ','BUY','700','$1.79','ENGINE',''],
+  ['07:13:04.300','BCDE','SELL','600','$0.81','ENGINE','failed-breakout exit'],
+  ['07:12:39.420','BCDE','BUY','600','$0.84','ENGINE',''],
+  ['06:58:02.110','EFGH','SELL','400','$2.58','ENGINE',''],
+  ['06:44:10.350','NOPQ','SELL','300','$2.19','ENGINE','<b>OVERRIDE EXIT</b> by you'],
+  ['06:12:05.880','HIJK','SELL','500','$0.48','ENGINE',''],
+];
+const fillRows = fills.filter(f=>f[2]!=='—').map(f=>`<div class="tr" style="height:25px;grid-template-columns:${fcols};font-size:11px"><span class="mono mu" style="font-size:10px">${f[0]}</span><span style="font-weight:700">${f[1]}</span><span class="${f[2]==='BUY'?'g':'rd'}" style="font-size:10.5px">${f[2]}</span><span class="mono r">${f[3]}</span><span class="mono r">${f[4]}</span><span>${f[5]==='YOU'?'<span class="so" style="font-size:10.5px">YOU</span>':'<span class="te" style="font-size:10.5px">ENGINE</span>'}</span><span class="so" style="font-size:10.5px">${f[6]}</span></div>`).join('');
+const fillsP = `<section class="panel" style="flex:1.05">
+  <div class="ptitle"><div class="subtabs"><span class="st on">FILLS (${FL?17:15})</span><span class="st">ALL ORDERS (${FL?27:23})</span><span class="st">PROBLEMS (${FL?3:2})</span><span class="st">REALLOCATIONS (0)</span></div><span>newest first · from Alpaca</span></div>
+  <div class="th" style="grid-template-columns:${fcols}"><span>TIME</span><span>SYMBOL</span><span>SIDE</span><span class="r">SH</span><span class="r">PRICE</span><span>OWNER</span><span>NOTE</span></div>
+  ${fillRows}
+  <div class="note" style="margin-top:2px">PROBLEMS = rejected, NOT FILLED, cancelled by the system, or UNKNOWN (sent, no answer yet — never resent until Alpaca confirms). REALLOCATIONS = engine only, its own positions, each with its reason. Click a row for its full trail · “why” opens Review.</div>
+ </section>`;
+// right column: broker check, reallocations
+const broker = FL ? `<section class="panel" style="flex-grow:1">
+  <div class="ptitle"><b>BROKER CHECK · ALPACA</b></div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:5px;background:#F2A93B"></span><b class="am">WAITING FOR FLATTEN</b><span class="mono dm" style="font-size:10.5px">07:49:18</span></div>
+  <div class="kr"><span class="so">Positions</span><span class="mono">2 = 2 ✓</span></div>
+  <div class="kr"><span class="so">Orders · cash</span><span class="mono">2 = 2 ✓ · $3,216.70 ✓</span></div>
+  <div class="note">Platform and Alpaca agree. FLATTEN COMPLETE is shown only when both show zero positions.</div>
+ </section>` : `<section class="panel" style="flex-grow:1">
+  <div class="ptitle"><b>BROKER CHECK · ALPACA</b><span class="btn" style="height:22px;font-size:10.5px">check now</span></div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:9px;height:9px;border-radius:5px;background:#34C77B"></span><b class="g">IN SYNC</b><span class="so">0 differences</span><span class="mono dm" style="font-size:10.5px">checked 07:42:30</span></div>
+  <div class="kr"><span class="so">Positions · orders</span><span class="mono">4 = 4 ✓ · 2 = 2 ✓</span></div>
+  <div class="kr"><span class="so">Cash · buying power</span><span class="mono">$522.80 ✓ · $27.76 ✓</span></div>
+  <div class="note">After every fill and reconnect, at start-up, and every few seconds. Alpaca's numbers win. One stock differs → no new entries in it. Cash or account differs → AUTO BLOCKED — BROKER SYNC, all new entries blocked. Exits always work.</div>
+ </section>`;
+const realloc = `<section class="panel" style="flex-grow:1">
+  <div class="ptitle"><b>REALLOCATIONS · ENGINE ONLY</b><span>reserve → trim weakest → close weakest</span></div>
+  <div class="kr"><span class="so">Today</span><span>none</span></div>
+  <div class="kr"><span class="so">Reserve kept for better setups</span><span class="mono">20% <span class="dm">(OPEN)</span></span></div>
+  <div class="note">Only the engine reallocates, and only its own positions. Yours are never trimmed or sold to make room. Each reallocation is listed here with its reason, e.g. “sold EFGH (+$16) to fund WXYZ — stronger setup”.</div>
+ </section>`;
+H.push(`<div style="display:flex;gap:8px;flex-grow:1;min-height:0">
+  <div class="col" style="width:772px;flex-shrink:0">${working}<div style="display:flex;gap:8px;flex-grow:1;min-height:0">${byOwner}<div class="col" style="width:300px;flex-shrink:0">${broker}</div></div></div>
+  ${fillsP}
+ </div>`);
+H.push(`</div>`);
+if (live) H.push('<div style="position:absolute;inset:0;border:3px solid #E5484D;pointer-events:none;z-index:50"></div>');
+document.getElementById('win').innerHTML = H.join('');
+</script>
+</body>
+</html>

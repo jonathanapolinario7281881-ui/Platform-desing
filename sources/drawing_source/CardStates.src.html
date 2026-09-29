@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trade card — states</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:16px 0 8px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.box{background:#121925;border:1px solid #2E3A4A;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.bh{display:flex;align-items:center;gap:7px;padding:6px 9px;background:#18212E;border-bottom:1px solid var(--line);white-space:nowrap}
+.bh .t{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-right:auto}
+.bc{padding:8px 9px;display:flex;flex-direction:column;gap:6px}
+.cap2{font-size:11px;color:var(--dim);line-height:1.35;padding:0 9px 9px}
+.tkb{font-size:14px}
+.rowx{display:flex;align-items:center;gap:7px;font-size:11.5px;white-space:nowrap}
+.bb{height:40px;font-size:11.5px}
+.bb small{font-size:9px}
+.seq{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:11px}
+.seq span.s{height:22px;display:flex;align-items:center;padding:0 7px;border-radius:4px;border:1px solid #2E3A4A;background:#10151D;white-space:nowrap}
+.hatch{background:repeating-linear-gradient(135deg,#19202A 0 6px,#232C38 6px 12px)!important;color:#7C8898!important;border-color:#2A3340!important}
+</style>
+<script src="card.js"></script>
+</head>
+<body>
+<h1>Pop-up trade card — states and examples</h1>
+<p class="sub">Companion to the trade-card drawing. The card is the same card as the main window's strip card, so every state here also shows on the strip, the Level 2 panels and Stock detail (consistency rule). Numbers are examples; timings are TEST values.</p>
+<div id="out"></div>
+<script>
+const hdr=(tk,cls,extra)=>`<span class="tkb ${cls||'no'}">${tk}</span>${extra||''}`;
+const chip=(t,c)=>`<span class="chip ${c||''}" style="height:17px;font-size:9.5px">${t}</span>`;
+const stl=(html,k,btn)=>{const st={b:'border-color:#3E5470;background:#111A28',r:'border-color:#A8262B;background:#2A1114',a:'border-color:#6B4A16;background:#1F180C',g:'border-color:#3A4556;background:#161D28',gr:'border-color:#1F6B45;background:#0F2119'}[k||'b'];return `<div class="stl" style="${st}">${html}${btn||''}</div>`;};
+const B=(l,s,c)=>`<span class="bb ${c}">${l}<small>${s}</small></span>`;
+const btns=a=>`<div class="bb4">${a.map(x=>B(...x)).join('')}</div>`;
+const box=(title,right,body,cap)=>`<div class="box"><div class="bh"><span class="t">${title}</span>${right}</div><div class="bc">${body}</div><div class="cap2">${cap}</div></div>`;
+const hold=(t)=>`<span class="sb" style="border-color:#7A3035;background:#1C1316;color:#F0A5A8">${t}</span>`;
+const S=[
+['OWNERSHIP',[
+ box('ENGINE ENTRY WORKING · AUTO ON',hdr('NOPQ','up',' <b class="g" style="font-size:11px">▲</b> '+chip("ENGINE'S ENTRY WORKING",'eng')),
+  stl('<b class="te">ENGINE BUY 200 / 500</b><span class="so">· working ≤ $2.31</span>','b',hold('CANCEL ENGINE ENTRY · hold 1 s'))+
+  btns([['BUY NOPQ','AUTO ON','b-dis'],['SELL/EXIT','🔒 engine\'s · 200 sh','b-dis'],['SHORT','AUTO ON','b-dis'],['COVER','—','b-dis']])+
+  `<div class="rowx"><span class="chip" style="height:18px;color:var(--amber);border-color:#6B4A16;background:#261D0E">ENGINE RE-ENTRY PAUSED · same setup ×</span><span class="dm" style="font-size:10.5px">after you cancel</span></div>`,
+  'Only while that engine entry is still working. Cancels only the unfilled 300; the 200 filled stay the engine\'s. Logged as your intervention. The pause ends when you click × or a genuinely new setup appears.'),
+ box('ENGINE\'S POSITION',hdr('WXYZ','no',' '+chip("ENGINE'S",'eng')),
+  `<div class="rowx"><span class="mono">700 @ $1.79</span><span class="mono g">+$56.00 · +4.5%</span><span class="te" style="font-size:11px">RISK LINE $1.72 · engine manages exit</span></div>`+
+  btns([['BUY','in position','b-dis'],['OVERRIDE EXIT','🔒 hold 1 s','b-ovr'],['SHORT','—','b-dis'],['COVER','—','b-dis']]),
+  'The exit is the engine\'s. OVERRIDE EXIT (hold 1 s) closes only this position; AUTO and the other engine positions keep running; same-setup re-entry paused. Not available on the phone.'),
+ box('OPENED OUTSIDE THE PLATFORM',hdr('RSTU','no'),
+  `<div class="rowx"><span class="chip you" style="height:17px;font-size:9.5px">YOURS · OPENED OUTSIDE PLATFORM</span><span class="mono">150 @ $4.02</span><span class="mono g">+$9.00</span></div>`+
+  btns([['BUY','in position','b-dis'],['SELL/EXIT','150 sh · one click','b-sell'],['SHORT','off · long-only','b-dis'],['COVER','—','b-dis']]),
+  'Bought outside the platform (e.g. in the Alpaca app). It is yours: your buttons work, the engine never adopts or manages it.'),
+]],
+['EXITS',[
+ box('EXIT NOT FILLED → SELL LOWER',hdr('IJKL','no',' '+chip('YOURS','you')),
+  stl('<b style="color:#FF9EA1">EXIT NOT FILLED</b><span class="so">· bid below $7.52 · 172 sh left</span>','r')+
+  btns([['BUY','—','b-dis'],['SELL LOWER TO $7.48','one click · 172 sh','b-sell'],['SHORT','—','b-dis'],['COVER','—','b-dis']]),
+  'Protected exit stepped down to its boundary. Nothing sells lower without your click; the button always names the exact next price. On the phone this needs a 1 s hold.'),
+ box('HALTED',hdr('MNOP','no',' '+chip('YOURS','you')+' <span class="mu" style="font-size:11px">SHORT 400 @ $3.12</span>'),
+  stl('<b class="mu">HALTED · 2:40 elapsed</b><span class="dm">· no official resume time yet</span>','g')+
+  btns([['BUY','HALTED','b-dis'],['SELL/EXIT','—','b-dis'],['SHORT','HALTED','b-dis'],['COVER PENDING','sends when trading resumes','b-hold']]),
+  'Pressed during a halt, the exit stays pending and the card says so. An official resume time shows only when the exchange publishes one.'),
+ box('CLOSED',hdr('GHIJ','no',' '+chip('YOURS','you')),
+  stl('<b class="g">CLOSED · +$64.00</b><span class="so">· 100 sh sold @ $13.04 · yours</span>','gr')+
+  btns([['BUY GHIJ','100 sh','b-buy'],['SELL/EXIT','—','b-dis'],['SHORT','off · long-only','b-dis'],['COVER','—','b-dis']]),
+  'The result stays about 5 s (TEST), then the card shows "No position". The card stays open until you close it.'),
+]],
+['BLOCKS — ALWAYS WITH THE REASON; EXITS STAY AVAILABLE',[
+ box('HARD DAILY LIMIT',hdr('QRST','up',' <b class="g" style="font-size:11px">▲ strong up</b>'),
+  stl('<b style="color:#FF9EA1">HARD LIMIT — NEW ENTRIES BLOCKED</b><span class="so">· exits OK</span>','r')+
+  btns([['BUY QRST','blocked · hard limit','b-dis'],['SELL/EXIT','—','b-dis'],['SHORT','blocked','b-dis'],['COVER','—','b-dis']]),
+  'For the rest of the day; nothing can add to a position. Your exits always work.'),
+ box('INTRADAY MARGIN CALL',hdr('ABCD','no',' '+chip('YOURS','you')),
+  stl('<b style="color:#FF9EA1">MARGIN CALL · $412</b><span class="so">· BUY/SHORT blocked</span>','r',`<span class="sb" style="border-color:#A8262B;background:#2A1114;color:#FFB3B5">EST. SELL 61 ABCD TO CURE MARGIN</span>`)+
+  btns([['BUY','in position','b-dis'],['SELL/EXIT','300 sh · one click','b-sell'],['SHORT','blocked','b-dis'],['COVER','—','b-dis']]),
+  'The cure button never runs without your click. Blocks lift when Alpaca confirms the call cleared; AUTO stays off until you turn it on.'),
+ box('NOT SAFE TO TRADE',hdr('ABCD','no',' '+chip('YOURS','you')),
+  stl('<b style="color:#FF9EA1">ALPACA EXECUTION UNAVAILABLE</b><span class="so">· orders can\'t be sent</span>','r')+
+  btns([['BUY','can\'t send','b-dis'],['SELL/EXIT','can\'t send','b-dis'],['SHORT','can\'t send','b-dis'],['COVER','—','b-dis']])+
+  `<div class="rowx"><b style="font-size:11px">Manual backup: use Alpaca directly</b><span class="dm" style="font-size:10.5px">only when only our link failed</span></div>`,
+  'Same three Alpaca labels as System Health. With Massive stale instead: BUY/SHORT refused, exits still available.'),
+ box('ONE STOCK OUT OF SYNC',hdr('ABCD','no',' '+chip('YOURS','you')),
+  stl('<b class="am">ABCD BLOCKED — BROKER SYNC</b><span class="so">· platform 300 · Alpaca 400</span>','a')+
+  btns([['BUY','in position','b-dis'],['SELL/EXIT','400 sh (Alpaca)','b-sell'],['SHORT','blocked','b-dis'],['COVER','—','b-dis']]),
+  'Alpaca\'s numbers win; only ABCD gets no new entries. If cash or the whole account disagrees, all entries are blocked (NOT SAFE TO TRADE).'),
+ box('UNKNOWN ORDER',hdr('ABCD','no',' '+chip('YOURS','you')),
+  stl('<b class="am">UNKNOWN · checking with Alpaca</b><span class="so">· sell 100 sent 07:50:02</span>','a')+
+  btns([['BUY','in position','b-dis'],['SELL/EXIT','checking…','b-dis'],['SHORT','—','b-dis'],['COVER','—','b-dis']]),
+  'Never resent until Alpaca confirms; new entries in that stock wait. The phone locks this stock\'s exit the same way.'),
+ box('NOT ELIGIBLE',hdr('OTCX','no',' <span class="chip" style="height:17px;font-size:9.5px;color:var(--muted);border-color:#3A4556">OTC MARKET</span> <span class="mono" style="font-size:11px">$0.0142</span>'),
+  `<span class="bb b-dis" style="height:40px">NOT ELIGIBLE FOR PLATFORM TRADING<small>OTC stock · not tradable at Alpaca · data only</small></span>`,
+  'The four buttons are replaced by the reason (same as Stock detail) — never an active BUY that fails.'),
+]],
+['SIZE, AUTO AND SHORTS',[
+ box('SIZE LIMITED · FULL CAP',hdr('LMNO','dn',' <b class="rd" style="font-size:11px">▼ strong down</b>'),
+  `<div class="szb"><span class="lab">SIZE</span><span class="o">10%</span><span class="o">25%</span><span class="o">50%</span><span class="o">$2,000</span><span class="o on" style="border-color:#F2A93B;background:#2A2010;color:var(--amber)">FULL CAP</span><span class="mono am nw" style="font-size:11px">= up to $2,318</span></div>`+
+  btns([['BUY LMNO','312 sh · $1,000 cap','b-buy b-lim'],['SELL/EXIT','—','b-dis'],['SHORT','off · long-only','b-dis'],['COVER','—','b-dis']]),
+  'Amber box = this stock\'s own cap is lower than your size ("SIZE LIMITED TO $1,000", reason on hover). FULL CAP gets an amber frame. Still one click.'),
+ box('AUTO ON',hdr('GHIJ','no',' '+chip('YOURS','you')),
+  `<div class="szb" style="opacity:.45"><span class="lab">SIZE</span><span class="o">10%</span><span class="o on">25%</span><span class="o">50%</span><span class="o">$2,000</span><span class="o">FULL CAP</span></div><div class="dm" style="font-size:10.5px;margin-top:-3px">Not used while AUTO is on · the engine sizes its own trades</div>`+
+  btns([['BUY','AUTO ON','b-dis'],['SELL/EXIT','100 sh · one click','b-sell'],['SHORT','AUTO ON','b-dis'],['COVER','—','b-dis']]),
+  'AUTO ON locks your BUY/SHORT; exits on your positions keep working.'),
+ box('SHORT BUTTON WORDING',`<span class="dm" style="font-size:10.5px">now → later</span>`,
+  `<div class="bb4" style="grid-template-columns:repeat(3,1fr)">${B('SHORT','off · long-only','b-dis')}${B('SHORT LMNO','400 sh','b-sh')}${B('SHORT','no borrow','b-dis')}</div>`,
+  'Phase 1: shorting is off at Alpaca, so SHORT says "off · long-only". Once shorts are enabled (Phase 3): the share count, or "no borrow" when the stock can\'t be borrowed.'),
+]],
+['OPENING THE CARD AND ORDER STATUS',[
+ box('FROM REVIEW OR A HISTORICAL AI ANSWER',`<span class="dm" style="font-size:10.5px">header only</span>`,
+  `<div class="tch live" style="border-radius:6px"><span class="lbl">LIVE CARD · CURRENT MARKET</span><div style="flex-grow:1"></div><span class="mono" style="font-size:11px;color:#fff">now 07:42:31 ET</span><span class="x" style="border-color:#8BBEFF;color:#fff">✕</span></div>`+
+  `<div class="dm" style="font-size:10.5px">Replay paused at 07:12:52.100 · prices here are live, not from the replay</div>`,
+  'A historical price is never mistaken for a tradable one (settled Review R3 / AI A1). All four buttons as usual.'),
+ box('JUST OPENED',hdr('ABCD','up',' <b class="g" style="font-size:11px">▲ strong up</b>'),
+  `<div class="bb4"><span class="bb hatch">BUY ABCD<small>opening…</small></span><span class="bb hatch">SELL/EXIT<small>opening…</small></span><span class="bb hatch">SHORT<small>opening…</small></span><span class="bb hatch">COVER<small>opening…</small></span></div>`,
+  'Buttons locked about 0.5 s (TEST) after the card opens, so a double-click on a ticker can never land on BUY. A double-click opens Stock detail instead.'),
+ box('ORDER STATUS ON THE CARD',`<span class="dm" style="font-size:10.5px">one at a time, from Alpaca</span>`,
+  `<div class="seq"><span class="s">RISK CHECK…</span>→<span class="s">SENT</span>→<span class="s bl">WORKING 583 @ ≤ $2.24 · CANCEL</span>→<span class="s bl">PARTIAL 300 / 583</span>→<span class="s g">FILLED</span></div><div class="seq"><span class="s am">NOT FILLED · price ran above $2.24</span><span class="s" style="color:#FF9EA1">REJECTED · reason</span><span class="s am">UNKNOWN · checking with Alpaca</span><span class="s">CANCELLED · by you</span></div>`,
+  'Closing the card never cancels an order — it keeps going and stays in the strip and Positions & Orders. While an entry works, BUY shows "order working" everywhere that stock appears.'),
+]],
+];
+document.getElementById('out').innerHTML = S.map(g=>`<h2>${g[0]}</h2><div class="grid">${g[1].join('')}</div>`).join('');
+</script>
+</body>
+</html>

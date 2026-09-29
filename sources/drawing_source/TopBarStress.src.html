@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thin top bar — every window</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:16px 0 24px;color:var(--text);font-family:'IBM Plex Sans',sans-serif}
+.pad{padding:0 22px}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:16px 0 6px;font-weight:700}
+.barwin{position:relative;width:1536px;height:70px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.cap{font-size:11.5px;color:var(--soft);padding:6px 22px 4px;display:flex;gap:14px;align-items:center}
+.cap .res{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green)}
+.grid{display:grid;gap:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.45;color:var(--soft)}
+.box b{color:var(--text)}
+</style>
+<script src="thinbar.js"></script>
+</head>
+<body>
+<div class="pad"><h1>Thin top bar — the same bar in every window (fit test at 1536 px)</h1>
+<p class="sub">Every separate window (Review, Positions &amp; Orders, Settings, Stock detail, AI Assistant, News &amp; Catalysts, System Health) has this bar and the 22 px alert line under it. The main window keeps its full top bar. Numbers are examples.</p></div>
+<div id="bars"></div>
+<div class="pad">
+<h2>RULES</h2>
+<div class="grid" style="grid-template-columns:repeat(3,1fr)">
+ <div class="box"><b>AUTO in every window.</b> The state is always in words: AUTO OFF — YOU TRADE · AUTO ON — ENGINE CAN TRADE · AUTO PAUSED — reason · AUTO BLOCKED — reason. While AUTO is on, <b>STOP AUTO</b> is one click here. Turning AUTO on and Resume AUTO: <b>main window only</b> (hold 2 s + checks); the paused block's hover says so.</div>
+ <div class="box"><b>Blink chips</b> only for stocks that matter to you: My list, the Level 2 slots, the Selected stock and <b>all open positions</b> — yours and the engine's (teal underline = engine's position). EXIT? (your positions only) comes first. Newest 3 shown, then "+N more". A chip blinks about 5 s, stays solid while the signal is active, and goes when it ends. Click = pop-up trade card.</div>
+ <div class="box"><b>Fit rule.</b> Nothing wraps; FLATTEN ALL can never be pushed off the edge. When space runs out: (1) the window name shortens, (2) chips shorten to arrow + ticker, (3) the "LIVE ALERTS" label hides, (4) chips drop into "+N more". <b>Safety states never disappear to save space:</b> PAPER/LIVE, AUTO BLOCKED/PAUSED, SOFT/HARD LIMIT when active, health and FLATTEN ALL always stay; the full reason goes in the alert line when the bar wording is short. The LIMIT tag shows only when a limit is reached. LIVE puts the red frame around every window. Chip count and timings are TEST values.</div>
+</div>
+</div>
+<script>
+const S = [
+ ['1 · Normal — PAPER, AUTO OFF', {}],
+ ['2 · AUTO ON — STOP AUTO one click; engine position chip', {name:'Positions & Orders',auto:'ON',chips:[['EXIT? GHIJ','ex'],['▲ ABCD strong up','up'],['▼ WXYZ strong down','dn',1]],more:1,alert:['INFO','07:42:40','Engine bought NOPQ · 200 of 500 @ $2.29 · entry still working, no higher than $2.31','']}],
+ ['3 · LIVE, soft limit — AUTO paused, DEGRADED', {name:'Positions & Orders',env:'LIVE',auto:'PAUSED',reason:'SOFT LIMIT',clockL:'REGULAR',clock:'10:14 ET',chips:[['EXIT? IJKL','ex'],['▲ QRST strong up','up'],['▲ NOPQ strong up','up',1]],more:1,pl:'−$318.40 · −1.27%',neg:true,limit:'SOFT',health:'DEGRADED',hc:'a',alert:['','10:14:02','SOFT LIMIT REACHED · AUTO PAUSED · −$318 (soft −$300) · your manual trading still allowed · Resume AUTO in the main window','att']}],
+ ['4 · Longest state — LIVE, AUTO BLOCKED, HARD LIMIT, NOT SAFE TO TRADE, 6 signals', {name:'Positions & Orders',env:'LIVE',auto:'BLOCKED',reason:'ALPACA',clockL:'REGULAR',clock:'10:31 ET',chips:[['EXIT? GHIJ','ex'],['EXIT? IJKL','ex'],['▼ WXYZ strong down','dn',1],['▲ ABCD strong up','up']],more:2,pl:'−$1,234.56 · −4.93%',neg:true,limit:'HARD',health:'NOT SAFE TO TRADE',hc:'r',alert:['','10:31:07','ALPACA EXECUTION UNAVAILABLE · PLATFORM CANNOT RELIABLY CONTROL ORDERS · Manual backup: use Alpaca directly','crit']}],
+ ['5 · Order circuit breaker tripped — AUTO BLOCKED — ORDER LIMIT', {name:'Positions & Orders',auto:'BLOCKED',reason:'ORDER LIMIT',clockL:'REGULAR',clock:'10:48 ET',chips:[['EXIT? GHIJ','ex'],['▲ ABCD strong up','up']],alert:['','10:48:03','ORDER LIMIT TRIPPED · 12 orders in 10 s (limit 8 per 10 s, TEST) · AUTO BLOCKED · your exits OK · see Positions & Orders','crit']}],
+ ['6 · Long window name — Stock detail, AUTO ON, after-hours', {name:'Stock detail · ABCD',auto:'ON',clockL:'AFTER-HOURS',clock:'17:05 ET',chips:[['EXIT? GHIJ','ex'],['▲ ABCD strong up','up'],['▲ QRST strong up','up'],['▼ LMNO strong down','dn']],more:0,alert:['INFO','17:05:11','After-hours: limit orders only (Alpaca) · your order size 25% = $1,308','']}],
+];
+document.getElementById('bars').innerHTML = S.map((s,i)=>`<div class="cap"><b>${s[0]}</b><span class="res" id="r${i}"></span></div><div class="barwin win${s[1].env==='LIVE'?' live':''}" id="b${i}">${thinBar(s[1])}</div>`).join('');
+S.forEach((s,i)=>{ const r=fitBar(document.querySelector('#b'+i+' header'));
+ document.getElementById('r'+i).textContent = (r.fits?'✓ fits':'✗ OVERFLOW')+' · FLATTEN ALL ends '+r.flatRightGap+' px from the edge · '+r.chipsShown+' chip'+(r.chipsShown===1?'':'s')+' shown'+(r.more?' (+'+r.more+' more)':'')+(r.nameTrunc?' · window name shortened':'')+(r.steps?' · '+r.steps:'');
+ if(!r.fits) document.getElementById('r'+i).style.color='#FF9EA1'; });
+</script>
+</body>
+</html>

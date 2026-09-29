@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Review window — v4 proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0E13;--panel:#121720;--panel2:#0F141C;--line:#232B38;--row:#1A212C;--text:#E7EAEE;--soft:#C9D1DB;--muted:#9BA6B5;--dim:#7D8899;--green:#34C77B;--red:#F0555A;--amber:#F2A93B;--yellow:#F2C94C;--blue:#5AA2FF;--purple:#B08CFF;--pink:#F9A8D4;--teal:#5CE0D2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg)}
+.win{position:relative;width:1536px;height:864px;overflow:hidden;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;display:flex;flex-direction:column}
+.mono{font-family:'IBM Plex Mono',monospace}
+.nw{white-space:nowrap}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+header{height:48px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 10px 0 6px;background:var(--panel);border-bottom:1px solid var(--line)}
+.back{height:34px;padding:0 11px 0 9px;border-radius:7px;border:1px solid #5B9BEA;background:#1D5AA8;color:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;font-family:inherit}
+.back b{font-size:12.5px;letter-spacing:.03em}
+kbd{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:1px 4px;border-radius:3px;border:1px solid rgba(255,255,255,.55);color:#DCE8FA}
+.wtitle{font-size:15px;font-weight:700;margin-left:4px;white-space:nowrap}
+.env{height:28px;display:flex;align-items:center;padding:0 9px;border-radius:6px;border:1px solid #3E5470;background:#1B2433;color:#A9C7FF;font-size:11.5px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.autop{height:28px;display:flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid #3A4556;background:#1A212C;font-size:11.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.lab{font-size:10px;letter-spacing:.06em;color:var(--muted);white-space:nowrap}
+.sig{height:28px;display:flex;align-items:center;padding:0 8px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap}
+.health{height:30px;padding:0 10px;border-radius:6px;border:1px solid #1F6B45;background:#0F2119;display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.flat{flex-shrink:0;height:36px;padding:0 12px;border-radius:6px;border:1px solid #E5484D;background:#2A1114;color:#FFB3B5;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.flat b{font-size:12px;letter-spacing:.04em;white-space:nowrap}.flat span{font-size:9.5px;opacity:.85}
+.alert{height:22px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 12px;background:#0E131B;border-bottom:1px solid var(--line)}
+.atag{font-size:9.5px;font-weight:700;letter-spacing:.08em;padding:1px 5px;border-radius:3px;color:#C9D1DB;background:#232B38}
+.tabrow{height:40px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid var(--line);background:#0D1118}
+.tab{height:30px;padding:0 16px;border-radius:6px;border:1px solid transparent;display:flex;align-items:center;font-size:12.5px;font-weight:700;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+.tab.on{color:#fff;background:#24324A;border-color:#5AA2FF}
+.seg{display:flex;border:1px solid #2E3A4A;border-radius:6px;overflow:hidden}
+.seg span{height:26px;display:flex;align-items:center;padding:0 10px;font-size:11.5px;color:var(--soft);white-space:nowrap;border-right:1px solid #2E3A4A;background:#161D28}
+.seg span:last-child{border-right:0}
+.seg span.on{background:#24324A;color:#fff;box-shadow:inset 0 0 0 1px #5AA2FF}
+.seg span.live{color:#FF9EA1}
+.btn{height:26px;padding:0 10px;border-radius:5px;border:1px solid #2E3A4A;background:#161D28;color:var(--text);font-size:11.5px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn.on{border-color:#5AA2FF;background:#24324A}
+.btn.pri{border-color:#5B9BEA;background:#1D5AA8;color:#fff;font-weight:700}
+.content{flex-grow:1;min-height:0;padding:8px;display:flex;gap:8px}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:6px}
+.ptitle{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ptitle>b{font-size:11px;letter-spacing:.08em;white-space:nowrap}
+.ptitle>span{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.th,.tr{display:grid;align-items:center;column-gap:8px;padding:0 8px}
+.th{height:22px;background:#161D28;border-radius:4px;font-size:9.5px;font-weight:600;letter-spacing:.07em;color:var(--muted)}
+.tr{height:30px;border-bottom:1px solid var(--row);font-size:11.5px}
+.tr.sel{background:#1B2638;box-shadow:inset 3px 0 0 #5AA2FF}
+.tr > *{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r{text-align:right}
+.chip{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap;border:1px solid}
+.you{color:#F2F4F7;border-color:#56627A;background:#1C2330}
+.eng{color:var(--teal);border-color:#1E5A55;background:#0E2422}
+.wh{color:#8FD9D1;border:1px dashed #3E7F78;background:transparent}
+.g{color:var(--green)}.rd{color:var(--red)}.am{color:var(--amber)}.te{color:var(--teal)}.ye{color:var(--yellow)}.mu{color:var(--muted)}.dm{color:var(--dim)}.so{color:var(--soft)}.bl{color:var(--blue)}.pu{color:var(--purple)}
+.kv{display:grid;grid-template-columns:118px 1fr;column-gap:10px;row-gap:3px;font-size:11.5px;line-height:1.35}
+.kv .k{color:var(--muted);font-size:10.5px;letter-spacing:.04em;padding-top:1px}
+.sec{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted);border-top:1px solid var(--row);padding-top:6px;margin-top:2px;display:flex;justify-content:space-between}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 11px;min-width:0}
+.tile .l{font-size:9.5px;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+.tile .v{font-family:'IBM Plex Mono',monospace;font-size:15px;margin-top:3px;white-space:nowrap}
+.tile .s{font-size:10px;color:var(--dim);white-space:nowrap;margin-top:1px}
+.subtabs{display:flex;gap:4px}
+.st{height:24px;padding:0 10px;border-radius:5px;border:1px solid #2E3A4A;background:#161D28;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;white-space:nowrap}
+.st.on{color:#fff;border-color:#5AA2FF;background:#24324A}
+.src{display:inline-block;width:58px;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;border-radius:3px;padding:1px 0}
+.note{font-size:10.5px;color:var(--dim);line-height:1.35}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const Q = new URLSearchParams(location.search);
+const tab = Q.get('tab') || 'journal';
+const live = Q.get('env') === 'live';   // trading mode (top bar); the Review results filter stays PAPER in all drawings
+const card = Q.get('card') === '1';
+const H = [];
+// ---------- thin top bar (same in every window) ----------
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">Review</span>
+${live?'<span class="env" style="border-color:#E5484D;background:#5A1216;color:#FFB3B5">LIVE — REAL MONEY</span>':'<span class="env">PAPER</span>'}
+<span class="autop">AUTO OFF — YOU TRADE</span>
+<div style="flex-grow:1"></div>
+<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span>
+<span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono g nw" style="font-size:12.5px">+$233.00 · +4.66%</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>
+<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:42:16</span><span class="ell so" style="font-size:11px">Engine would have bought ABCD · 500 sh @ $2.12 · AUTO is off, not traded · added to Review as a would-have trade</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (14) ▸</span></div>`);
+
+// ---------- tab row ----------
+const tabs = [['journal','JOURNAL'],['replay','REPLAY'],['performance','PERFORMANCE']].map(([k,l])=>`<span class="tab ${k===tab?'on':''}">${l}</span>`).join('');
+let right;
+if (tab==='performance') {
+  right = `<span class="lab">PERIOD</span><span class="seg"><span>Today</span><span>This week</span><span class="on">Last 30 days</span><span>All</span><span>Custom…</span></span>
+  <span class="lab" style="margin-left:10px">OWNER</span><span class="seg"><span class="on">All</span><span>You</span><span>Engine</span></span>`;
+} else {
+  right = `<span class="btn">◂</span><span class="mono nw" style="font-size:12px;font-weight:600">FRI SEP 25, 2026</span><span class="btn">▸</span><span class="btn">Today</span>`;
+}
+H.push(`<div class="tabrow">${tabs}<div style="flex-grow:1"></div>${right}
+<span class="lab" style="margin-left:14px">SHOWING RESULTS</span><span class="seg"><span class="on">PAPER</span><span class="live">LIVE</span><span style="color:#B08CFF">RESEARCH</span></span>
+${live?'<span class="nw" style="margin-left:6px;font-size:10.5px;font-weight:600;color:#F2A93B;border:1px solid #6B4A16;background:#261D0E;border-radius:4px;padding:2px 6px">viewing PAPER results · you are trading LIVE</span>':'<span class="note nw" style="margin-left:6px">filter only · never added together</span>'}</div>`);
+
+const chip = (cls, t) => `<span class="chip ${cls}">${t}</span>`;
+const own = o => o==='YOU'?chip('you','YOU'):o==='ENGINE'?chip('eng','ENGINE'):chip('wh','WOULD-HAVE');
+
+// ================= JOURNAL =================
+if (tab==='journal') {
+  const cols = '62px 50px 40px 94px 1fr 38px 50px 50px 60px 46px 102px 118px';
+  const T = [
+   ['07:42:16','ABCD','LONG','WH','Explosive runner','500','$2.12','–','+$31','+1.2R','—','open · est. fills'],
+   ['07:39:51','IJKL','LONG','YOU','Pullback / continuation','172','$7.60','–','+$42','—','—','open'],
+   ['07:25:03','MNOP','LONG','YOU','Bottom reversal','400','$3.12','$3.19','+$28','—','YOU','win'],
+   ['07:21:40','GHIJ','LONG','YOU','Moderate move','100','$12.40','–','+$159','—','—','open'],
+   ['07:16:12','WXYZ','LONG','ENGINE','Re-entry / 2nd surge','700','$1.79','–','+$64','+2.6R','—','open'],
+   ['07:12:39','BCDE','LONG','ENGINE','Explosive runner','600','$0.84','$0.81','−$18','−0.7R','ENGINE','valid strategy loss'],
+   ['06:55:40','EFGH','LONG','ENGINE','Pullback / continuation','400','$2.54','$2.58','+$16','+0.6R','ENGINE','win'],
+   ['06:48:03','STUV','LONG','ENGINE','Moderate move','400','$0.88','$0.83','−$20','−0.8R','ENGINE','execution / slippage'],
+   ['06:31:17','NOPQ','LONG','ENGINE','Bottom reversal','300','$2.10','$2.19','+$27','+1.1R','OVERRIDE EXIT','win'],
+   ['06:02:55','HIJK','LONG','ENGINE','Explosive runner','500','$0.57','$0.48','−$45','−1.8R','ENGINE','market regime'],
+   ['05:48:20','KLMN','LONG','YOU','Moderate move','300','$1.46','$1.41','−$15','−0.6R','YOUR STOP','valid strategy loss'],
+  ];
+  const resCls = r => r==='win'?'g':r.startsWith('open')?'mu':r==='valid strategy loss'?'so':(r==='execution / slippage'||r==='market regime')?'am':'rd';
+  const byCls = b => b==='YOU'?'':b==='ENGINE'?'te':b==='YOUR STOP'?'ye':b==='OVERRIDE EXIT'?'':b.includes('FLATTEN')||b.includes('ALPACA')?'rd':'dm';
+  const rows = T.map(t=>{
+    const wh = t[3]==='WH';
+    const pnlCls = t[8].startsWith('+')?'g':t[8].startsWith('−')?'rd':'mu';
+    return `<div class="tr ${t[1]==='MNOP'?'sel':''}" style="column-gap:6px;grid-template-columns:${cols};${wh?'color:#AAB6C4;font-style:italic':''}">
+    <span class="mono">${t[0]}</span><span style="font-weight:700;font-style:normal">${t[1]}</span><span class="g" style="font-size:10.5px">${t[2]}</span>
+    <span style="font-style:normal">${wh?chip('wh','WOULD-HAVE'):own(t[3])}</span><span class="so">${t[4]}</span>
+    <span class="mono r">${t[5]}</span><span class="mono r">${t[6]}</span><span class="mono r">${t[7]}</span>
+    <span class="mono r ${pnlCls}" style="${wh?'opacity:.75':''}">${t[8]}</span><span class="mono r ${t[9].startsWith('+')?'g':t[9].startsWith('−')?'rd':'dm'}" style="${wh?'opacity:.75':''}">${t[9]}</span>
+    <span class="${byCls(t[10])}" style="font-size:10.5px;font-weight:${t[10]==='OVERRIDE EXIT'?700:500};font-style:normal">${t[10]}</span><span class="${resCls(t[11])}" style="font-size:11px">${t[11]}</span></div>`;}).join('');
+  const resTile = (l,v,c)=>`<div style="flex:1;min-width:0;background:#0F141C;border:1px solid var(--line);border-radius:6px;padding:4px 8px"><div class="lab" style="font-size:9px">${l}</div><div class="mono ${c}" style="font-size:12.5px">${v}</div></div>`;
+  const trades = `<section class="panel" style="flex:0 0 486px">
+   <div class="ptitle"><b>TRADES · FRI SEP 25</b><span>one row per round trip · 10 real trades (7 closed, 3 open) + 1 would-have · realized −$27 · open +$265 · fees −$5 · day +$233.00</span></div>
+   <div style="display:flex;gap:5px;align-items:center"><span class="btn on">All</span><span class="btn">Yours</span><span class="btn">Engine's</span><span class="btn">Would-have</span><span class="btn">Losses</span><span class="btn">Overrides &amp; flattens</span>
+    <span class="btn" style="width:120px;color:var(--dim)">⌕ ticker</span><div style="flex-grow:1"></div><span class="btn">⇩ EXPORT CSV</span></div>
+   <div class="th" style="column-gap:6px;grid-template-columns:${cols}"><span>TIME</span><span>SYMBOL</span><span>SIDE</span><span>OWNER</span><span>SETUP</span><span class="r">SH</span><span class="r">ENTRY</span><span class="r">EXIT</span><span class="r">P&amp;L</span><span class="r">R</span><span>CLOSED BY</span><span>RESULT</span></div>
+   <div>${rows}</div>
+   <div style="display:flex;gap:6px;margin-top:2px">${resTile('WINS','+$71','g')}${resTile('VALID STRATEGY LOSS','−$33','so')}${resTile('EXECUTION / SLIPPAGE','−$20','am')}${resTile('MARKET REGIME','−$45','am')}${resTile('TECHNICAL FAILURE','$0','mu')}${resTile('RULE BREAKS','0','mu')}</div>
+  </section>`;
+  const missCols='48px 44px 104px 1fr';
+  const miss = [['EFHI','+48%','#14 at 06:40','needed Level 2; all 3 slots were busy'],['YZAB','+31%','#38 at 07:05','spread too wide when the trigger fired'],['CDFG','+22%','outside the 50','volume came late; promoted after the move'],['QRST','+19%','#9 at 07:30','AUTO off · no click from you (human timing)']];
+  const missed = `<section class="panel" style="flex:1">
+   <div class="ptitle"><b>MISSED RUNNERS · RULE v1</b><span>catchable then, not traded · +2 not catchable</span></div>
+   <div class="th" style="grid-template-columns:${missCols}"><span>SYMBOL</span><span class="r">MOVE</span><span>FIRST SEEN</span><span>WHY IT WAS MISSED</span></div>
+   ${miss.map(m=>`<div class="tr" style="height:auto;min-height:27px;padding-top:4px;padding-bottom:4px;grid-template-columns:${missCols}"><span style="font-weight:700">${m[0]}</span><span class="mono r g">${m[1]}</span><span class="so" style="font-size:11px">${m[2]}</span><span class="so" style="font-size:11px;white-space:normal;line-height:1.3">${m[3]}</span></div>`).join('')}
+  </section>`;
+  const evCols='62px 1fr';
+  const ev = [
+   ['07:20:02','<b>STOP AUTO</b> (you) → AUTO OFF · 1 engine entry cancelled · WXYZ still engine-managed',''],
+   ['06:47:15','<span class="am">ALPACA CONNECTIVITY ISSUE · CAUSE UNKNOWN</span> · 0:38 · new AUTO entries blocked',''],
+   ['06:44:10','<b>OVERRIDE EXIT NOPQ</b> (you) · closed at $2.19 · re-entry paused for that setup',''],
+   ['06:12:31','HIJK <span class="mu">HALTED</span> · 2:40 elapsed · resumed 06:15:11',''],
+   ['06:00:05','<b>AUTO ON — ENGINE CAN TRADE</b> (you, hold 2 s)',''],
+   ['05:55:31','<span class="ye">YOUR STOP</span> hit on KLMN · sold 300 @ $1.41',''],
+  ];
+  const events = `<section class="panel" style="flex:1.18">
+   <div class="ptitle"><div class="subtabs"><span class="st on">DAY EVENTS (9)</span><span class="st">BLOCKED &amp; REJECTED (4)</span></div><span>alert history, kept for good</span></div>
+   ${ev.map(e=>`<div class="tr" style="height:auto;min-height:27px;padding-top:4px;padding-bottom:4px;grid-template-columns:${evCols}"><span class="mono mu" style="font-size:10.5px">${e[0]}</span><span class="so" style="font-size:11px;white-space:normal;line-height:1.3">${e[1]}</span></div>`).join('')}
+  </section>`;
+  const why = `<section class="panel" style="flex-grow:1;gap:5px">
+   <div class="ptitle"><b>WHY · MNOP · 07:25:03</b><span>selected trade</span></div>
+   <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">${chip('you','YOURS')}<span class="chip" style="color:#8CE0B0;border-color:#1F6B45;background:#0F2119">LONG</span><span class="chip" style="color:var(--soft);border-color:#3A4556">BOTTOM REVERSAL</span><span class="chip" style="color:var(--green);border-color:#1F6B45">WIN</span><div style="flex-grow:1"></div><span class="mono g" style="font-size:14px">+$28.00 · +2.2%</span><span class="mono dm" style="font-size:11px">R —</span></div>
+   <div class="sec"><span>YOUR ENTRY</span></div>
+   <div class="kv"><span class="k">CLICK</span><span>07:25:03.412 · BUY on the <b>Selected card</b></span>
+   <span class="k">SIZE</span><span>25% preset = $1,308 ÷ ceiling $3.27 = <b>400 sh</b></span>
+   <span class="k">FILL</span><span>400 @ <b>$3.12</b> · 2 steps · 380 ms · ask at click $3.11 → <span class="am">+$0.01 slippage (0.3%)</span></span></div>
+   <div class="sec"><span>ORDER TRAIL</span><span class="dm" style="letter-spacing:0;font-weight:400">ALPACA</span></div>
+   <div class="mono" style="font-size:10.5px;line-height:1.45;color:var(--soft)">.412 click → .431 BUY 400 limit $3.11 sent → .502 ack → .610 raised to $3.12 → .792 filled 400 @ $3.12</div>
+   <div class="sec"><span>WHAT THE ENGINE SAW AT YOUR CLICK</span></div>
+   <div class="kv"><span class="k">RANK · L2</span><span>#6 · no Level 2 slot (quotes and trades only)</span>
+   <span class="k">ENGINE</span><span>rebound forming · not triggered yet</span>
+   <span class="k">AI</span><span><span class="am">CAUTION</span> · 2m old · “dilution filing last week”</span>
+   <span class="k">NEWS</span><span>C · 3h · follow-up press release</span></div>
+   <div class="sec"><span>YOU VS ENGINE ON THIS TRADE</span><span class="dm" style="letter-spacing:0;font-weight:400">engine = would-have, est. fills</span></div>
+   <div style="display:grid;grid-template-columns:70px 1fr 1fr 70px;column-gap:8px;row-gap:2px;font-size:11.5px;align-items:center">
+    <span></span><span class="lab">IN</span><span class="lab">OUT</span><span class="lab" style="text-align:right">RESULT</span>
+    <span>${chip('you','YOU')}</span><span class="mono">07:25:03 · $3.12</span><span class="mono">07:33:12 · $3.19</span><span class="mono g r">+$28</span>
+    <span>${chip('wh','ENGINE')}</span><span class="mono" style="color:#AAB6C4">07:25:09 · $3.14</span><span class="mono" style="color:#AAB6C4">07:31:40 · $3.17</span><span class="mono g r" style="opacity:.75">+$12</span>
+   </div>
+   <div class="note">You were in 6 s earlier and $0.02 cheaper, and held longer: <span class="g">+$16 better than the engine</span> on this one.</div>
+   <div class="sec"><span>YOUR EXIT · HOW IT WENT</span></div>
+   <div class="kv"><span class="k">EXIT</span><span>07:33:12 · you clicked SELL/EXIT · 400 @ $3.19 · 1 step · no SELL LOWER needed</span>
+   <span class="k">BEST · WORST</span><span><span class="g">+$44</span> at 07:30:55 · <span class="rd">−$16</span> at 07:26:10 · held 8:09</span>
+   <span class="k">CAPTURED</span><span>64% of the best move after your entry · stock at close of day $3.05</span></div>
+   <div class="sec"><span>VERSIONS · SOURCES</span></div>
+   <div class="note mono" style="font-size:10.5px">model v0.3.1 · risk r12 · AI p4 · quotes MASSIVE · book — (no slot) · order + fills ALPACA</div>
+   <div class="btn" style="height:28px;color:var(--dim);margin-top:3px">✎ your note (optional) — e.g. “entered on the reclaim of VWAP”</div>
+   <div style="display:flex;gap:6px;margin-top:2px"><span class="btn pri" style="height:30px">▶ REPLAY THIS TRADE</span><span class="btn" style="height:30px">Ask AI about this trade ↗</span></div>
+  </section>`;
+  H.push(`<div class="content"><div class="col" style="width:944px;flex-shrink:0">${trades}<div style="display:flex;gap:8px;flex-grow:1;min-height:0">${missed}${events}</div></div><div class="col" style="flex-grow:1">${why}</div></div>`);
+}
+
+// ================= REPLAY =================
+if (tab==='replay') {
+  // 5-second bars 07:10:00 → 07:14:00 (48 bars)
+  const bars=[]; let p=0.826;
+  // bar i covers 07:10:00 + 5*i seconds
+  const shape = i => {
+    if (i<29) return 0.8255 + Math.sin(i*1.3)*0.0028;   // flat until 07:12:25
+    if (i<32) return 0.829 + (i-28)*0.0045;            // run-up 07:12:25-07:12:40 (breakout of $0.83, signal 07:12:38.8, buy 07:12:39.4)
+    const fixed = {32:0.8475, 33:0.8490, 34:0.8450, 35:0.8350, 36:0.8110, 37:0.8060};
+    if (fixed[i]) return fixed[i];                      // top 07:12:40-55, fade from 07:12:55, exit 07:13:04 at $0.81
+    return 0.806 - (i-37)*0.0022 + Math.sin(i)*0.0015;  // drift down to ~$0.785
+  };
+  for (let i=0;i<48;i++){ const c=+shape(i).toFixed(4); const o=i?bars[i-1].c:0.825; const hi=Math.max(o,c)+0.0012+((i*7)%3)*0.0007; const lo=Math.min(o,c)-0.0012-((i*5)%3)*0.0006; const v= i>=29&&i<38? 34+((i*37)%36): 5+((i*13)%9); bars.push({o,c,hi,lo,v}); }
+  const W=936,Hc=250, x0=8, pmin=0.78,pmax=0.865, bw=W/48;
+  const Y=v=> 8 + (pmax-v)/(pmax-pmin)*(Hc-16);
+  let svg=`<svg width="${W+60}" height="${Hc+54}" style="display:block">`;
+  [0.78,0.80,0.82,0.84,0.86].forEach(l=>{svg+=`<line x1="0" x2="${W}" y1="${Y(l)}" y2="${Y(l)}" stroke="#1A212C"/><text x="${W+8}" y="${Y(l)+4}" fill="#7D8899" font-size="10" font-family="IBM Plex Mono">${l.toFixed(2)}</text>`});
+  // L2 slot shading (in slot from start), halt none. data gap marker
+  svg+=`<rect x="${x0+32.82*bw}" y="4" width="${bw*0.5}" height="${Hc-8}" fill="rgba(242,169,59,.16)"/><text x="${x0+32.82*bw-3}" y="${Hc-12}" fill="#F2A93B" font-size="9" font-family="IBM Plex Sans" text-anchor="end">DATA GAP 0.4 s · MASSIVE</text>`;
+  // lines: trigger, ceiling, risk
+  const hl=(v,col,dash,lab)=>{svg+=`<line x1="0" x2="${W}" y1="${Y(v)}" y2="${Y(v)}" stroke="${col}" stroke-dasharray="${dash}" stroke-width="1"/><text x="6" y="${Y(v)-3}" fill="${col}" font-size="9.5" font-family="IBM Plex Sans">${lab}</text>`};
+  hl(0.86,'#8A96A8','2 3','CEILING $0.86');
+  hl(0.80,'#5CE0D2','5 4','RISK LINE $0.80 (1R = $25)');
+  // VWAP
+  let vw='',pv=0,vv=0;for(let i=0;i<48;i++){const b=bars[i];pv+=(b.hi+b.lo+b.c)/3*b.v;vv+=b.v;const v=pv/vv; vw+=(i?'L':'M')+(x0+i*bw+bw/2)+','+Y(v);} svg+=`<path d="${vw}" stroke="#B08CFF" fill="none" stroke-width="1.4"/>`;
+  bars.forEach((b,i)=>{const cx=x0+i*bw+bw/2, up=b.c>=b.o, col=up?'#34C77B':'#F0555A'; svg+=`<line x1="${cx}" x2="${cx}" y1="${Y(b.hi)}" y2="${Y(b.lo)}" stroke="${col}"/><rect x="${cx-bw*0.32}" y="${Y(Math.max(b.o,b.c))}" width="${bw*0.64}" height="${Math.max(1.5,Math.abs(Y(b.o)-Y(b.c)))}" fill="${col}"/>`; svg+=`<rect x="${cx-bw*0.32}" y="${Hc+26-b.v*0.35}" width="${bw*0.64}" height="${b.v*0.35}" fill="${up?'#1F6B45':'#7A2A2E'}"/>`;});
+  // signal, buy, sell, cursor
+  const tx = t => x0 + (t/5)*bw;               // seconds after 07:10:00 → x
+  const bx=tx(159.42), sx=tx(184.3), cur=tx(172.1), sg=tx(158.83);
+  svg+=`<line x1="${sg}" x2="${sg}" y1="22" y2="${Y(0.84)}" stroke="#34C77B" stroke-dasharray="2 2"/><text x="${sg-4}" y="18" fill="#34C77B" font-size="9.5" font-family="IBM Plex Sans" text-anchor="end">signal ▲ 07:12:38.8 · BUY 600 @ $0.84 at 07:12:39.4</text>`;
+  svg+=`<text x="${bx-6}" y="${Y(0.84)+22}" fill="#34C77B" font-size="13">▲</text>`;
+  svg+=`<text x="${sx-6}" y="${Y(0.81)-10}" fill="#F0555A" font-size="13">▼</text><text x="${sx+10}" y="${Y(0.81)-14}" fill="#F0555A" font-size="9.5" font-family="IBM Plex Sans">SELL 600 @ $0.81</text>`;
+  svg+=`<line x1="${cur}" x2="${cur}" y1="4" y2="${Hc+28}" stroke="#5AA2FF" stroke-width="1.5"/><text x="${cur+4}" y="12" fill="#8BBEFF" font-size="10" font-family="IBM Plex Mono">07:12:52.100</text>`;
+  ['07:10:00','07:11:00','07:12:00','07:13:00','07:14:00'].forEach((t,k)=>{svg+=`<text x="${x0+k*12*bw}" y="${Hc+44}" fill="#7D8899" font-size="9.5" font-family="IBM Plex Mono">${t}</text>`});
+  svg+='</svg>';
+  // scrubber
+  const ticks=[[158.83/5,'#34C77B'],[159.18/5,'#5AA2FF'],[159.42/5,'#5AA2FF'],[164.1/5,'#F2A93B'],[183.9/5,'#F0555A'],[184.3/5,'#5AA2FF']];
+  const scrub=`<div style="position:relative;height:14px;background:#161D28;border:1px solid #2E3A4A;border-radius:7px;margin:0 60px 0 0">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:${34.42/48*100}%;background:#1D3350;border-radius:7px"></div>
+    ${ticks.map(t=>`<div style="position:absolute;left:${t[0]/48*100}%;top:2px;width:2px;height:8px;background:${t[1]}"></div>`).join('')}
+    <div style="position:absolute;left:calc(${34.42/48*100}% - 6px);top:-3px;width:12px;height:18px;border-radius:4px;background:#5AA2FF"></div></div>`;
+  const chart = `<section class="panel" style="flex-grow:1">
+   <div class="ptitle"><b>BCDE · 5-SECOND BARS</b><span><span class="g">▲ buy</span> · <span class="rd">▼ sell</span> · <span class="pu">— VWAP</span> · <span class="te">- - risk line</span> · ceiling · <span class="am">▮ data gap</span> · Level 2 slot 2 since 07:08 · zoom: ticks · 5 s · 1 min</span></div>
+   ${svg}
+   ${scrub}
+   <div style="display:flex;gap:5px;align-items:center"><span class="btn">|◀ start</span><span class="btn">◀ step</span><span class="btn pri" style="width:74px;justify-content:center">${card?'❚❚ Paused':'▶ Play'}</span><span class="btn">step ▶</span>
+   <span class="lab" style="margin-left:8px">SPEED</span><span class="seg"><span>0.25×</span><span class="on">1×</span><span>5×</span><span>20×</span></span>
+   <span class="lab" style="margin-left:8px">JUMP TO</span><span class="btn">signal</span><span class="btn">entry</span><span class="btn">exit</span><span class="btn">next event ▸</span></div>
+  </section>`;
+  // Level 2 at moment
+  const asks=[['0.8650','6,000'],['0.8600','20,000'],['0.8550','12,500'],['0.8520','8,000'],['0.8500','42,000',1]];
+  const bids=[['0.8450','9,000'],['0.8420','11,000'],['0.8400','25,000'],['0.8350','7,500'],['0.8300','15,000']];
+  const brow=(p,sz,side,big)=>`<div style="display:grid;grid-template-columns:1fr 70px 1fr;font-family:'IBM Plex Mono',monospace;font-size:11px;height:19px;align-items:center;${side==='a'?'background:rgba(240,85,90,.07)':'background:rgba(52,199,123,.07)'}"><span class="r g" style="padding-right:8px">${side==='b'?sz:''}</span><span style="text-align:center;color:${side==='a'?'#FF9EA1':'#8CE0B0'}">${p}</span><span style="padding-left:8px"><span style="${big?'border:1px solid #E7EAEE;border-radius:3px;padding:0 3px;font-weight:600;color:#fff':'color:#F0555A'}">${side==='a'?sz:''}</span></span></div>`;
+  const tsl=[['52.100','0.8450','2,000','r'],['51.870','0.8450','500','r'],['51.400','0.8500','1,200','g'],['50.950','0.8450','3,100','r'],['50.300','0.8500','800','g'],['49.720','0.8480','1,500','r']];
+  const book = `<section class="panel" style="width:486px;flex-shrink:0">
+   <div class="ptitle"><b>LEVEL 2 AT 07:12:52.100</b><span>IBKR · slot 2 · as it was</span></div>
+   <div class="mono" style="font-size:10.5px;display:flex;gap:10px"><span class="g">BIDS 41%</span><span class="rd">ASKS 59%</span><span class="mu">SPR $0.005</span></div>
+   <div style="display:flex;gap:10px;min-height:0">
+    <div style="flex:1.1;min-width:0"><div class="th" style="grid-template-columns:1fr 70px 1fr;padding:0"><span class="r" style="padding-right:8px">BID SZ</span><span style="text-align:center">PRICE</span><span style="padding-left:8px">ASK SZ</span></div>
+    ${asks.map(a=>brow(a[0],a[1],'a',a[2])).join('')}<div class="mono mu" style="font-size:9.5px;text-align:center;height:14px">spread $0.005</div>${bids.map(b=>brow(b[0],b[1],'b')).join('')}</div>
+    <div style="flex:1;min-width:0"><div class="th" style="grid-template-columns:62px 1fr 1fr;padding:0 4px"><span>TIME</span><span class="r">PRICE</span><span class="r">SIZE</span></div>
+    ${tsl.map(t=>`<div style="display:grid;grid-template-columns:62px 1fr 1fr;padding:0 4px;height:19px;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px"><span class="mu">:${t[0]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[1]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[2]}</span></div>`).join('')}
+    <div class="note" style="margin-top:6px">Big order boxed white = large size showing, not guaranteed support. Stocks without a Level 2 slot show “NO LEVEL 2 RECORDED”.</div></div>
+   </div>
+   <div class="sec"><span>AT THIS MOMENT</span></div>
+   <div class="kv" style="grid-template-columns:86px 1fr;font-size:11px"><span class="k">ENGINE</span><span>in position · momentum fading · score 0.74 → 0.58</span>
+   <span class="k">EXIT CHECK</span><span>failed-breakout exit not passed yet (needs a close under $0.83)</span>
+   <span class="k">AI</span><span><span class="g">GO</span> · 48 s old · “offering closed; no new filing”</span>
+   <span class="k">POSITION</span><span>600 @ $0.84 · <span class="g">+$3.00</span> · engine's · risk line $0.80</span>
+   <span class="k">ACCOUNT</span><span>cash $4,210 · BP $4,210 (1×) · margin OK · loss $0 / $600</span></div>
+  </section>`;
+  const src = s => { const m={MASSIVE:['#1B2433','#A9C7FF'],IBKR:['#231A33','#C9B2FF'],ALPACA:['#2A2210','#F6D59A'],ENGINE:['#0E2422','#5CE0D2'],RISK:['#1C2330','#E7EAEE'],AI:['#1A212C','#C9D1DB']}[s]; return `<span class="src" style="background:${m[0]};color:${m[1]}">${s}</span>`; };
+  const tl=[
+   ['07:12:38.201','MASSIVE','Trade and quote burst received · trade rate 6× normal'],
+   ['07:12:38.405','ENGINE','Volume and trade-rate threshold passed'],
+   ['07:12:38.620','ENGINE','Breakout above $0.83 confirmed'],
+   ['07:12:38.830','ENGINE','<span class="g">Signal ▲ fired</span> · score 0.74 · AI check GO (35 s old)'],
+   ['07:12:39.010','RISK','Approved 600 sh · risk $25 = 1R · risk line $0.80 · cash only (non-marginable)'],
+   ['07:12:39.180','ALPACA','BUY 600 sent · limit $0.84 at the ask · ceiling $0.86'],
+   ['07:12:39.300','ALPACA','Order acknowledged'],
+   ['07:12:39.420','ALPACA','<span class="g">Filled 600 @ $0.84</span> · slippage $0.00 · signal → fill 590 ms'],
+   ['07:12:52.100','IBKR','Buying fades; asks refill at $0.85 (42,000 showing)',1],
+   ['07:13:03.900','ENGINE','Failed-breakout exit condition passed'],
+   ['07:13:04.050','ALPACA','SELL 600 sent · limit $0.81 at the bid'],
+   ['07:13:04.300','ALPACA','<span class="rd">Filled 600 @ $0.81 · −$18.00 (−0.7R)</span> · after exit the stock fell to $0.78'],
+  ];
+  const timeline = `<section class="panel" style="flex-grow:1">
+   <div class="ptitle"><b>EVENT TIMELINE</b><span>every step to the millisecond, with its source · click a line to jump there</span></div>
+   ${tl.map(t=>`<div class="tr ${t[3]?'sel':''}" style="height:22px;grid-template-columns:96px 62px 1fr;font-size:11px;border-bottom-color:#161C26"><span class="mono ${t[3]?'':'mu'}">${t[0]}</span>${src(t[1])}<span class="so">${t[2]}</span></div>`).join('')}
+  </section>`;
+  const head = `<div style="display:flex;align-items:center;gap:7px;height:34px;flex-shrink:0;padding:0 2px">
+   <span class="lab">REPLAY</span><span class="btn on" style="height:30px;font-weight:700">Trade: BCDE 07:12:39 · ENGINE ▾</span><span class="btn" style="height:30px">Missed runner ▾</span><span class="btn" style="height:30px">Time window: stock + from–to ▾</span>
+   <span style="width:8px"></span><span class="chip" style="color:#8CE0B0;border-color:#1F6B45">LONG</span>${chip('eng','ENGINE')}<span class="chip" style="color:var(--soft);border-color:#3A4556">VALID STRATEGY LOSS</span>
+   <div style="flex-grow:1"></div><span class="mono dm nw" style="font-size:10.5px">model v0.3.1 · risk r12 · AI p4</span><span class="chip" style="color:var(--green);border-color:#1F6B45;background:#0F2119">MATCHES RECORDED LIVE ✓</span><span class="chip" style="color:var(--amber);border-color:#6B4A16;background:#261D0E">1 DATA GAP</span><span class="chip" style="color:var(--muted);border-color:#3A4556">READ-ONLY · NO ORDERS</span></div>`;
+  H.push(`<div class="content" style="flex-direction:column">${head}<div style="display:flex;gap:8px;flex:0 0 400px;min-height:0">${chart}${book}</div><div style="display:flex;gap:8px;flex-grow:1;min-height:0">${timeline}</div></div>`);
+}
+
+// ================= PERFORMANCE =================
+if (tab==='performance') {
+  const tile=(l,v,s,c)=>`<div class="tile" style="flex:1"><div class="l">${l}</div><div class="v ${c||''}">${v}</div><div class="s">${s}</div></div>`;
+  // 21 trading days Aug 27 → Sep 25; last day = today's +$233; total scaled to +$792
+  const raw=[45,70,-30,-38,20,95,30,-42,-25,12,50,10,60,18,-28,14,26,72,16,-20];
+  const k=(792-233)/raw.reduce((x,y)=>x+y,0); const seq=raw.map(v=>Math.round(v*k)); seq[19]+= (792-233)-seq.reduce((x,y)=>x+y,0); seq.push(233);
+  const days=seq.length; let e=0; const cum=seq.map(v=>e+=v);
+  let peak=0,dd=0,ddBase=0; cum.forEach(v=>{ if(v>peak)peak=v; if(v-peak<dd){dd=v-peak;ddBase=5000+peak;} });
+  const ddTxt='−$'+Math.abs(dd)+' · −'+(Math.abs(dd)/ddBase*100).toFixed(1)+'% from peak';
+  const tiles = `<div style="display:flex;gap:8px;flex-shrink:0">${tile('NET P&amp;L AFTER COSTS','+$'+cum[days-1],'paper · last 30 days','g')}${tile('EXPECTANCY','+0.21 R','+$5.28 per trade · 1R = $25','g')}${tile('WIN RATE','56%','84 of 150 · never judged alone')}${tile('AVG WIN / LOSS','$22 / $16','payoff 1.4')}${tile('PROFIT FACTOR','1.75','wins $1,848 ÷ losses $1,056')}${tile('MAX DRAWDOWN',ddTxt.split(' · ')[0],ddTxt.split(' · ')[1],'rd')}${tile('CAPTURE','47%','of the available move')}${tile('TRADES','150','7.1 per day · no quota')}</div>`;
+  const CW=884, CH=176, mx=Math.max(...cum), mn=Math.min(0,...cum);
+  const cx=i=> 14+i*(CW-28)/(days-1), cy=v=> 22+(mx-v)/(mx-mn)*(CH-34);
+  let path=cum.map((v,i)=>(i?'L':'M')+cx(i)+','+cy(v)).join('');
+  let svg=`<svg width="${CW}" height="${CH}" style="display:block"><line x1="0" x2="${CW}" y1="${cy(0)}" y2="${cy(0)}" stroke="#2E3A4A" stroke-dasharray="3 3"/><path d="${path} L${cx(days-1)},${cy(0)} L${cx(0)},${cy(0)} Z" fill="rgba(52,199,123,.10)"/><path d="${path}" stroke="#34C77B" stroke-width="2" fill="none"/><text x="${cx(days-1)-8}" y="${cy(cum[days-1])+4}" fill="#34C77B" font-size="11" font-family="IBM Plex Mono" text-anchor="end">+$${cum[days-1]}</text><text x="4" y="${cy(0)+12}" fill="#7D8899" font-size="9.5" font-family="IBM Plex Mono">$0</text></svg>`;
+  const BH=62; const bmx=Math.max(...seq.map(Math.abs));
+  let bars=`<svg width="${CW}" height="${BH+14}" style="display:block"><line x1="0" x2="${CW}" y1="${BH/2+4}" y2="${BH/2+4}" stroke="#2E3A4A"/>`;
+  seq.forEach((v,i)=>{const h=Math.abs(v)/bmx*(BH/2); bars+=`<rect x="${cx(i)-14}" y="${v>=0?BH/2+4-h:BH/2+4}" width="28" height="${Math.max(1,h)}" fill="${v>=0?'#2FA86A':'#C8474B'}"/>`});
+  bars+=`<text x="2" y="${BH+13}" fill="#7D8899" font-size="9.5" font-family="IBM Plex Mono">Aug 27</text><text x="${CW-2}" y="${BH+13}" fill="#7D8899" font-size="9.5" font-family="IBM Plex Mono" text-anchor="end">Sep 25</text></svg>`;
+  const acct=`<section class="panel" style="flex-grow:1"><div class="ptitle"><b>ACCOUNT OVER TIME</b><span>cumulative net P&amp;L after costs · each day's net P&amp;L below</span></div>${svg}${bars}</section>`;
+  const vr=(l,a,b,ca,cb)=>`<div class="tr" style="height:25px;grid-template-columns:1fr 150px 132px;font-size:11.5px"><span class="so">${l}</span><span class="mono r ${ca||''}">${a}</span><span class="mono r ${cb||''}" style="${cb==='est'?'color:#AAB6C4':''}">${b}</span></div>`;
+  const yve=`<section class="panel" style="width:600px;flex-shrink:0">
+   <div class="ptitle"><b>YOU VS. ENGINE</b><span>same stocks · engine = would-have trades, est. fills</span></div>
+   <div class="th" style="grid-template-columns:1fr 150px 132px"><span></span><span class="r">YOU</span><span class="r">ENGINE (same stocks)</span></div>
+   ${vr('Trades','41','33 (skipped 8)')}${vr('Win rate','51%','61%')}${vr('Net P&amp;L after costs','+$212','+$388','g','g')}${vr('Average per trade','+$5.17','+$11.76','g','g')}
+   ${vr('Your entry vs engine\'s (typical)','2.8 s later · +$0.04','—')}${vr('Your exits vs engine\'s (your trades)','+$62 better','—','g')}
+   <div class="tr" style="height:25px;grid-template-columns:1fr 150px 132px;font-size:11.5px;background:#141B26"><span><b>OVERRIDE EXIT</b> <span class="mu">· 3 times</span></span><span class="mono r g">+$41</span><span class="mono r g">+$55 if kept</span></div>
+   <div class="note">Overrides are counted on their own: engine trades you closed early. Here the engine would have made $14 more by keeping them. R isn't used for your trades without a stop, so this compares dollars after costs.</div>
+  </section>`;
+  const splitCols='1fr 50px 50px 70px 62px';
+  const split=[['Explosive runner','32','53%','+0.39 R','+$310'],['Pullback / continuation','41','61%','+0.23 R','+$240'],['Bottom reversal','30','57%','+0.20 R','+$150'],['Re-entry / 2nd surge','22','55%','+0.19 R','+$102'],['Moderate move','25','52%','−0.02 R','−$10']];
+  const p1=`<section class="panel" style="flex:1.25"><div class="ptitle"><b>SPLIT BY</b><span class="btn" style="height:22px">Setup type ▾</span></div>
+   <div class="note" style="margin-top:-2px">also: price band · float · session · long / short · news grade · spread · strategy version</div>
+   <div class="th" style="grid-template-columns:${splitCols}"><span>SETUP</span><span class="r">TRADES</span><span class="r">WIN</span><span class="r">EXPECT.</span><span class="r">NET</span></div>
+   ${split.map(s=>`<div class="tr" style="height:27px;grid-template-columns:${splitCols}"><span class="so">${s[0]}</span><span class="mono r">${s[1]}</span><span class="mono r">${s[2]}</span><span class="mono r ${s[3].startsWith('−')?'rd':'g'}">${s[3]}</span><span class="mono r ${s[4].startsWith('−')?'rd':'g'}">${s[4]}</span></div>`).join('')}</section>`;
+  const aiCols='1fr 70px 76px';
+  const ai=[['Win rate','55%','58%'],['Expectancy','+0.17 R','+0.21 R'],['Bad trades avoided','—','14'],['Good trades blocked','—','5'],['Average AI delay','—','0 ms*']];
+  const p2=`<section class="panel" style="flex:1"><div class="ptitle"><b>ENGINE ALONE VS. ENGINE + AI</b></div>
+   <div class="th" style="grid-template-columns:${aiCols}"><span></span><span class="r">ALONE</span><span class="r">+ AI</span></div>
+   ${ai.map(s=>`<div class="tr" style="height:25px;grid-template-columns:${aiCols}"><span class="so">${s[0]}</span><span class="mono r">${s[1]}</span><span class="mono r">${s[2]}</span></div>`).join('')}
+   <div class="note">The AI stays only if it improves real results after costs (File 7). *The AI never holds up a fast trigger.</div></section>`;
+  const lb=(l,v,w,c)=>`<div style="display:grid;grid-template-columns:112px 1fr 50px;align-items:center;column-gap:8px;height:19px;font-size:11px"><span class="so">${l}</span><div style="height:7px;border-radius:3px;background:#1A212C"><div style="height:7px;width:${w}%;border-radius:3px;background:${c}"></div></div><span class="mono r">${v}</span></div>`;
+  const p3=`<section class="panel" style="flex:1.05"><div class="ptitle"><b>WHERE LOSSES CAME FROM</b></div>
+   ${lb('Valid strategy','−$610',100,'#6E7A8A')}${lb('Market regime','−$260',43,'#F2A93B')}${lb('Execution / slippage','−$150',25,'#F2A93B')}${lb('Technical failure','−$36',6,'#F0555A')}${lb('Rule breaks','$0',0,'#F0555A')}
+   <div class="sec"><span>MISSED RUNNERS · RULE v1</span></div>
+   <div style="font-size:11.5px">Caught early: <b class="mono">38 of 71</b> catchable movers <span class="mu">(54%)</span></div>
+   <div class="note" style="font-size:10.5px;color:var(--soft)">19 more gave no usable warning (not catchable, counted apart) · why missed: Level 2 slots busy 12 · signal late 9 · spread 7 · you didn't click 5 · buying power 0</div></section>`;
+  const kr=(l,v,c)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;height:19px;align-items:center"><span class="so nw">${l}</span><span class="mono nw ${c||''}">${v}</span></div>`;
+  const p4=`<section class="panel" style="flex:1.05"><div class="ptitle"><b>EXECUTION &amp; ACCOUNT SAFETY</b></div>
+   ${kr('Slippage · entries / exits','$0.006 / $0.009')}${kr('Signal → fill · typical / slow 5%','410 ms / 1.2 s')}${kr('NOT FILLED (price ran past ceiling)','6')}${kr('Fees · borrow fees','$14 · $0')}
+   <div class="sec"><span>SAFETY</span></div>
+   ${kr('INTRADAY MARGIN CALLS','0 — TARGET 0','g')}${kr('AUTO paused · soft limit / give-back','1 / 2')}${kr('Hard-limit days · FLATTEN ALL','0 · 1')}${kr('Connection incidents','2 (0:38 longest)')}</section>`;
+  H.push(`<div class="content" style="flex-direction:column">
+   <div class="am" style="font-size:11px;height:14px;flex-shrink:0">Every number is a placeholder until real paper-trading results exist · all results after commissions, fees and slippage · examples are never targets</div>
+   ${tiles}
+   <div style="display:flex;gap:8px;flex:0 0 312px;min-height:0">${acct}${yve}</div>
+   <div style="display:flex;gap:8px;flex-grow:1;min-height:0">${p1}${p2}${p3}${p4}</div></div>`);
+}
+if (live) H.push('<div style="position:absolute;inset:0;border:3px solid #E5484D;pointer-events:none;z-index:50"></div>');
+if (card && tab==='replay') {
+  // mini 1-min chart for today up to now
+  let cs='<svg width="334" height="86" style="display:block">'; const pts=[0.70,0.71,0.72,0.74,0.73,0.75,0.78,0.80,0.82,0.83,0.845,0.83,0.81,0.80,0.795,0.79,0.792,0.788,0.79,0.791,0.79];
+  const yy=v=>6+(0.86-v)/(0.86-0.69)*70; pts.forEach((v,i)=>{ if(!i) return; const o=pts[i-1], up=v>=o, x=8+i*15.6; cs+=`<line x1="${x}" x2="${x}" y1="${yy(Math.max(o,v)+0.004)}" y2="${yy(Math.min(o,v)-0.004)}" stroke="${up?'#34C77B':'#F0555A'}"/><rect x="${x-4.5}" y="${yy(Math.max(o,v))}" width="9" height="${Math.max(1.5,Math.abs(yy(o)-yy(v)))}" fill="${up?'#34C77B':'#F0555A'}"/>`; });
+  cs+=`<text x="326" y="${yy(0.79)+3}" fill="#E7EAEE" font-size="9.5" font-family="IBM Plex Mono" text-anchor="end">now</text></svg>`;
+  H.push(`<div style="position:absolute;left:0;right:0;top:110px;bottom:0;background:rgba(6,8,12,.55);z-index:40"></div>
+  <div style="position:absolute;left:700px;top:178px;width:420px;z-index:45;background:#121720;border:2px solid #5AA2FF;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.6);overflow:hidden">
+   <div style="height:34px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#1D5AA8;color:#fff"><b class="nw" style="font-size:12px;letter-spacing:.06em">LIVE CARD · CURRENT MARKET</b><div style="flex-grow:1"></div><span class="mono nw" style="font-size:11px">now 07:42:31 ET</span><span style="font-size:14px;margin-left:4px">✕</span></div>
+   <div style="padding:9px 11px;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:17px">BCDE</b><span class="chip" style="color:#8CE0B0;border-color:#1F6B45">LONG setup</span><span class="mu" style="font-size:11px">rank #41</span><div style="flex-grow:1"></div><span class="mono" style="font-size:16px">$0.7900</span><span class="mono rd" style="font-size:12px">−3.1%</span></div>
+    <div style="display:flex;gap:10px;font-size:11px;align-items:center"><span>NEWS <b>B</b> · 2h 36m</span><span>SPR <span class="mono">$0.005</span></span><span class="chip" style="color:var(--green);border-color:#1F6B45">AI GO · 1m</span><span class="mu">no Level 2 slot</span></div>
+    <div style="background:#0F141C;border:1px solid var(--line);border-radius:6px;padding:4px 0">${cs}</div>
+    <div style="font-size:11px" class="so">Engine: no setup right now · watching</div>
+    <div style="display:flex;gap:8px"><span class="btn" style="flex:1;height:38px;justify-content:center;flex-direction:column;gap:0;border-color:#1F6B45;background:#0F2119;color:#8CE0B0;font-weight:700;line-height:1.1">BUY 1,575<span style="font-size:9.5px;font-weight:400;color:#9BA6B5">25% = $1,308 · cash only</span></span><span class="btn" style="flex:1;height:38px;justify-content:center;flex-direction:column;gap:0;color:#6E7A8A;line-height:1.1">SELL/EXIT<span style="font-size:9.5px">—</span></span><span class="btn" style="flex:1;height:38px;justify-content:center;flex-direction:column;gap:0;color:#6E7A8A;line-height:1.1">SHORT<span style="font-size:9.5px">off · long-only</span></span><span class="btn" style="flex:1;height:38px;justify-content:center;flex-direction:column;gap:0;color:#6E7A8A;line-height:1.1">COVER<span style="font-size:9.5px">—</span></span></div>
+    <div class="note" style="border-top:1px solid var(--row);padding-top:6px">Prices here are live, not from the replay. <b class="so">Replay paused at 07:12:52.100</b> · close this card to continue.</div>
+   </div></div>`);
+}
+document.getElementById('win').innerHTML = H.join('').replace(/font-family="IBM Plex (Mono|Sans)"/g, (m,f)=>`style="font-family:'IBM Plex ${f}',sans-serif"`);
+</script>
+</body>
+</html>

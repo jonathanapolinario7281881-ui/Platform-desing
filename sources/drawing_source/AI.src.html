@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Assistant — v4 proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.qq{height:30px;display:flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid #2E3A4A;background:#161D28;font-size:11.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist{font-size:11px;color:var(--soft);display:grid;grid-template-columns:54px 1fr;column-gap:6px;min-height:20px;align-items:center}
+.me{align-self:flex-end;max-width:70%;background:#1B2638;border:1px solid #2F4B75;border-radius:10px;padding:8px 11px;font-size:12.5px}
+.ai{align-self:flex-start;max-width:92%;background:#121A26;border:1px solid #263245;border-radius:10px;padding:9px 12px;font-size:12px;line-height:1.45;display:flex;flex-direction:column;gap:5px}
+.who{font-size:10px;color:var(--dim);display:flex;gap:6px;align-items:center}
+.lbl2{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-top:2px}
+.tk{color:#8BBEFF;font-weight:700;text-decoration:underline;text-decoration-color:#2F5C95;text-underline-offset:2px}
+.srcs{display:flex;gap:5px;flex-wrap:wrap}
+.srcc{height:18px;display:inline-flex;align-items:center;padding:0 6px;border-radius:4px;border:1px solid #2F5C95;font-size:10px;color:#9CC3FF;background:#12223A;white-space:nowrap}
+.ctx{height:22px;display:inline-flex;align-items:center;gap:6px;padding:0 8px;border-radius:5px;border:1px solid #2F5C95;background:#12223A;color:#9CC3FF;font-size:10.5px;font-weight:600;white-space:nowrap}
+.rdr{display:grid;grid-template-columns:1fr auto;column-gap:8px;font-size:11px;min-height:20px;align-items:center;border-bottom:1px solid var(--row)}
+.no{font-size:11px;color:var(--soft);line-height:1.55}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const H = [];
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">AI Assistant</span><span class="env">PAPER</span><span class="autop">AUTO OFF — YOU TRADE</span>
+<div style="flex-grow:1"></div>
+<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span>
+<span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono g nw" style="font-size:12.5px">+$233.00 · +4.66%</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>
+<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:42:18</span><span class="ell so" style="font-size:11px">ABCD BUY partly filled · 300 of 521 @ $2.15 · still working, no higher than $2.24 · size limited by cash</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (15) ▸</span></div>`);
+
+const left = `<div class="col" style="width:292px;flex-shrink:0">
+ <section class="panel" style="flex:0 0 auto;gap:5px"><div class="ptitle"><b>QUICK QUESTIONS</b></div>
+  ${['Pre-market brief on the Ranked 50','What changed in the last 5 minutes?','Why did the engine take, skip or exit a stock?','Explain today\'s trades (from Review)','Compare two stocks','What does this filing, halt or alert mean?','Why is my button LIMITED or blocked?'].map((q,i)=>`<div class="qq" style="${i===6?'border-color:#2F5C95':''}">${q}${i===6?' <span class="bd" style="margin-left:auto;font-size:9px;height:16px;padding:0 5px;border-radius:3px;border:1px solid #2F5C95;color:#9CC3FF">HELP</span>':''}</div>`).join('')}
+ </section>
+ <section class="panel" style="flex-grow:1;gap:4px"><div class="ptitle"><b>EARLIER QUESTIONS</b><span>kept for you only</span></div>
+  <div class="btn" style="height:26px;color:var(--dim)">⌕ search your questions…</div>
+  ${[['07:31','Is the ABCD news real?'],['07:14','Why did the engine buy WXYZ again?'],['06:50','Pre-market brief'],['06:12','What does a 424B5 filing mean?'],['Fri','Why did STUV slip $0.05?'],['Fri','Explain Friday\'s results']].map(h=>`<div class="hist"><span class="mono dm">${h[0]}</span><span class="ell">${h[1]}</span></div>`).join('')}
+ </section></div>`;
+
+const conv = `<section class="panel" style="flex-grow:1;gap:8px">
+ <div class="ptitle"><b>CONVERSATION</b><span>read-only assistant · context, not a prediction</span></div>
+ <div style="display:flex;flex-direction:column;gap:7px;flex-grow:1;min-height:0">
+  <div class="who" style="align-self:flex-end">You · 07:42:40 · <span class="ctx" style="height:18px;font-size:9.5px">📎 ABCD · live snapshot 07:42:31</span></div>
+  <div class="me">Why is <span class="tk">ABCD</span> ranked #1, and is the news real?</div>
+  <div class="who">AI · 07:42:43 · answered in 3 s</div>
+  <div class="ai">
+   <div><b>Short answer:</b> <span class="tk">ABCD</span> is #1 because trading jumped after a catalyst that looks real. The engine has been in <b class="g">Acceleration</b> since 07:41:40.</div>
+   <div class="lbl2">FROM THE DATA</div>
+   <div>• Relative volume 18.2× and rising · trades per minute ×4 in 90 s · asks being taken · spread $0.01<br>• The engine would have bought at $2.12 (07:42:16); AUTO was off, so nothing was sent</div>
+   <div class="lbl2">THE NEWS AND FILINGS</div>
+   <div>• 07:31:04 Newswire, graded <b>A</b>: supply agreement with a national distributor<br>• SEC EDGAR checked 07:41: no S-1 / S-3 / 424B found in the last 90 days (not a guarantee)</div>
+   <div class="lbl2">MY READING · RISKS</div>
+   <div>The move and the news agree (no contradiction). Risks: low float (6.2 million shares) — moves can reverse fast; already +32.7% today.</div>
+   <div class="srcs"><span class="srcc">engine log 07:42:16 ↗</span><span class="srcc">Massive trades 07:42:31 ↗</span><span class="srcc">Newswire 07:31:04 ↗</span><span class="srcc">SEC EDGAR 07:41 ↗</span><span class="srcc">positions · Alpaca 07:42:30 ↗</span></div>
+  </div>
+  <div class="who" style="align-self:flex-end">You · 07:43:05</div>
+  <div class="me">Buy 500 more ABCD</div>
+  <div class="who">AI · 07:43:06</div>
+  <div class="ai" style="border-color:#3A4556">
+   <div>The AI Assistant cannot place, change or cancel orders. To trade manually, <span class="tk">open the current ABCD trade card ▸</span></div>
+   <div class="dm" style="font-size:11px">Right now your size is 25% = $1,308, but a new BUY would be LIMITED by cash: $27.76 available (221 shares of your last order are still working).</div>
+  </div>
+  <div class="who" style="align-self:flex-end">You · 07:44:10 · <span class="ctx" style="height:18px;font-size:9.5px;border-color:#6B5A1E;background:#221D0C;color:#F2C27A">📎 HISTORICAL TRADE · MNOP · 07:25:03</span></div>
+  <div class="me">Why did I do better than the engine on <span class="tk">MNOP</span>?</div>
+  <div class="who">AI · 07:44:12</div>
+  <div class="ai">
+   <div>You bought 6 s earlier and $0.02 lower, and sold 1 min 32 s later: <b class="g">+$28</b> vs the engine's estimated <b>+$12</b> (would-have fills are estimates).</div>
+   <div class="srcs"><span class="srcc">Review · MNOP trade ↗</span><span class="srcc">fills · Alpaca ↗</span></div>
+  </div>
+ </div>
+ <div style="display:flex;gap:8px;align-items:center;border-top:1px solid var(--row);padding-top:8px">
+  <span class="ctx">📎 ABCD · live snapshot ×</span>
+  <div class="btn" style="flex-grow:1;height:34px;color:var(--dim);font-size:12px">Ask about any stock, trade, alert or rule…</div>
+  <span class="btn" style="height:34px;width:40px;justify-content:center;font-size:15px">🎤</span>
+  <span class="btn pri" style="height:34px;padding:0 16px">Ask</span>
+ </div>
+ <div class="dm" style="font-size:10.5px;margin-top:-3px">🎤 hold to speak: it only types your words into the box · you review and press Ask · never a trading command</div>
+</section>`;
+
+const right = `<div class="col" style="width:356px;flex-shrink:0">
+ <section class="panel" style="flex:0 0 auto;gap:5px"><div class="ptitle"><b>CONTEXT ATTACHED</b><span>added by "Ask AI about ABCD"</span></div>
+  <div class="no">ABCD · $2.15 · +32.7% · rank #1 · L2·1 · NEWS A · 11m · AI GO · 40 s · yours 300 sh · BUY 221 working</div>
+  <div class="dm" style="font-size:10.5px">From Review it attaches "HISTORICAL TRADE · time" — never shown as live; a ticker clicked there opens "LIVE CARD · CURRENT MARKET". Remove with ×.</div>
+ </section>
+ <section class="panel" style="flex:0 0 auto;gap:3px"><div class="ptitle"><b>WHAT IT CAN READ</b><span>and how fresh</span></div>
+  ${[['Engine states, ranks, signals, logs','live'],['Level 2 slots · IBKR / trades · Massive','live'],['News · Benzinga','07:41'],['Filings · SEC EDGAR','07:41'],['FDA items · openFDA','06:00'],['Your positions and orders · Alpaca','07:42:30'],['Review: journal, replays, results','today'],['Active platform rules + your live Settings','live']].map(r=>`<div class="rdr"><span class="so">${r[0]}</span><span class="mono ${r[1]==='live'?'g':'dm'}" style="font-size:10.5px">${r[1]}</span></div>`).join('')}
+  <div class="dm" style="font-size:10.5px">If a source is stale or down, the answer says so. If sources disagree: <b class="am">SOURCE CONFLICT</b>, both shown — never quietly picks one.</div>
+ </section>
+ <section class="panel" style="flex:0 0 auto;gap:3px;border-color:#3A4556"><div class="ptitle"><b>WHAT IT CAN NEVER DO</b><span class="bd b-lock" style="display:inline-flex;height:18px;padding:0 6px;border-radius:4px;border:1px solid #3A4556;font-size:9.5px;font-weight:700;color:#AAB6C4;background:#1A212C">🔒 LOCKED</span></div>
+  <div class="no">• Place, change or cancel orders<br>• Change settings or turn AUTO on / off<br>• Pin Level 2 or change the engine's verdicts<br>• Sit in the engine's path — it runs on its own queue, so questions never slow the engine or its AI checks</div>
+ </section>
+ <section class="panel" style="flex-grow:1;gap:4px"><div class="ptitle"><b>AI SERVICE</b></div>
+  <div class="rdr"><span class="so">Status</span><span class="g">● ready · ~3 s per answer</span></div>
+  <div class="rdr"><span class="so">Used today</span><span class="mono so">18 questions · est. $0.21</span></div>
+  <div class="dm" style="font-size:10.5px">If the service is down: "AI ASSISTANT UNAVAILABLE — trading and the engine are not affected".</div>
+ </section></div>`;
+
+H.push(`<div class="content">${left}${conv}${right}</div>`);
+document.getElementById('win').innerHTML = H.join('');
+</script>
+</body>
+</html>

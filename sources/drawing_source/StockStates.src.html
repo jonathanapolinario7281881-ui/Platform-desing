@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stock detail — states</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:18px 0 8px;font-weight:700}
+.grid{display:grid;gap:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.cap{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.35}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+.bigbtn{width:150px;height:42px;border-radius:7px;border:1px solid;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:12.5px;font-weight:700;white-space:nowrap}
+.bigbtn small{font-size:9.5px;font-weight:500;opacity:.9}
+.b-buy{background:#16784A;border-color:#22A366;color:#fff}
+.b-sell{background:#A8262B;border-color:#D0454A;color:#fff}
+.b-dis{background:#19202A;border-color:#2A3340;color:#7C8898}
+.b-ovr{background:#1C1316;border-color:#7A3035;color:#F0A5A8}
+.line{font-size:12px;padding:6px 9px;border-radius:6px;border:1px solid;display:flex;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<h1>Stock detail — states and examples</h1>
+<p class="sub">Companion to the two Stock detail drawings. Every state is a word or label, never color alone. Same rules as the main window, the pop-up trade card and Positions &amp; Orders.</p>
+
+<h2>1 · TRADE BUTTONS — SPECIAL STATES</h2>
+<div class="grid" style="grid-template-columns:1.35fr 1fr 1fr">
+ <div class="box"><div class="row"><b>OTCX</b><span class="chip" style="color:var(--muted);border-color:#3A4556">OTC MARKET</span><span class="mono">$0.0142</span></div>
+  <div class="row" style="margin-top:8px"><span class="bigbtn b-dis" style="width:auto;padding:0 12px">NOT ELIGIBLE FOR PLATFORM TRADING<small>OTC stock · not tradable at Alpaca · data only</small></span></div>
+  <div class="cap">Search can open any symbol. OTC, delisted, unsupported types or Alpaca "not tradable" show whatever data exists; all four buttons are replaced by this line with the reason — never an active BUY that fails.</div></div>
+ <div class="box"><div class="row"><b>RSTU</b><span class="chip you">YOURS · OPENED OUTSIDE PLATFORM</span><span class="mono">150 @ $4.02</span></div>
+  <div class="row" style="margin-top:8px"><span class="bigbtn b-sell">SELL/EXIT RSTU<small>150 sh · one click</small></span></div>
+  <div class="cap">Found at Alpaca, not opened by the platform (e.g. bought in the Alpaca app). It is yours; the engine never adopts or manages it.</div></div>
+ <div class="box"><div class="row"><b>NOPQ</b><span class="chip eng">ENGINE'S ENTRY WORKING</span><span class="mono">200/500 · ≤ $2.31</span></div>
+  <div class="row" style="margin-top:8px"><span class="bigbtn b-ovr">CANCEL ENGINE ENTRY<small>hold 1 s · unfilled 300 only</small></span></div>
+  <div class="row" style="margin-top:6px"><span class="chip" style="color:var(--amber);border-color:#6B4A16;background:#261D0E">ENGINE RE-ENTRY PAUSED · same setup ×</span></div>
+  <div class="cap">Only while the engine's entry is working. Filled shares stay the engine's. Logged as your intervention.</div></div>
+</div>
+
+<h2>2 · PIN TO LEVEL 2 — FOUR STATES</h2>
+<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+ <div class="box"><span class="btn" style="height:28px;font-weight:700">📌 PIN TO LEVEL 2</span><div class="cap">AUTO OFF · puts this stock into a slot and keeps it there. The engine gives up its weakest slot that isn't showing one of your positions.</div></div>
+ <div class="box"><span class="btn" style="height:28px;border-color:#6B5A1E;color:var(--yellow);background:#221D0C;font-weight:700">📌 PINNED · L2·2 · unpin</span><div class="cap">One pin at a time. Stays until you unpin or AUTO turns on (same rule as the panel pin).</div></div>
+ <div class="box"><span class="btn" style="height:28px;color:#7C8898;background:#19202A">PIN UNAVAILABLE · all slots hold your positions</span><div class="cap">Never forces out a slot showing a stock you hold.</div></div>
+ <div class="box"><span class="btn" style="height:28px;color:#7C8898;background:#19202A">PIN RELEASED · AUTO ON</span><div class="cap">The engine needs all three slots while AUTO is on.</div></div>
+</div>
+
+<h2>3 · NO LEVEL 2 SLOT — THE TRADING LINE SAYS WHAT IS TRUE</h2>
+<div class="grid" style="grid-template-columns:repeat(3,1fr)">
+ <div class="box"><div class="line" style="border-color:#1F6B45;background:#0F2119"><b class="g">NO LEVEL 2 SLOT · TRADING AVAILABLE</b></div><div class="cap">Only when Massive and Alpaca are healthy, the stock is eligible and not halted. Quotes and Time &amp; Sales come from Massive.</div></div>
+ <div class="box"><div class="line" style="border-color:#A8262B;background:#2A1114"><b class="rd">NO LEVEL 2 SLOT · NOT SAFE TO TRADE — ALPACA EXECUTION UNAVAILABLE</b></div><div class="cap">The real restriction is shown instead; buttons follow the settled connection rules.</div></div>
+ <div class="box"><div class="line" style="border-color:#3A4556;background:#161D28"><b class="mu">NO LEVEL 2 SLOT · HALTED · 2:40 elapsed</b></div><div class="cap">Halt shown as elapsed time; an official resume time only when the exchange publishes one.</div></div>
+</div>
+
+<h2>4 · OFFERING / DILUTION LINE — ALWAYS WITH SOURCE AND TIME</h2>
+<div class="grid" style="grid-template-columns:repeat(3,1fr)">
+ <div class="box"><div class="line" style="border-color:#1F6B45"><span>S-1 / S-3 / 424B: <b class="g">none found in last 90 days</b> · SEC checked 07:41</span></div><div class="cap">"None found" = nothing in the SEC search, not a guarantee. 90 days is a TEST value.</div></div>
+ <div class="box"><div class="line" style="border-color:#7A3035;background:#1E0F12"><span><b style="color:#FF9EA1">424B5 filed 07:05 today — possible offering</b> · SEC checked 07:17</span></div><div class="cap">Shown with the filing time; the NEWS grade and the AI reading update from it.</div></div>
+ <div class="box"><div class="line" style="border-color:#6B4A16;background:#261D0E"><span><b class="am">SEC CHECK UNAVAILABLE since 07:20</b> · filings unknown</span></div><div class="cap">A stale or missing source is said plainly, never shown as "none".</div></div>
+</div>
+
+<h2>5 · PRESSURE BAR AND AI AGE</h2>
+<div class="grid" style="grid-template-columns:1.3fr 1fr">
+ <div class="box"><div style="display:flex;align-items:center;gap:8px;font-size:11px"><span class="mono g">BIDS 58%</span><div style="flex:1;height:6px;border-radius:3px;background:#7A2A2E"><div style="width:58%;height:6px;border-radius:3px;background:#2FA86A"></div></div><span class="mono rd">ASKS 42%</span><span class="dm">shown in the book now · not a prediction</span></div><div class="cap">Visible order-book pressure only; displayed orders can disappear at any moment.</div></div>
+ <div class="box"><div class="row"><span class="chip" style="color:var(--green);border-color:#1F6B45">AI GO · 40 s</span><span class="chip" style="color:var(--amber);border-color:#6B4A16">AI CAUTION · 4m · OLD</span><span class="chip" style="color:#FF9EA1;border-color:#7A3035">AI NO-GO · 1m</span></div><div class="cap">OLD after 3 minutes (display rule, TEST value); the engine uses its own freshness rules.</div></div>
+</div>
+</body>
+</html>

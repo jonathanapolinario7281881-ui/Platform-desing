@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Positions and Orders — states</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:19px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px;font-weight:700}
+.grid{display:grid;gap:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.cap{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+.st2{display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap;border:1px solid}
+.xbtn{height:34px;padding:0 10px;border-radius:6px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:11.5px;font-weight:700;white-space:nowrap;border:1px solid;min-width:140px}
+.xbtn small{font-size:9.5px;font-weight:500;opacity:.85}
+.sell{background:#A8262B;border-color:#D0454A;color:#fff}
+.cov{background:#1D5AA8;border-color:#3D7BD0;color:#fff}
+.ovr{background:#1C1316;border-color:#7A3035;color:#F0A5A8}
+.dis{background:#19202A;border-color:#2A3340;color:#7C8898}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+.kr{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;min-height:20px;align-items:center}
+</style>
+</head>
+<body>
+<h1>Positions &amp; Orders — states and examples</h1>
+<p class="sub">Companion to the two window drawings. Every state is a word or label, never color alone. Numbers are placeholders.</p>
+
+<h2>1 · ORDER STATUS — every order shows exactly one of these (Alpaca is the source)</h2>
+<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+ <div class="box"><span class="st2" style="color:#C9D1DB;border-color:#3A4556">RISK CHECK…</span><div class="cap">Checked by the platform before sending (size, cash, limits, session, duplicates).</div></div>
+ <div class="box"><span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">SENT · waiting for Alpaca</span><div class="cap">Has a unique order ID, so a retry can never create a second order.</div></div>
+ <div class="box"><span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">WORKING · 583 @ ≤ $2.24</span><div class="cap">Entry being worked up to its ceiling (2c). CANCEL on your own orders.</div></div>
+ <div class="box"><span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">PARTIAL · 300/521</span><div class="cap">Filled shares are already a position; the rest keeps working.</div></div>
+ <div class="box"><span class="st2" style="color:#8CE0B0;border-color:#1F6B45;background:#0F2119">FILLED · 583 @ $2.19</span><div class="cap">One-time fill sound (5f). Moves to Fills.</div></div>
+ <div class="box"><span class="st2" style="color:#C9D1DB;border-color:#3A4556">CANCEL PENDING</span> <span class="st2" style="color:#C9D1DB;border-color:#3A4556">CANCELLED · by you</span><div class="cap">Also “by STOP AUTO”, “by CANCEL ALL ENTRIES”, “by FLATTEN ALL”. A late fill after a cancel is still shown and counted.</div></div>
+ <div class="box"><span class="st2" style="color:var(--amber);border-color:#6B4A16;background:#261D0E">NOT FILLED · price ran above $2.24</span><div class="cap">Stopped at the ceiling. Filled shares are kept (PARTIAL).</div></div>
+ <div class="box"><span class="st2" style="color:var(--amber);border-color:#6B4A16;background:#261D0E">REJECTED · not shortable</span> <span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">EXIT REJECTED</span><div class="cap">Rejected entry = Attention (no new risk). Rejected exit = Critical (you're exposed) (5f).</div></div>
+ <div class="box" style="grid-column:span 2"><span class="st2" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">UNKNOWN · sent 1.8 s ago, no answer · checking with Alpaca</span><div class="cap">A timeout or dropped connection after sending. The platform asks Alpaca what happened and <b>never resends</b> until Alpaca confirms. New entries in that stock wait until it's resolved; exits of other positions are not affected.</div></div>
+ <div class="box"><span class="st2" style="color:#C9D1DB;border-color:#3A4556">EXPIRED · end of session</span><div class="cap">An order Alpaca ends at the session close.</div></div>
+ <div class="box"><span class="st2" style="color:var(--yellow);border-color:#6B5A1E;background:#221D0C">YOUR STOP · triggers at $13.40</span><div class="cap">Your optional stop is a working item with move / ×. Where it's held (Alpaca or the platform) is still OPEN.</div></div>
+</div>
+
+<h2>2 · EXIT BUTTON ON EACH POSITION ROW — same rules as the main-window cards (5c, 5d, 5g)</h2>
+<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+ <div class="box"><span class="xbtn sell">SELL/EXIT<small>172 sh · one click</small></span><div class="cap">Yours, long. Works in AUTO OFF and AUTO ON. Closes the whole position.</div></div>
+ <div class="box"><span class="xbtn cov">COVER<small>400 sh · one click</small></span><div class="cap">Yours, short (only after shorts are enabled in Phase 3).</div></div>
+ <div class="box"><span class="xbtn ovr">🔒 OVERRIDE EXIT<small>hold 1 s · engine's position</small></span><div class="cap">Engine's position. A click does nothing; hold 1 s closes only this one. Logged as your intervention.</div></div>
+ <div class="box"><span class="xbtn dis">HALTED<small>2:40 elapsed</small></span><div class="cap">Stock halted: exit waits; after FLATTEN ALL it says FLATTEN PENDING and sells at resume.</div></div>
+ <div class="box"><span class="xbtn sell">SELL LOWER TO $1.75<small>one click · normal exit</small></span><div class="cap">Your exit reached its boundary: “EXIT NOT FILLED · bid below $1.80”. Nothing sells lower without your click (2c).</div></div>
+ <div class="box"><span class="xbtn sell" style="background:#7A1C20">SELL LOWER TO $7.40<small>hold 0.5 s · past the band</small></span><div class="cap">During FLATTEN ALL, below the emergency band: a short hold instead of a click (4).</div></div>
+ <div class="box"><span class="xbtn dis">checking…<small>exit UNKNOWN</small></span><div class="cap">Exit sent, no answer yet: the button waits instead of sending twice.</div></div>
+ <div class="box"><span class="xbtn dis">CLOSED<small>+$28.00 · yours</small></span><div class="cap">Stays about 5 s, then the row leaves (kept in Fills and Review).</div></div>
+</div>
+
+<h2>3 · CANCELLING ENTRIES · POSITION OPENED OUTSIDE THE PLATFORM · ENGINE REALLOCATION · SHORT ROW (later)</h2>
+<div class="grid" style="grid-template-columns:1fr 1.25fr 1.15fr;margin-bottom:10px">
+ <div class="box"><div class="row"><b style="font-size:11px;letter-spacing:.08em">WORKING ORDERS · 4</b><div style="flex-grow:1"></div><span class="btn" style="border-color:#D0454A;color:#FFB3B5;background:#2A1114;font-weight:700">CANCEL ALL ENTRIES (3)</span></div><div class="cap">Appears only with 2+ unfilled entries (yours and the engine's). Cancels only unfilled BUY/SHORT; positions, exits and stops are untouched; the engine can't resend the same entry without a genuinely new trigger (5g).</div></div>
+ <div class="box"><div class="row"><b>NOPQ</b><span class="g" style="font-size:11px;font-weight:700">BUY</span><span class="chip eng">ENGINE</span><span class="st2" style="color:#9CC3FF;border-color:#2F5C95;background:#12223A">PARTIAL 200/500 · ≤ $2.31</span><span class="xbtn ovr" style="min-width:0">CANCEL ENGINE ENTRY<small>hold 1 s</small></span></div>
+  <div class="row" style="margin-top:6px"><span class="so" style="font-size:11px">after the hold:</span><span class="st2" style="color:#C9D1DB;border-color:#3A4556">CANCELLED · 300 unfilled · by you</span><span class="st2" style="color:var(--amber);border-color:#6B4A16;background:#261D0E">ENGINE RE-ENTRY PAUSED · same setup ×</span></div>
+  <div class="cap">Only while that engine entry is still working. Cancels only the unfilled rest; the 200 filled shares stay the ENGINE's position. Logged as your intervention. Same button here, on the engine's card in the strip and on the pop-up trade card.</div></div>
+ <div class="box"><div class="row"><b>RSTU</b><span class="g" style="font-size:11px;font-weight:700">LONG</span><span class="chip you">YOURS · OPENED OUTSIDE PLATFORM</span><span class="mono">150 @ $4.02</span></div><div class="cap">Found at Alpaca but not opened by the platform (e.g. bought in the Alpaca app during “Manual backup: use Alpaca directly”). It is yours: your SELL/EXIT works; the engine never adopts or manages it.</div></div>
+</div>
+<div class="grid" style="grid-template-columns:1.3fr 1.2fr">
+ <div class="box"><div class="kr"><span class="mono mu">example</span><span>Engine sold <b>EFGH</b> 400 @ $2.58 (+$16) → funded <b>WXYZ</b> 700 @ $1.79</span></div><div class="kr"><span class="mu">reason</span><span>WXYZ setup clearly stronger after costs · EFGH momentum fading · reserve was used up</span></div><div class="cap">REALLOCATIONS tab: engine only, its own positions only, in the order reserve → trim weakest → close weakest. Your positions are never trimmed or sold to make room.</div></div>
+ <div class="box"><div class="row" style="font-size:12px"><b>MNOP</b><span class="pu" style="font-size:11px;font-weight:700">SHORT</span><span class="chip you">YOURS</span><span class="mono">400 @ $3.12</span><span class="st2" style="color:#C9B2FF;border-color:#4A3A7A">BORROW · easy · fee 0.0%</span><span class="st2" style="color:var(--amber);border-color:#6B4A16">HTB · 18%/yr</span></div><div class="cap">When shorts are enabled (Phase 3): SIDE in purple, COVER instead of SELL/EXIT, and the borrow status and fee from Alpaca on the row.</div></div>
+</div>
+
+<h2>4 · BROKER CHECK (ALPACA) — in sync, checking, and two levels of mismatch</h2>
+<div class="grid" style="grid-template-columns:0.8fr 0.9fr 1.15fr 1.15fr">
+ <div class="box"><div class="row"><span style="width:9px;height:9px;border-radius:5px;background:#34C77B"></span><b class="g">IN SYNC</b><span class="so">0 differences · 07:42:30</span></div><div class="cap">Positions, orders, cash and buying power all match.</div></div>
+ <div class="box"><div class="row"><span style="width:9px;height:9px;border-radius:5px;background:#F2A93B"></span><b class="am">CHECKING</b><span class="so">after reconnect · 3 s</span></div><div class="cap">After a reconnect or restart: rebuilt from Alpaca, never assumed empty. New AUTO entries wait for the result.</div></div>
+ <div class="box" style="border-color:#6B4A16"><div class="row"><span style="width:9px;height:9px;border-radius:5px;background:#F2A93B"></span><b class="am">STOCK MISMATCH · ABCD</b></div>
+  <div class="kr"><span>shares</span><span class="mono">platform 300 · <b>Alpaca 521</b></span></div>
+  <div class="cap">Alpaca's number used. No new entries in ABCD only; everything else keeps trading; exits work. Incident in Review.</div></div>
+ <div class="box" style="border-color:#A8262B"><div class="row"><span style="width:9px;height:9px;border-radius:5px;background:#F0555A"></span><b class="rd">ACCOUNT MISMATCH · AUTO BLOCKED — BROKER SYNC</b></div>
+  <div class="kr"><span>cash</span><span class="mono">platform $522.80 · <b>Alpaca $498.10</b></span></div>
+  <div class="cap">Critical. Cash, buying power or account totals differ, so no size can be trusted: all new entries blocked (yours and AUTO); exits always work.</div></div>
+</div>
+
+<h2>5 · MARGIN TILE — the three settled stages (5h)</h2>
+<div class="grid" style="grid-template-columns:1fr 1.2fr 2.2fr">
+ <div class="box"><div class="lab">MARGIN</div><div class="g mono" style="font-size:13px;margin-top:3px">HEADROOM OK</div><div class="cap">margin calls: 0 — TARGET 0 · nothing extra shows.</div></div>
+ <div class="box" style="border-color:#6B4A16"><div class="lab">MARGIN</div><div class="am mono" style="font-size:13px;margin-top:3px">HEADROOM LOW · NEW SIZE REDUCED</div><div class="cap">Attention. FULL CAP and sizes shrink automatically (amber LIMITED box on the buttons).</div></div>
+ <div class="box" style="border-color:#A8262B;background:#1E0F12"><div class="row"><b class="rd" style="font-size:12.5px">INTRADAY MARGIN CALL · $412 · CURE REQUIRED</b><span class="so" style="font-size:11px">since 10:14:05 · Alpaca deadline Tue Sep 29 · goal: today</span></div>
+  <div class="row" style="margin-top:6px"><span class="xbtn sell" style="min-width:0">EST. SELL 61 ABCD TO CURE MARGIN<small>one click · your position · estimate, recalculated live</small></span><span class="so" style="font-size:11px">Engine already sold 150 WXYZ (its own) → $282 cured · AUTO and your BUY/SHORT blocked · exits available · working entries cancelled</span></div>
+  <div class="cap">After the fill the platform re-checks Alpaca and recalculates any remainder; the call is cleared only when Alpaca confirms. If Alpaca ever sells something itself, the fill is labeled <b class="rd">CLOSED BY ALPACA · MARGIN</b> here, in the alert history and in Review.</div></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Main window v4 — alert, limit and emergency states</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0E13;--panel:#121720;--line:#232B38;--text:#E7EAEE;--muted:#9BA6B5;--dim:#8A96A8;--green:#34C77B;--red:#F0555A;--amber:#F2A93B;--yellow:#F2C94C;--blue:#5AA2FF;--purple:#B08CFF;--pink:#F9A8D4;--teal:#5CE0D2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;width:1536px;padding:20px 24px 28px}
+.mono{font-family:'IBM Plex Mono',monospace}
+h1{font-size:19px;margin:0 0 4px;letter-spacing:.02em}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 18px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:22px 0 8px;font-weight:700}
+.cap{font-size:11.5px;color:var(--dim);margin:3px 0 10px 2px}
+.row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+/* alert line */
+.al{height:22px;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:4px;margin-bottom:4px}
+.tag{font-size:9.5px;font-weight:700;letter-spacing:.08em;padding:1px 5px;border-radius:3px;white-space:nowrap}
+.t{font-size:10.5px;color:var(--muted)}
+.msg{font-size:11px;white-space:nowrap}
+.grow{flex-grow:1}
+.lnk{font-size:10.5px;color:var(--blue);white-space:nowrap}
+.mini{height:17px;padding:0 7px;border-radius:4px;font-size:9.5px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;white-space:nowrap}
+/* top bar pieces */
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.tlabel{font-size:10.5px;color:var(--dim);margin-bottom:6px}
+.auto{display:flex;align-items:center;gap:10px;height:40px;padding:0 4px 0 12px;border-radius:8px}
+.autol{font-size:13px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.abtn{height:32px;padding:0 10px;border-radius:6px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.abtn b{font-size:11.5px}.abtn i{font-style:normal;font-size:9.5px;opacity:.85}
+.meter{display:flex;flex-direction:column;gap:3px;line-height:1.1}
+.ml{font-size:10px;letter-spacing:.06em;white-space:nowrap}
+.bar{position:relative;width:70px;height:6px;border-radius:3px;background:#273142}
+.bar>div:first-child{height:6px;border-radius:3px}
+.tick{position:absolute;left:50%;top:-3px;width:2px;height:12px;background:var(--amber);border-radius:1px}
+.hbtn{height:32px;padding:0 10px;border-radius:6px;border:1px solid #2E3A4A;background:#161D28;display:flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:4px}
+/* cards */
+.card{width:192px;background:#0F141C;border:1px solid var(--line);border-radius:7px;padding:6px 7px;display:flex;flex-direction:column;gap:4px}
+.ch{display:flex;align-items:center;gap:5px;height:18px}
+.sym{font-size:14px;font-weight:700;padding:0 4px;border-radius:3px}
+.side{font-size:9.5px;font-weight:700}
+.own{font-size:8.5px;font-weight:700;letter-spacing:.04em;padding:1px 4px;border-radius:3px;border:1px solid}
+.pl{font-family:'IBM Plex Mono',monospace;font-size:10px}
+.st{font-size:9.5px;font-weight:700;letter-spacing:.02em;padding:2px 5px;border-radius:3px;line-height:1.25}
+.btn{height:36px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid}
+.btn b{font-size:11px;white-space:nowrap}.btn i{font-style:normal;font-size:8.5px;opacity:.9;white-space:nowrap}
+.hold{position:relative;overflow:hidden}
+.hold .fill{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,0.14)}
+.note{font-size:10.5px;color:var(--muted);max-width:192px;line-height:1.35;margin-top:6px}
+.lock{display:inline-block;width:9px;height:10px;vertical-align:-1px;margin-right:3px}
+/* colors */
+.sw{display:flex;align-items:center;gap:7px;font-size:11.5px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+.chip{width:14px;height:14px;border-radius:3px}
+.blink{display:flex;flex-direction:column;align-items:center;gap:6px;width:170px}
+.arrow{color:var(--dim);font-size:18px;margin-top:6px}
+</style>
+</head>
+<body>
+<h1>Main window v4 — states you don't see in the normal screen</h1>
+<p class="sub">Alert line, AUTO and limits, health, exits and emergency controls, blink sequence and the color rule. Everything here is from the approved decision log (Sept 25). Numbers are placeholders set in paper testing.</p>
+
+<h2>1 · ALERT LINE UNDER THE TOP BAR — critical first, then attention, then info; it never moves anything else</h2>
+<div class="al" style="background:#0E131B"><span class="tag" style="color:#C9D1DB;background:#232B38">INFO</span><span class="t mono">07:42:16</span><span class="msg" style="color:#C9D1DB">WXYZ jumped from #30 to #2 and took Level 2 slot 2 · XQRB (#212) stays in My list because you pinned it</span><span class="grow"></span><span class="lnk">Today's alerts (14) ▸</span></div>
+<div class="cap">Info: quiet. Rank jumps, Level 2 swaps. (Your fills are info too, but with a short one-time sound.)</div>
+<div class="al" style="background:#261D0E;border-color:#6B4A16"><span class="tag" style="color:#1A1206;background:#F2A93B">ATTENTION</span><span class="t mono">09:41:07</span><span class="msg" style="color:#F6D59A">IJKL · <span style="color:#F9A8D4;font-weight:700">EXIT?</span> Volume fading — engine would exit now · your position, 200 sh</span><span class="grow"></span><span class="mini" style="border:1px solid #8A6A2E;color:#F6D59A">SEEN</span><span class="lnk">Today's alerts (15) ▸</span></div>
+<div class="cap">Attention: one sound + amber line. EXIT?, soft limit, give-back, partial fill, AI turns NO-GO on a stock you hold, BUY/SHORT rejected, IBKR needs login / Level 2 down (DEGRADED).</div>
+<div class="al" style="background:#3A1114;border-color:#A8262B"><span class="tag" style="color:#fff;background:#D0454A">CRITICAL</span><span class="t mono" style="color:#FFB3B5">10:05:22</span><span class="msg" style="color:#FFD4D5;font-weight:600">GHIJ · EXIT NOT FILLED · bid below $11.80 · 300 sh still open</span><span style="font-size:10px;color:#FFB3B5">🔊 repeats every 10 s</span><span class="grow"></span><span class="mini" style="background:#A8262B;color:#fff;border:1px solid #D0454A">SELL LOWER TO $11.75</span><span class="mini" style="border:1px solid #D0454A;color:#FFD4D5">SEEN</span><span class="lnk" style="color:#FFB3B5">Today's alerts (16) ▸</span></div>
+<div class="cap">Critical: own sound, repeats until you click SEEN. Exit rejected / EXIT NOT FILLED, FLATTEN INCOMPLETE, hard limit, NOT SAFE TO TRADE (Alpaca, Massive, clock), intraday margin call, broker sync mismatch, halt on a stock you hold.</div>
+<div class="al" style="background:#2A1013;border-color:#7A2A2E"><span class="tag" style="color:#fff;background:#8E2A2F">CRITICAL</span><span class="t mono" style="color:#FFB3B5">10:05:22</span><span class="msg" style="color:#FFD4D5">GHIJ · EXIT NOT FILLED · bid below $11.80 · 300 sh still open</span><span style="font-size:10px;color:#C98A8D">🔇 seen 10:05:31 · stays red until it's fixed</span><span class="mini" style="border:1px solid #7A2A2E;color:#FFB3B5">+1 more</span><span class="grow"></span><span class="mini" style="background:#A8262B;color:#fff;border:1px solid #D0454A">SELL LOWER TO $11.75</span><span class="lnk" style="color:#FFB3B5">Today's alerts (17) ▸</span></div>
+<div class="cap">After SEEN: the sound stops, the line stays red until the problem is actually fixed. "+1 more" = a second unresolved critical. A new info or attention alert never covers a critical one.</div>
+
+<h2>2 · TOP BAR — AUTO, LOSS LIMIT AND HEALTH STATES</h2>
+<div class="row">
+ <div class="tile"><div class="tlabel">AUTO OFF (you trade)</div><div class="auto" style="background:#1A212C;border:1px solid #3A4556"><span class="autol">AUTO OFF — YOU TRADE</span><span class="abtn" style="background:#223044;border:1px solid #3E5470"><b>Turn AUTO on</b><i>hold 2 s</i></span></div></div>
+ <div class="tile"><div class="tlabel">AUTO ON (engine can trade)</div><div class="auto" style="background:#0D3533;border:1px solid #1FA79B"><span class="autol" style="color:var(--teal)">AUTO ON — ENGINE CAN TRADE</span><span class="abtn" style="background:#A8262B;border:1px solid #D0454A"><b>STOP AUTO</b><i>one click</i></span></div></div>
+ <div class="tile"><div class="tlabel">Give-back or soft limit reached</div><div class="auto" style="background:#2A2010;border:1px solid #8A6A2E"><span class="autol" style="color:var(--amber)">AUTO PAUSED — GAVE BACK $500</span><span class="abtn" style="background:#223044;border:1px solid #3E5470"><b>Resume AUTO</b><i>hold 2 s</i></span></div></div>
+ <div class="tile"><div class="tlabel">Safety blocks AUTO</div><div class="auto" style="background:#1A212C;border:1px solid #6B2A2E;padding-right:12px"><span class="autol" style="color:#FFB3B5">AUTO BLOCKED — ALPACA</span></div></div>
+</div>
+<div class="cap" style="margin-top:8px">AUTO never restarts by itself after a pause, FLATTEN ALL or your STOP AUTO: you turn it back on (hold 2 s). After a connection block it continues only after a verified recovery; otherwise AUTO STAYS BLOCKED until you press Resume AUTO.</div>
+
+<div class="row" style="margin-top:6px">
+ <div class="tile"><div class="tlabel">Loss limit · normal</div><div class="meter"><span class="ml" style="color:var(--muted)">LOSS LIMIT</span><div style="display:flex;align-items:center;gap:6px"><div class="bar"><div style="width:0%;background:var(--blue)"></div><div class="tick"></div></div><span class="mono" style="font-size:11.5px">$0 / $600</span></div></div></div>
+ <div class="tile"><div class="tlabel">Loss limit · some loss</div><div class="meter"><span class="ml" style="color:var(--muted)">LOSS LIMIT</span><div style="display:flex;align-items:center;gap:6px"><div class="bar"><div style="width:30%;background:var(--blue)"></div><div class="tick"></div></div><span class="mono" style="font-size:11.5px">$180 / $600</span></div></div></div>
+ <div class="tile" style="border-color:#8A6A2E"><div class="tlabel">Soft limit ($300) passed</div><div class="meter"><span class="ml" style="color:var(--amber);font-weight:700">SOFT LIMIT · AUTO PAUSED</span><div style="display:flex;align-items:center;gap:6px"><div class="bar"><div style="width:53%;background:var(--amber)"></div><div class="tick"></div></div><span class="mono" style="font-size:11.5px;color:#F6D59A">$318 / $600</span></div></div></div>
+ <div class="tile" style="border-color:#A8262B"><div class="tlabel">Hard limit reached</div><div class="meter"><span class="ml" style="color:#FF8A8D;font-weight:700">HARD LIMIT — NEW ENTRIES BLOCKED · exits OK</span><div style="display:flex;align-items:center;gap:6px"><div class="bar"><div style="width:100%;background:var(--red)"></div><div class="tick"></div></div><span class="mono" style="font-size:11.5px;color:#FFB3B5">$604 / $600</span></div></div></div>
+ <div class="tile" style="width:300px"><div class="tlabel">Hover on the meter</div><div style="font-size:11px;line-height:1.5;color:#C9D1DB">Today (closed + open): <span class="mono">−$318</span><br>Soft limit <span class="mono">$300</span> · Hard limit <span class="mono">$600</span><br>Today's high <span class="mono">+$240</span> · given back <span class="mono">$558</span><br><span style="color:var(--dim)">Hard limit: lower today, raise from tomorrow.</span></div></div>
+</div>
+
+<div class="row" style="margin-top:12px">
+ <div class="tile"><div class="tlabel">Health (click opens System Health)</div><div class="row" style="gap:8px">
+  <span class="hbtn"><span class="dot" style="background:var(--green)"></span><b style="color:#7FE0A8;letter-spacing:.04em">HEALTHY</b></span>
+  <span class="hbtn" style="border-color:#8A6A2E"><span class="dot" style="background:var(--amber)"></span><b style="color:var(--amber);letter-spacing:.04em">DEGRADED</b></span>
+  <span class="hbtn" style="border-color:#A8262B;background:#2A1114"><span class="dot" style="background:var(--red)"></span><b style="color:#FFB3B5;letter-spacing:.04em">NOT SAFE TO TRADE</b></span></div></div>
+ <div class="tile"><div class="tlabel">Paper / live</div><div class="row" style="gap:8px">
+  <span class="hbtn" style="border-color:#3E5470;background:#1B2433;color:#A9C7FF;font-weight:700;letter-spacing:.04em">PAPER</span>
+  <span class="hbtn" style="border-color:#E5484D;background:#5A1216;color:#FFB3B5;font-weight:700;letter-spacing:.04em">LIVE — REAL MONEY</span></div>
+  <div style="font-size:10.5px;color:var(--dim);margin-top:6px">LIVE also puts a thin red frame around the whole window.</div></div>
+ <div class="tile"><div class="tlabel">Emergency, always top right (every window + phone)</div><div class="row" style="gap:8px;align-items:center">
+  <span class="abtn hold" style="height:36px;padding:0 12px;background:#2A1114;border:1px solid #E5484D;color:#FFB3B5"><span class="fill" style="width:62%"></span><b style="letter-spacing:.04em;position:relative">FLATTEN ALL</b><i style="position:relative">hold 1 s</i></span>
+  <span style="font-size:10.5px;color:var(--dim);max-width:250px">Bar fills while you hold; letting go early does nothing. No keyboard shortcut for emergency buttons.</span></div></div>
+</div>
+
+<div class="tlabel" style="margin:14px 0 6px 2px;font-size:11.5px;color:var(--muted)">FLATTEN ALL sequence — shown on the button and in the alert line; AUTO stays OFF afterwards until you turn it back on</div>
+<div class="row" style="gap:10px;align-items:stretch">
+ <div class="tile" style="width:170px"><div class="tlabel">1 · Holding</div><span class="abtn hold" style="height:36px;padding:0 12px;background:#2A1114;border:1px solid #E5484D;color:#FFB3B5;display:inline-flex"><span class="fill" style="width:62%"></span><b style="letter-spacing:.04em;position:relative">FLATTEN ALL</b><i style="position:relative">keep holding…</i></span><div class="note" style="margin-top:6px">Let go early = nothing happens.</div></div>
+ <div class="tile" style="width:300px"><div class="tlabel">2 · Working</div><span class="abtn" style="height:36px;padding:0 12px;background:#5A1216;border:1px solid #E5484D;color:#fff;display:inline-flex"><b style="letter-spacing:.04em">FLATTENING…</b><i>3 of 5 closed</i></span><div class="note" style="margin-top:6px;max-width:270px">AUTO OFF · entry orders cancelled · exits sent · waiting for fills and broker reconcile.</div></div>
+ <div class="tile" style="width:380px;border-color:#1F7A4D"><div class="tlabel">3a · Done (only after the broker confirms)</div><div class="al" style="background:#0F2A1D;border-color:#1F7A4D;margin:0"><span class="tag" style="color:#06140C;background:#34C77B">DONE</span><span class="msg" style="color:#BFF0D3;font-weight:600">FLATTEN COMPLETE — ALL POSITIONS CLOSED</span></div><div class="note" style="margin-top:6px;max-width:300px">Never shown before positions and orders are reconciled with Alpaca. AUTO stays OFF.</div></div>
+ <div class="tile" style="width:540px;border-color:#A8262B"><div class="tlabel">3b · Something still open</div><div class="al" style="background:#3A1114;border-color:#A8262B;margin:0"><span class="tag" style="color:#fff;background:#D0454A">CRITICAL</span><span class="msg" style="color:#FFD4D5;font-weight:600">FLATTEN INCOMPLETE — 1 POSITION PENDING · ABCD · HALTED · 4:18 elapsed</span></div><div class="note" style="margin-top:6px;max-width:530px">The exit stays armed and fires as soon as ABCD can trade again; then FLATTEN COMPLETE. Past the emergency band: the card offers SELL LOWER TO $x (hold 0.5 s).</div></div>
+</div>
+
+<h2>3 · CARDS AND BUTTONS — ORDERS, EXITS AND EMERGENCY STATES</h2>
+<div class="row">
+ <div><div class="card" style="border-color:#2F5C94">
+  <div class="ch"><span class="sym" style="background:rgba(52,199,123,0.4)">QRST</span><span class="side" style="color:var(--green)">LONG</span><span class="grow"></span><span class="own" style="color:var(--blue)">SELECTED</span></div>
+  <div class="pl" style="color:var(--muted)">No position</div>
+  <div style="display:flex;align-items:center;gap:6px"><span style="font-size:9.5px;font-weight:700;color:var(--blue);white-space:nowrap;min-width:0">WORKING 878 @ ≤ $1.49</span><span class="grow"></span><span class="mini" style="border:1px solid #3E5470;color:#C9D1DB;padding:0 5px;flex-shrink:0">CANCEL</span></div>
+  <div style="display:flex;gap:4px"><div class="btn" style="flex:1;background:#19202A;border-color:#2A3340;color:#7C8898"><b>BUY QRST</b><i>order working</i></div><div class="btn" style="flex:1;background:#19202A;border-color:#2A3340;color:#7C8898"><b>SHORT</b><i>order working</i></div></div>
+ </div><div class="note">Order waiting: 878 sh = $1,308 ÷ the ceiling $1.49, so even the worst fill stays inside your size. Next: PARTIAL 300/878 → FILLED.</div></div>
+
+ <div><div class="card" style="border-color:#A8262B">
+  <div class="ch"><span class="sym">GHIJ</span><span class="side" style="color:var(--green)">LONG</span><span class="grow"></span><span class="own" style="color:#E7EAEE">YOURS</span></div>
+  <div class="pl" style="color:var(--red)">300 @ $12.40  −$192.00 −5.2%</div>
+  <div class="st" style="background:#3A1114;color:#FFD4D5;border:1px solid #A8262B">EXIT NOT FILLED · bid below $11.80</div>
+  <div class="btn" style="background:#A8262B;border-color:#D0454A;color:#fff"><b>SELL LOWER TO $11.75</b><i>one click · 300 sh left</i></div>
+ </div><div class="note">Normal exit reached its protection limit. One click = your OK for one more step down (only the shares not sold yet).</div></div>
+
+ <div><div class="card" style="border-color:#A8262B;border-style:dashed">
+  <div class="ch"><span class="sym">MNOP</span><span class="side" style="color:var(--purple)">SHORT</span><span class="grow"></span><span class="own" style="color:#E7EAEE">YOURS</span></div>
+  <div class="st" style="background:#3A1114;color:#FFD4D5;border:1px solid #A8262B">FLATTEN PENDING · 600 sh remaining</div>
+  <div class="pl" style="color:#FFB3B5">past the emergency band · ask $3.21</div>
+  <div class="btn hold" style="background:#5E1C1F;border-color:#D0454A;color:#fff"><span class="fill" style="width:40%"></span><b style="position:relative">COVER HIGHER TO $3.24</b><i style="position:relative">hold 0.5 s</i></div>
+ </div><div class="note">After FLATTEN ALL: automatic first. Only past the emergency band do you get this manual step, with a short hold (a long position shows SELL LOWER TO $x).</div></div>
+
+ <div><div class="card" style="border-color:#1E5F5A">
+  <div class="ch"><span class="sym">WXYZ</span><span class="side" style="color:var(--green)">LONG</span><span class="grow"></span><span class="own" style="color:var(--teal)">ENGINE'S</span></div>
+  <div class="pl" style="color:var(--green)">800 @ $1.79  +$64.00 +4.5%</div>
+  <div style="font-size:9.5px;color:var(--teal)">RISK LINE $1.72 · engine manages exit</div>
+  <div class="btn hold" style="background:#1C1316;border-color:#7A3035;color:#F0A5A8"><span class="fill" style="width:55%"></span><b style="position:relative"><svg class="lock" viewBox="0 0 9 10" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.3px"><rect x="1" y="4.5" width="7" height="5" rx="1"></rect><path d="M2.5 4.5V3.2a2 2 0 0 1 4 0V4.5"></path></svg>OVERRIDE EXIT</b><i style="position:relative">hold 1 s · engine's position</i></div>
+ </div><div class="note">A click does nothing; holding about 1 s closes only this engine position. AUTO and everything else keep running. Logged as a human override.</div></div>
+
+ <div><div class="card">
+  <div class="ch"><span class="sym">WXYZ</span><span class="side" style="color:var(--green)">LONG</span><span class="grow"></span><span class="own" style="color:var(--blue)">SELECTED</span></div>
+  <div class="pl" style="color:var(--muted)">No position · closed by OVERRIDE</div>
+  <div class="st" style="background:#1B2433;color:#A9C7FF;border:1px solid #3E5470">ENGINE RE-ENTRY PAUSED · same setup ✕</div>
+  <div style="display:flex;gap:4px"><div class="btn" style="flex:1;background:#16784A;border-color:#22A366;color:#fff"><b>BUY WXYZ</b><i>667 sh</i></div><div class="btn" style="flex:1;background:#5E36A8;border-color:#7E57CC;color:#fff"><b>SHORT</b><i>667 sh</i></div></div>
+ </div><div class="note">After an override the engine can't jump back in on the same setup. Click ✕ to release, or it ends when a genuinely new setup appears. You can always trade it yourself.</div></div>
+
+ <div><div class="card">
+  <div class="ch"><span class="sym">EFGH</span><span class="side" style="color:var(--green)">LONG</span><span class="grow"></span><span class="own" style="color:var(--blue)">SELECTED</span></div>
+  <div class="pl" style="color:var(--muted)">No position</div>
+  <div class="st" style="background:#3A1114;color:#FFD4D5;border:1px solid #A8262B">HARD LIMIT · no new entries today</div>
+  <div style="display:flex;gap:4px"><div class="btn" style="flex:1;background:#19202A;border-color:#2A3340;color:#7C8898"><b><svg class="lock" viewBox="0 0 9 10" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.3px"><rect x="1" y="4.5" width="7" height="5" rx="1"></rect><path d="M2.5 4.5V3.2a2 2 0 0 1 4 0V4.5"></path></svg>BUY EFGH</b><i>hard limit</i></div><div class="btn" style="flex:1;background:#19202A;border-color:#2A3340;color:#7C8898"><b>SHORT</b><i>hard limit</i></div></div>
+ </div><div class="note">Hard limit: BUY/SHORT locked for you and AUTO; nothing can add to a position. Exits always work.</div></div>
+</div>
+
+<div class="row" style="margin-top:14px;align-items:center">
+ <div class="tile" style="display:flex;align-items:center;gap:10px;padding:6px 10px">
+  <span style="font-size:11.5px;font-weight:700;letter-spacing:.08em">SELECTED STOCK + OPEN POSITIONS</span><span style="font-size:11px;color:var(--muted)">5 shown</span>
+  <span class="mini" style="height:22px;border:1px solid #6B2A2E;color:#FFB3B5;background:#1C1316">CANCEL ALL ENTRIES (3)</span>
+  <span style="font-size:10.5px;color:var(--blue)">Positions &amp; Orders ↗</span></div>
+ <div class="note" style="max-width:560px;margin:0">Appears only when 2+ buy/short orders are waiting. One click cancels only unfilled entries (yours and the engine's); positions, exits and stops are never touched, and the engine can't resend the same entry without a genuinely new trigger.</div>
+</div>
+
+<h2>4 · BLINK SEQUENCE (ticker box) AND THE COLOR RULE</h2>
+<div class="row" style="align-items:center">
+ <div class="blink"><span class="sym" style="font-size:16px;background:rgba(52,199,123,0.65);padding:2px 6px">ABCD</span><span style="font-size:10.5px;color:var(--dim);text-align:center">new signal: pulses ~1× a second for ~5 s + sound*</span></div><span class="arrow">→</span>
+ <div class="blink"><span class="sym" style="font-size:16px;background:#1F7A4D;padding:2px 6px">ABCD</span><span style="font-size:10.5px;color:var(--dim);text-align:center">solid green box while the signal lasts</span></div><span class="arrow">→</span>
+ <div class="blink"><span class="sym" style="font-size:16px;padding:2px 6px">ABCD</span><span style="font-size:10.5px;color:var(--dim);text-align:center">plain when the signal ends</span></div><span class="arrow">→</span>
+ <div class="blink"><span class="sym" style="font-size:16px;background:rgba(52,199,123,0.65);padding:2px 6px">ABCD</span><span style="font-size:10.5px;color:var(--dim);text-align:center">blinks again only on a genuinely new trigger</span></div>
+ <div class="note" style="max-width:330px;margin:0 0 0 12px">Red ▼ works the same way. *Sound only for My List, Level 2 panels, the Selected stock and your positions; other Ranked 50 stocks blink silently. Only engine signals blink; prices never flash.</div>
+</div>
+<div class="row" style="margin-top:12px;gap:8px">
+ <span class="sw"><span class="chip" style="background:var(--green)"></span>Green · up / buy / profit</span>
+ <span class="sw"><span class="chip" style="background:var(--red)"></span>Red · down / sell / loss / danger</span>
+ <span class="sw"><span class="chip" style="background:var(--purple)"></span>Purple · short</span>
+ <span class="sw"><span class="chip" style="background:var(--pink)"></span>Pink · EXIT? only</span>
+ <span class="sw"><span class="chip" style="background:var(--teal)"></span>Teal · engine's positions</span>
+ <span class="sw"><span class="chip" style="background:var(--blue)"></span>Blue · selection, navigation</span>
+ <span class="sw"><span class="chip" style="background:#C9D1DB"></span>Grey · halted / unavailable</span>
+ <span class="sw"><span class="chip" style="background:var(--amber)"></span>Amber · be careful (always with a word)</span>
+ <span class="sw"><span class="chip" style="background:var(--yellow)"></span>Yellow · things you set (My List, ★, PINNED, STOP)</span>
+ <span class="sw"><span class="chip" style="background:transparent;border:1.5px solid #E7EAEE"></span>White box · big order in the book</span>
+</div>
+</body>
+</html>

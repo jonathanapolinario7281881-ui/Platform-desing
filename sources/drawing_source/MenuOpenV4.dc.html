@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Main window v4, menu open</title><script src="./support.js"></script></head>
+<body><x-dc><helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#0B0E13}
+@keyframes pulseG{0%,100%{background-color:rgba(52,199,123,0.12)}50%{background-color:rgba(52,199,123,0.65)}}
+@keyframes pulseR{0%,100%{background-color:rgba(240,85,90,0.12)}50%{background-color:rgba(240,85,90,0.65)}}
+@keyframes pulseP{0%,100%{background-color:rgba(244,114,182,0.10)}50%{background-color:rgba(244,114,182,0.55)}}
+a{color:#5AA2FF}</style></helmet>
+<div style="width: 1536px; height: 864px; background: #0B0E13; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif;">
+<dc-import name="MainV4" menu-open="{{yes}}" hint-size="1536px,864px"></dc-import>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1536,"height":864}}'>
+class Component extends DCLogic { renderVals() { return { yes: true }; } }
+</script></body></html>

@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Main window</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0E13}
+@keyframes pulseG{0%,100%{background-color:rgba(52,199,123,0.12)}50%{background-color:rgba(52,199,123,0.65)}}
+@keyframes pulseR{0%,100%{background-color:rgba(240,85,90,0.12)}50%{background-color:rgba(240,85,90,0.65)}}
+@keyframes pulseP{0%,100%{background-color:rgba(244,114,182,0.10)}50%{background-color:rgba(244,114,182,0.55)}}
+a{color:#5AA2FF}a:hover{color:#8BBEFF}
+</style>
+</helmet>
+<div style="position: relative; width: 1536px; height: 864px; box-sizing: border-box; overflow: hidden; background: #0B0E13; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; display: flex; flex-direction: column; box-shadow: {{frame}};">
+
+<header style="height: 48px; box-sizing: border-box; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: #121720; border-bottom: 1px solid #232B38;">
+<button onClick="{{toggleLive}}" aria-label="Switch between paper and live" style="height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid {{envBorder}}; background: {{envBg}}; color: {{envFg}}; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; cursor: pointer;">{{envLabel}}</button>
+<div style="display: flex; align-items: center; gap: 10px; height: 40px; box-sizing: border-box; padding: 0 4px 0 12px; border-radius: 8px; background: {{autoBg}}; border: 1px solid {{autoBorder}};">
+<span style="font-size: 12.5px; font-weight: 700; letter-spacing: 0.02em; color: {{autoFg}}; white-space: nowrap;">{{autoLabel}}</span>
+<sc-if value="{{hasAutoBtn}}" hint-placeholder-val="{{ true }}"><button onClick="{{toggleAuto}}" style="height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid {{actBorder}}; background: {{actBg}}; color: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; cursor: pointer;">
+<span style="font-size: 11.5px; font-weight: 700; white-space: nowrap;">{{autoAction}}</span>
+<span style="font-size: 9.5px; opacity: 0.85; white-space: nowrap;">{{actSub}}</span>
+</button></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; line-height: 1.15;">
+<span style="font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: #F2A93B; white-space: nowrap;">PRE-MARKET</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; white-space: nowrap;">07:42:18 ET</span>
+</div>
+<div style="flex-grow: 1; min-width: 0;"></div>
+<div style="display: flex; flex-direction: column; line-height: 1.15;">
+<span style="font-size: 10px; letter-spacing: 0.06em; color: #9BA6B5;">EQUITY</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;">{{equity}}</span>
+</div>
+<div style="display: flex; flex-direction: column; line-height: 1.15;">
+<span style="font-size: 10px; letter-spacing: 0.06em; color: #9BA6B5;">DAY P&amp;L</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{pnlColor}}; white-space: nowrap;">{{dayPnl}}</span>
+</div>
+<div title="Cash = your own money (used for stocks that can't be bought on margin). Total BP = what the broker lets you buy, including margin." style="display: grid; grid-template-columns: auto auto; column-gap: 6px; row-gap: 1px; align-items: baseline; line-height: 1.1;">
+<span style="font-size: 9.5px; letter-spacing: 0.05em; color: #9BA6B5;">CASH</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; text-align: right;">{{cash}}</span>
+<span style="font-size: 9.5px; letter-spacing: 0.05em; color: #9BA6B5; white-space: nowrap;">TOTAL BP</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; text-align: right;">{{totalBp}}</span>
+</div>
+<div title="{{lossTitle}}" style="display: flex; flex-direction: column; gap: 3px; line-height: 1.1;">
+<span style="font-size: 10px; letter-spacing: 0.06em; color: {{lossLabelColor}}; white-space: nowrap;">{{lossLabel}}</span>
+<div style="display: flex; align-items: center; gap: 6px;">
+<div style="position: relative; width: 60px; height: 6px; border-radius: 3px; background: #273142;"><div style="width: {{lossPct}}%; height: 6px; border-radius: 3px; background: {{lossColor}};"></div><div aria-hidden="true" style="position: absolute; left: {{softPct}}%; top: -3px; width: 2px; height: 12px; background: #F2A93B; border-radius: 1px;"></div></div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; white-space: nowrap;">{{lossText}}</span>
+</div>
+</div>
+<button style="height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid {{hBorder}}; background: {{hBg}}; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{hDot}};"></span><span style="font-weight: 700; letter-spacing: 0.04em; color: {{hFg}};">{{hLabel}}</span></button>
+<button style="height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid #2E3A4A; background: #161D28; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; cursor: pointer; white-space: nowrap;">Ask AI ↗</button>
+<button onClick="{{toggleMenu}}" aria-expanded="{{menuExpanded}}" style="height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid {{menuBtnBorder}}; background: {{menuBtnBg}}; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; cursor: pointer; white-space: nowrap;">Windows ▾</button>
+<button style="flex-shrink: 0; height: 36px; padding: 0 12px; border-radius: 6px; border: 1px solid #E5484D; background: #2A1114; color: #FFB3B5; font-family: 'IBM Plex Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; cursor: pointer;"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap;">FLATTEN ALL</span><span style="font-size: 9.5px; opacity: 0.85;">hold 1 s</span></button>
+</header>
+
+<div role="status" aria-live="polite" style="height: 22px; box-sizing: border-box; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: {{alertBg}}; border-bottom: 1px solid {{alertBorder}};">
+<span style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; padding: 1px 5px; border-radius: 3px; color: {{alertTagFg}}; background: {{alertTagBg}}; white-space: nowrap;">{{alertTag}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9BA6B5; white-space: nowrap;">{{alertTime}}</span>
+<span style="font-size: 11px; color: {{alertFg}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;">{{alertText}}</span>
+<div style="flex-grow: 1;"></div>
+<span style="font-size: 10.5px; color: #5AA2FF; white-space: nowrap; cursor: pointer;">{{alertHistory}}</span>
+</div>
+
+<div style="display: flex; gap: 8px; padding: 8px; flex-grow: 1; min-height: 0;">
+
+<section aria-label="Stock lists" style="width: 698px; flex-shrink: 0; display: flex; flex-direction: column; background: #121720; border: 1px solid #232B38; border-radius: 8px; overflow: hidden;">
+<div style="display: flex; align-items: center; gap: 8px; padding: 7px 8px;">
+<input aria-label="Search any stock" placeholder="Search any stock…" style="flex-grow: 1; min-width: 0; height: 30px; box-sizing: border-box; padding: 0 10px; border-radius: 6px; border: 1px solid #2E3A4A; background: #0E131B; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px;">
+</div>
+<div style="display: flex; align-items: baseline; gap: 8px; height: 22px; box-sizing: border-box; padding: 3px 8px 0 8px; background: #151B24; border-bottom: 1px solid #232B38;">
+<span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: #F2C94C;">MY LIST · 5</span>
+<span style="font-size: 10px; color: #8A96A8;">your pinned stocks in rank order · a blinking one moves to the top</span>
+</div>
+<div style="display: grid; grid-template-columns: 34px 78px 30px 24px 52px 48px 78px 78px 64px 38px 52px 52px 30px 26px; align-items: center; height: 22px; padding: 0 4px; background: #171D27; border-bottom: 1px solid #232B38; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: #9BA6B5;">
+<span style="letter-spacing: 0;">RANK</span>
+<span style="padding-left: 4px;">SYMBOL</span>
+<span style="text-align: center; letter-spacing: 0;">NEWS</span>
+<span style="padding-left: 5px;">SIDE</span>
+<span style="text-align: right;">PRICE</span>
+<span style="text-align: right;">CHG</span>
+<span style="text-align: right;">VOLUME</span>
+<span style="text-align: right;">FLOAT</span>
+<span style="text-align: right;">TRADES</span>
+<span style="text-align: right;">RVOL</span>
+<span style="text-align: right;">VWAP</span>
+<span style="padding-right: 4px; text-align: right;">SPR</span>
+<span style="text-align: center;">AI</span>
+<span style="text-align: center;">L2</span>
+</div>
+<div style="height: 110px; flex-shrink: 0; overflow-y: auto; border-bottom: 2px solid #2A3547;">
+<sc-for list="{{mineRows}}" as="r" hint-placeholder-count="5">
+<button onClick="{{r.pick}}" aria-label="Select {{r.sym}}, rank {{r.rank}}" style="width: 100%; display: grid; grid-template-columns: 34px 78px 30px 24px 52px 48px 78px 78px 64px 38px 52px 52px 30px 26px; align-items: center; height: 22px; padding: 0 4px; box-sizing: border-box; border: none; border-bottom: 1px solid #1A212C; background: {{r.bg}}; color: #E7EAEE; text-align: left; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;">
+<span style="display: flex; align-items: center; gap: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.rank}}<sc-if value="{{r.hasJump}}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; color: #34C77B;">▲{{r.jump}}</span></sc-if></span>
+<span style="display: flex; align-items: center; gap: 3px;"><span style="padding: 1px 3px; border-radius: 3px; font-size: 12px; font-weight: 600; animation: {{r.anim}};">{{r.sym}}</span><sc-if value="{{r.hasSig}}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; color: {{r.sigColor}};">{{r.sigGlyph}}</span></sc-if><sc-if value="{{r.star}}" hint-placeholder-val="{{ false }}"><span title="Also on My list" style="font-size: 9.5px; color: #F2C94C;">★</span></sc-if><sc-if value="{{r.halted}}" hint-placeholder-val="{{ false }}"><span style="font-size: 8.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; color: #0B0E13; background: #C9D1DB;">HALT</span></sc-if></span>
+<span style="display: flex; justify-content: center;"><span title="{{r.nTitle}}" style="width: 16px; height: 15px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 700; color: {{r.nColor}}; border: 1px solid {{r.nBorder}}; background: {{r.nBg}}; opacity: {{r.nOpacity}};">{{r.nLetter}}</span></span>
+<span style="padding-left: 5px; font-size: 11px; font-weight: 700; color: {{r.sideColor}};">{{r.side}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px;">{{r.price}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.chgColor}};">{{r.chg}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px;">{{r.vol}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.flt}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.trades}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.rvol}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.vwapColor}};">{{r.vwap}}</span>
+<span title="{{r.sprTitle}}" style="padding-right: 3px; text-align: right;"><span style="padding: 0 1px; border-radius: 3px; border: 1px solid {{r.sprBorder}}; background: {{r.sprBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.sprColor}}; font-weight: {{r.sprWeight}};">{{r.spr}}</span></span>
+<span style="display: flex; justify-content: center;"><span style="font-size: 9px; font-weight: 700; padding: 0 3px; border-radius: 3px; color: {{r.aiColor}}; border: 1px {{r.aiBorderStyle}} {{r.aiBorder}}; opacity: {{r.aiOpacity}};">{{r.ai}}</span></span>
+<span style="text-align: center; font-size: 9.5px; font-weight: 700; color: #5AA2FF;">{{r.l2}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; align-items: baseline; gap: 8px; height: 22px; box-sizing: border-box; padding: 3px 8px 0 8px; background: #151B24; border-bottom: 1px solid #232B38;">
+<span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; color: #E7EAEE;">RANKED 50</span>
+<span style="font-size: 10px; color: #8A96A8;">best opportunity at the top · ★ = also on My list</span>
+</div>
+<div style="display: grid; grid-template-columns: 34px 78px 30px 24px 52px 48px 78px 78px 64px 38px 52px 52px 30px 26px; align-items: center; height: 22px; padding: 0 4px; background: #171D27; border-bottom: 1px solid #232B38; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: #9BA6B5;">
+<span style="letter-spacing: 0;">RANK</span>
+<span style="padding-left: 4px;">SYMBOL</span>
+<span style="text-align: center; letter-spacing: 0;">NEWS</span>
+<span style="padding-left: 5px;">SIDE</span>
+<span style="text-align: right;">PRICE</span>
+<span style="text-align: right;">CHG</span>
+<span style="text-align: right;">VOLUME</span>
+<span style="text-align: right;">FLOAT</span>
+<span style="text-align: right;">TRADES</span>
+<span style="text-align: right;">RVOL</span>
+<span style="text-align: right;">VWAP</span>
+<span style="padding-right: 4px; text-align: right;">SPR</span>
+<span style="text-align: center;">AI</span>
+<span style="text-align: center;">L2</span>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; min-height: 0;">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="30">
+<button onClick="{{r.pick}}" aria-label="Select {{r.sym}}, rank {{r.rank}}" style="width: 100%; display: grid; grid-template-columns: 34px 78px 30px 24px 52px 48px 78px 78px 64px 38px 52px 52px 30px 26px; align-items: center; height: 22px; padding: 0 4px; box-sizing: border-box; border: none; border-bottom: 1px solid #1A212C; background: {{r.bg}}; color: #E7EAEE; text-align: left; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;">
+<span style="display: flex; align-items: center; gap: 2px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.rank}}<sc-if value="{{r.hasJump}}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; color: #34C77B;">▲{{r.jump}}</span></sc-if></span>
+<span style="display: flex; align-items: center; gap: 3px;"><span style="padding: 1px 3px; border-radius: 3px; font-size: 12px; font-weight: 600; animation: {{r.anim}};">{{r.sym}}</span><sc-if value="{{r.hasSig}}" hint-placeholder-val="{{ false }}"><span style="font-size: 9px; color: {{r.sigColor}};">{{r.sigGlyph}}</span></sc-if><sc-if value="{{r.star}}" hint-placeholder-val="{{ false }}"><span title="Also on My list" style="font-size: 9.5px; color: #F2C94C;">★</span></sc-if><sc-if value="{{r.halted}}" hint-placeholder-val="{{ false }}"><span style="font-size: 8.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; color: #0B0E13; background: #C9D1DB;">HALT</span></sc-if></span>
+<span style="display: flex; justify-content: center;"><span title="{{r.nTitle}}" style="width: 16px; height: 15px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 700; color: {{r.nColor}}; border: 1px solid {{r.nBorder}}; background: {{r.nBg}}; opacity: {{r.nOpacity}};">{{r.nLetter}}</span></span>
+<span style="padding-left: 5px; font-size: 11px; font-weight: 700; color: {{r.sideColor}};">{{r.side}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px;">{{r.price}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.chgColor}};">{{r.chg}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px;">{{r.vol}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.flt}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.trades}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #C9D1DB;">{{r.rvol}}</span>
+<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.vwapColor}};">{{r.vwap}}</span>
+<span title="{{r.sprTitle}}" style="padding-right: 3px; text-align: right;"><span style="padding: 0 1px; border-radius: 3px; border: 1px solid {{r.sprBorder}}; background: {{r.sprBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{r.sprColor}}; font-weight: {{r.sprWeight}};">{{r.spr}}</span></span>
+<span style="display: flex; justify-content: center;"><span style="font-size: 9px; font-weight: 700; padding: 0 3px; border-radius: 3px; color: {{r.aiColor}}; border: 1px {{r.aiBorderStyle}} {{r.aiBorder}}; opacity: {{r.aiOpacity}};">{{r.ai}}</span></span>
+<span style="text-align: center; font-size: 9.5px; font-weight: 700; color: #5AA2FF;">{{r.l2}}</span>
+</button>
+</sc-for>
+</div>
+<div style="padding: 5px 10px; border-top: 1px solid #232B38; background: #151B24; display: flex; flex-direction: column; gap: 2px;">
+<span style="font-size: 10px; color: #8A96A8;"><span style="color: #34C77B;">▲ green blink</span> strong up · <span style="color: #F0555A;">▼ red blink</span> strong down · NEWS A–D = newest headline's grade (bright = under 1 h, dim = older) · <span style="color: #F2C94C;">★</span> also on My list · AI GO / CAU / NO (dashed = older than 3 min) · VWAP green = price above it, red = below · SPR = spread (amber box = wide, red box = very wide) · re-sorts about once a second, holds still under your pointer</span>
+</div>
+</section>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+
+<div style="height: 32px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: #121720; border: 1px solid {{sizeBarBorder}}; border-radius: 8px; opacity: {{sizeOpacity}};">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: #9BA6B5; white-space: nowrap; margin-right: 2px;">YOUR ORDER SIZE</span>
+<sc-for list="{{sizes}}" as="z" hint-placeholder-count="5">
+<button onClick="{{z.pick}}" aria-pressed="{{z.pressed}}" style="height: 24px; padding: 0 9px; border-radius: 5px; border: 1px solid {{z.border}}; background: {{z.bg}}; color: {{z.fg}}; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap;">{{z.label}}</button>
+</sc-for>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #E7EAEE; white-space: nowrap; margin-left: 4px;">{{sizeAmt}}</span>
+<div style="flex-grow: 1;"></div>
+<span style="font-size: 10.5px; color: #9BA6B5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{sizeNote}}</span>
+</div>
+
+<div style="display: flex; gap: 8px; height: 442px; flex-shrink: 0;">
+<sc-for list="{{panels}}" as="p" hint-placeholder-count="3">
+<section aria-label="Level 2 slot {{p.slot}}: {{p.sym}}" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; padding: 6px 7px; background: #121720; border: 1px solid {{p.frame}}; border-radius: 8px;">
+<div style="display: flex; align-items: center; gap: 5px; height: 22px;">
+<span style="font-size: 9.5px; font-weight: 700; color: #5AA2FF; border: 1px solid #2F5C94; border-radius: 3px; padding: 1px 3px;">L2·{{p.slot}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #9BA6B5;">#{{p.rank}}</span>
+<span style="font-size: 16px; font-weight: 700; padding: 0 5px; border-radius: 4px; animation: {{p.anim}};">{{p.sym}}</span>
+<sc-if value="{{p.hasSig}}" hint-placeholder-val="{{ false }}"><span style="font-size: 10.5px; font-weight: 600; color: {{p.sigColor}}; white-space: nowrap;">{{p.sigText}}</span></sc-if>
+<div style="flex-grow: 1;"></div>
+<button aria-pressed="{{p.pinPressed}}" title="{{p.pinTitle}}" style="height: 20px; padding: 0 6px; border-radius: 4px; border: 1px solid {{p.pinBorder}}; background: {{p.pinBg}}; color: {{p.pinFg}}; opacity: {{p.pinOpacity}}; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; white-space: nowrap;">{{p.pinLabel}}</button>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; height: 20px;">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600;">{{p.price}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #34C77B;">{{p.chg}}</span>
+<span style="font-size: 10px; font-weight: 700; white-space: nowrap; color: {{p.sideColor}};">{{p.sideLabel}}</span>
+<div style="flex-grow: 1;"></div>
+<span title="{{p.nTitle}}" style="display: flex; align-items: center; gap: 4px; height: 18px; box-sizing: border-box; padding: 0 5px; border-radius: 3px; border: 1px solid {{p.nBorder}}; background: {{p.nBg}}; opacity: {{p.nOpacity}}; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; color: #C9D1DB; white-space: nowrap;">NEWS<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{p.nColor}};">{{p.nLetter}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; font-weight: 500; color: #C9D1DB;">· {{p.nAge}}</span></span>
+</div>
+<div style="display: flex; align-items: center; gap: 5px; height: 16px; font-size: 10px; white-space: nowrap;">
+<span style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em; color: #8A96A8;">SPR</span>
+<span title="{{p.sprTitle}}" style="padding: 0 3px; border-radius: 3px; border: 1px solid {{p.sprBorder}}; background: {{p.sprBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{p.sprColor}}; font-weight: {{p.sprWeight}};">{{p.spr}}</span>
+<div style="flex-grow: 1;"></div>
+<span title="{{p.noteTitle}}" style="color: {{p.noteColor}}; overflow: hidden; text-overflow: ellipsis;">{{p.note}}</span>
+</div>
+<div style="position: relative; height: 94px; flex-shrink: 0; background: #0E131B; border-radius: 5px; overflow: hidden;">
+<sc-for list="{{p.candles}}" as="c" hint-placeholder-count="40">
+<div style="position: absolute; left: {{c.wx}}px; top: {{c.wy}}px; width: 1px; height: {{c.wh}}px; background: {{c.col}};"></div>
+<div style="position: absolute; left: {{c.bx}}px; top: {{c.by}}px; width: {{c.bw}}px; height: {{c.bh}}px; background: {{c.col}};"></div>
+<div style="position: absolute; left: {{c.bx}}px; top: {{c.vy}}px; width: {{c.bw}}px; height: {{c.vh}}px; background: {{c.vcol}};"></div>
+<div style="position: absolute; left: {{c.bx}}px; top: {{c.dy}}px; width: {{c.bw}}px; height: 2px; background: #C7A2FF; opacity: 0.8;"></div>
+</sc-for>
+<span style="position: absolute; left: 5px; top: 3px; font-size: 9px; color: #8A96A8;">1-min · <span style="color: #C7A2FF;">VWAP</span></span>
+<sc-if value="{{p.hasRisk}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; right: 0; top: {{p.riskY}}px; border-top: 1px dashed #5CE0D2;"></div>
+<span style="position: absolute; left: 5px; top: {{p.riskLabelY}}px; font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; color: #5CE0D2; background: rgba(11,14,19,0.85); padding: 0 3px; border-radius: 2px;">{{p.riskText}}</span>
+</sc-if>
+<sc-if value="{{p.hasMarker}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: {{p.mx}}px; top: {{p.my}}px; width: 7px; height: 7px; border: 2px solid #FFFFFF; border-radius: 6px;"></div>
+<span style="position: absolute; right: 4px; top: 3px; font-size: 9px; color: #E7EAEE; background: rgba(11,14,19,0.85); padding: 1px 4px; border-radius: 3px;">{{p.markerText}}</span>
+</sc-if>
+</div>
+<div title="Share of shares waiting on each side of the book" style="display: flex; align-items: center; gap: 5px; height: 12px; font-size: 8.5px; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap;">
+<span style="color: #34C77B;">BIDS {{p.bidPct}}%</span>
+<div style="flex-grow: 1; height: 5px; display: flex; border-radius: 3px; overflow: hidden; background: #D9474C;"><div style="width: {{p.bidPct}}%; height: 5px; background: #2FB36E;"></div></div>
+<span style="color: #F0555A;">{{p.askPct}}% ASKS</span>
+</div>
+<div style="display: flex; gap: 5px; flex-shrink: 0;">
+<div style="width: 117px; flex-shrink: 0;">
+<div style="display: grid; grid-template-columns: 40px 37px 40px; height: 13px; font-size: 8.5px; font-weight: 600; letter-spacing: 0.03em; color: #8A96A8;">
+<span style="text-align: right; white-space: nowrap;">BID SZ</span>
+<span style="text-align: center; white-space: nowrap;">PRICE</span>
+<span style="padding-left: 2px;">ASK SZ</span>
+</div>
+<sc-for list="{{p.book}}" as="b" hint-placeholder-count="11">
+<div style="display: grid; grid-template-columns: 40px 37px 40px; height: 12px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; background: {{b.bg}};">
+<span style="text-align: right; color: {{b.bcol}};"><span style="padding: 0 1px; border-radius: 2px; border: 1px solid {{b.bBorder}}; font-weight: {{b.bWeight}};">{{b.bid}}</span></span>
+<span style="text-align: center; color: {{b.pcol}};">{{b.px}}</span>
+<span style="color: #F0555A;"><span style="padding: 0 1px; border-radius: 2px; border: 1px solid {{b.aBorder}}; font-weight: {{b.aWeight}};">{{b.ask}}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="flex-grow: 1; min-width: 0;">
+<div style="display: grid; grid-template-columns: 53px 27px 1fr; height: 13px; font-size: 8.5px; font-weight: 600; letter-spacing: 0.03em; color: #8A96A8;">
+<span style="white-space: nowrap;">T&amp;S TIME</span>
+<span style="text-align: right;">PRICE</span>
+<span style="text-align: right;">SIZE</span>
+</div>
+<sc-for list="{{p.prints}}" as="t" hint-placeholder-count="11">
+<div style="display: grid; grid-template-columns: 53px 27px 1fr; height: 12px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{t.col}}; font-weight: {{t.w}}; background: {{t.bg}};">
+<span style="color: #9BA6B5; font-weight: 400;">{{t.time}}</span>
+<span style="text-align: right;">{{t.px}}</span>
+<span style="text-align: right;">{{t.size}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 15px;"><span style="color: #9BA6B5;">Engine </span><span style="font-weight: 600; color: {{p.stateColor}};">{{p.state}}</span><span style="color: #9BA6B5;"> · {{p.evidence}}</span></div>
+<div style="display: flex; align-items: center; gap: 5px; height: 17px; font-size: 10.5px; white-space: nowrap; overflow: hidden;">
+<span style="color: #9BA6B5;">AI</span>
+<span style="font-size: 9px; font-weight: 700; padding: 1px 3px; border-radius: 3px; color: {{p.aiColor}}; border: 1px solid {{p.aiBorder}};">{{p.aiLabel}}</span>
+<span style="color: #C9D1DB; overflow: hidden; text-overflow: ellipsis;">{{p.aiText}}</span>
+</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{p.posColor}};">{{p.pos}}</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;">
+<sc-for list="{{p.btns}}" as="bt" hint-placeholder-count="4">
+<button disabled="{{bt.disabled}}" aria-label="{{bt.aria}}" title="{{bt.tip}}" style="height: 42px; min-width: 0; border-radius: 6px; border: 1px solid {{bt.border}}; background: {{bt.bg}}; color: {{bt.fg}}; font-family: 'IBM Plex Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 0 1px; cursor: {{bt.cursor}};">
+<span style="display: flex; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 700; white-space: nowrap;"><sc-if value="{{bt.locked}}" hint-placeholder-val="{{ false }}"><svg width="9" height="10" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.3px;"><rect x="1" y="4.5" width="7" height="5" rx="1"></rect><path d="M2.5 4.5V3.2a2 2 0 0 1 4 0V4.5"></path></svg></sc-if>{{bt.label}}</span>
+<span style="font-size: 9px; opacity: 0.9; white-space: nowrap; border-radius: 3px; padding: {{bt.subPad}}; background: {{bt.subBg}}; color: {{bt.subFg}}; border: 1px solid {{bt.subBorder}}; line-height: 11px;">{{bt.sub}}</span>
+</button>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+
+<section aria-label="Selected stock and your positions" style="flex-grow: 1; min-height: 0; box-sizing: border-box; position: relative; display: flex; flex-direction: column; background: #121720; border: 1px solid #232B38; border-radius: 8px; overflow: hidden;">
+<div style="display: flex; align-items: center; gap: 10px; padding: 6px 10px 4px 10px;">
+<span style="font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; white-space: nowrap;">SELECTED STOCK + OPEN POSITIONS</span>
+<span style="font-size: 11px; color: #9BA6B5; white-space: nowrap;">{{stripCount}}</span>
+<div style="flex-grow: 1;"></div>
+<div style="display: flex; border: 1px solid #2E3A4A; border-radius: 5px; overflow: hidden;">
+<button style="height: 22px; padding: 0 8px; border: none; background: #24324A; color: #E7EAEE; font-family: 'IBM Plex Sans', sans-serif; font-size: 10.5px; cursor: pointer;">Cards</button>
+<button style="height: 22px; padding: 0 8px; border: none; background: #161D28; color: #9BA6B5; font-family: 'IBM Plex Sans', sans-serif; font-size: 10.5px; cursor: pointer;">List</button>
+</div>
+<span style="font-size: 10.5px; color: #5AA2FF; white-space: nowrap;">Positions &amp; Orders ↗</span>
+</div>
+<div style="flex-grow: 1; min-height: 0; overflow-x: auto; overflow-y: hidden; display: flex; gap: 8px; padding: 0 10px 6px 10px;">
+<sc-for list="{{cards}}" as="k" hint-placeholder-count="6">
+<sc-if value="{{k.isDivider}}" hint-placeholder-val="{{ false }}">
+<div aria-hidden="true" style="width: 16px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0;">
+<div style="flex-grow: 1; width: 0; border-left: 1px dashed #2E3A4A;"></div>
+<span style="writing-mode: vertical-rl; transform: rotate(180deg); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; color: #5CE0D2;">ENGINE'S</span>
+<div style="flex-grow: 1; width: 0; border-left: 1px dashed #2E3A4A;"></div>
+</div>
+</sc-if>
+<sc-if value="{{k.isCard}}" hint-placeholder-val="{{ true }}">
+<article aria-label="{{k.sym}} card" style="width: 192px; flex-shrink: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 3px; padding: 6px 7px; background: #0F141C; border: 1px {{k.borderStyle}} {{k.border}}; border-radius: 7px;">
+<div style="display: flex; align-items: center; gap: 5px; height: 18px;">
+<span style="font-size: 14px; font-weight: 700; padding: 0 4px; border-radius: 3px; animation: {{k.anim}};">{{k.sym}}</span>
+<span style="font-size: 9.5px; font-weight: 700; color: {{k.sideColor}};">{{k.side}}</span>
+<div style="flex-grow: 1;"></div>
+<span style="font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em; padding: 1px 4px; border-radius: 3px; color: {{k.ownerColor}}; border: 1px solid {{k.ownerColor}};">{{k.owner}}</span>
+</div>
+<div style="display: flex; align-items: center; gap: 5px; height: 16px;">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600;">{{k.price}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{k.chgColor}};">{{k.chg}}</span>
+<div style="flex-grow: 1;"></div>
+<span title="{{k.nTitle}}" style="display: flex; align-items: center; gap: 3px; height: 15px; box-sizing: border-box; padding: 0 4px; border-radius: 3px; border: 1px solid {{k.nBorder}}; background: {{k.nBg}}; opacity: {{k.nOpacity}}; font-size: 8px; font-weight: 700; letter-spacing: 0.04em; color: #C9D1DB; white-space: nowrap;">NEWS<span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{k.nColor}};">{{k.nLetter}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 500;">· {{k.nAge}}</span></span>
+</div>
+<div style="display: flex; align-items: center; gap: 5px; height: 15px; font-size: 9px; white-space: nowrap;">
+<span style="font-weight: 700; letter-spacing: 0.04em; color: #8A96A8;">SPR</span>
+<span title="{{k.sprTitle}}" style="padding: 0 2px; border-radius: 3px; border: 1px solid {{k.sprBorder}}; background: {{k.sprBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{k.sprColor}}; font-weight: {{k.sprWeight}};">{{k.spr}}</span>
+<span style="font-size: 8.5px; font-weight: 700; padding: 0 3px; border-radius: 3px; color: {{k.aiColor}}; border: 1px solid {{k.aiBorder}};">{{k.ai}}</span>
+<div style="flex-grow: 1;"></div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #9BA6B5;">{{k.rankTag}}</span>
+</div>
+<div style="position: relative; height: 54px; flex-shrink: 0; background: #0B0F16; border-radius: 4px; overflow: hidden;">
+<sc-for list="{{k.candles}}" as="c" hint-placeholder-count="30">
+<div style="position: absolute; left: {{c.wx}}px; top: {{c.wy}}px; width: 1px; height: {{c.wh}}px; background: {{c.col}};"></div>
+<div style="position: absolute; left: {{c.bx}}px; top: {{c.by}}px; width: {{c.bw}}px; height: {{c.bh}}px; background: {{c.col}};"></div>
+<div style="position: absolute; left: {{c.bx}}px; top: {{c.vy}}px; width: {{c.bw}}px; height: {{c.vh}}px; background: {{c.vcol}};"></div>
+</sc-for>
+<sc-if value="{{k.hasLine}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; left: 0; right: 0; top: {{k.lineY}}px; border-top: 1px dashed {{k.lineColor}};"></div></sc-if>
+<sc-if value="{{k.halted}}" hint-placeholder-val="{{ false }}"><div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: rgba(11,14,19,0.72);"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #0B0E13; background: #D5DBE3; padding: 2px 6px; border-radius: 3px;">HALTED · 2:40 elapsed</span></div></sc-if>
+</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{k.posColor}};">{{k.pos}}</div>
+<sc-if value="{{k.hasStop}}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 5px; height: 17px; font-size: 9.5px;"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #F2C94C; padding: 0 4px; border: 1px dashed #F2C94C; border-radius: 3px;">STOP {{k.stopText}}</span><button style="height: 16px; padding: 0 5px; border-radius: 3px; border: 1px solid #2E3A4A; background: transparent; color: #9BA6B5; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; cursor: pointer;">move</button><button aria-label="Cancel stop" style="height: 16px; padding: 0 5px; border-radius: 3px; border: 1px solid #2E3A4A; background: transparent; color: #9BA6B5; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; cursor: pointer;">×</button></div></sc-if>
+<sc-if value="{{k.canAddStop}}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; height: 17px;"><button style="height: 16px; padding: 0 6px; border-radius: 3px; border: 1px dashed #5B6B80; background: transparent; color: #C9D1DB; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer;">+ STOP</button></div></sc-if>
+<sc-if value="{{k.isEngine}}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; height: 17px; font-size: 9.5px; color: #5CE0D2; white-space: nowrap; overflow: hidden;">RISK LINE {{k.riskText}} · engine manages exit</div></sc-if>
+<sc-if value="{{k.hasStatus}}" hint-placeholder-val="{{ false }}"><div style="display: flex; align-items: center; gap: 5px; height: 17px; font-size: 9.5px; white-space: nowrap;"><span style="font-weight: 700; color: #5AA2FF;">{{k.statusText}}</span><div style="flex-grow: 1;"></div><button style="height: 16px; padding: 0 5px; border-radius: 3px; border: 1px solid #3E5470; background: transparent; color: #A9C7FF; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; font-weight: 700; cursor: pointer;">CANCEL</button></div></sc-if>
+<div style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 1px 3px; border-radius: 3px; color: {{k.readColor}}; animation: {{k.readAnim}};">{{k.read}}</div>
+<div style="display: flex; flex-direction: column; gap: 0;">
+<sc-for list="{{k.prints}}" as="t" hint-placeholder-count="2">
+<div style="display: grid; grid-template-columns: 58px 36px 1fr; height: 11px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: {{t.col}};">
+<span style="color: #8A96A8;">{{t.time}}</span>
+<span style="text-align: right;">{{t.px}}</span>
+<span style="text-align: right;">{{t.size}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; gap: 4px; margin-top: auto;">
+<sc-for list="{{k.btns}}" as="bt" hint-placeholder-count="1">
+<button disabled="{{bt.disabled}}" aria-label="{{bt.aria}}" title="{{bt.tip}}" style="flex: 1 1 0; min-width: 0; height: 36px; border-radius: 6px; border: 1px solid {{bt.border}}; background: {{bt.bg}}; color: {{bt.fg}}; font-family: 'IBM Plex Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: {{bt.cursor}};">
+<span style="display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; white-space: nowrap;"><sc-if value="{{bt.locked}}" hint-placeholder-val="{{ false }}"><svg width="9" height="10" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.3px;"><rect x="1" y="4.5" width="7" height="5" rx="1"></rect><path d="M2.5 4.5V3.2a2 2 0 0 1 4 0V4.5"></path></svg></sc-if>{{bt.label}}</span>
+<span style="font-size: 8.5px; opacity: 0.9; white-space: nowrap; border-radius: 3px; padding: {{bt.subPad}}; background: {{bt.subBg}}; color: {{bt.subFg}}; border: 1px solid {{bt.subBorder}}; line-height: 10px;">{{bt.sub}}</span>
+</button>
+</sc-for>
+</div>
+</article>
+</sc-if>
+</sc-for>
+</div>
+<sc-if value="{{edgeShow}}" hint-placeholder-val="{{ false }}"><button aria-label="Jump to {{edgeSym}}" style="position: absolute; right: 6px; top: 58px; width: 40px; height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0; border-radius: 6px; border: 1px solid #F472B6; background: #2A1323; font-family: 'IBM Plex Sans', sans-serif; color: #FBCFE8; cursor: pointer; overflow: hidden;"><span style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; animation: pulseP 1.3s ease-in-out infinite;"></span><span style="position: relative; font-size: 10.5px; font-weight: 700;">{{edgeSym}}</span><span style="position: relative; font-size: 9.5px; font-weight: 700;">EXIT?</span><span style="position: relative; font-size: 14px;">▸</span></button></sc-if>
+</section>
+
+</div>
+</div>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Windows menu" style="position: absolute; top: 48px; right: 126px; width: 340px; box-sizing: border-box; padding: 6px; background: #161D28; border: 1px solid #3E5470; border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.55); display: flex; flex-direction: column; gap: 2px; z-index: 5;">
+<div style="padding: 6px 10px 4px 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: #9BA6B5;">OPEN A WINDOW</div>
+<a href="#stock" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none; background: #1E2836;"><span style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #E7EAEE;">Stock detail page<span style="font-size: 10.5px; font-weight: 400; color: #8A96A8;">or double-click a stock</span></span><span style="font-size: 11px; color: #9BA6B5;">Everything about one stock: chart, Level 2, news, AI, position</span></a>
+<a href="#ai" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #E7EAEE;">AI Assistant<span style="font-size: 10.5px; font-weight: 400; color: #8A96A8;">or Ask AI</span></span><span style="font-size: 11px; color: #9BA6B5;">Ask questions, pre-market brief, end-of-day review</span></a>
+<a href="#positions" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="font-size: 13px; font-weight: 600; color: #E7EAEE;">Positions &amp; Orders</span><span style="font-size: 11px; color: #9BA6B5;">All positions, orders, fills, capital in use</span></a>
+<a href="#review" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #E7EAEE;">Review<span style="font-size: 10.5px; font-weight: 400; color: #8A96A8;">Journal · Replay · Performance</span></span><span style="font-size: 11px; color: #9BA6B5;">Every trade and why, replay, results, You vs. Engine</span></a>
+<a href="#news" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="font-size: 13px; font-weight: 600; color: #E7EAEE;">News &amp; Catalysts</span><span style="font-size: 11px; color: #9BA6B5;">Headlines graded A–D, SEC filings, FDA items</span></a>
+<a href="#health" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #E7EAEE;">System Health<span style="font-size: 10.5px; font-weight: 400; color: #8A96A8;">or the Health button</span></span><span style="font-size: 11px; color: #9BA6B5;">Connections, safety checks, account safety, recovery</span></a>
+<a href="#settings" style="display: flex; flex-direction: column; gap: 1px; padding: 7px 10px; border-radius: 6px; text-decoration: none;"><span style="font-size: 13px; font-weight: 600; color: #E7EAEE;">Settings</span><span style="font-size: 11px; color: #9BA6B5;">Paper/live, risk limits, order sizes, My list, sounds</span></a>
+</nav>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"autoOn":{"editor":"boolean","default":false},"live":{"editor":"boolean","default":false},"menuOpen":{"editor":"boolean","default":false},"$preview":{"width":1536,"height":864}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var st = this.state || {};
+    var autoOn = st.autoOn != null ? st.autoOn : !!this.props.autoOn;
+    var live = st.live != null ? st.live : !!this.props.live;
+    var sel = st.sel || 'QRST';
+    var menuOpen = st.menuOpen != null ? st.menuOpen : !!this.props.menuOpen;
+    var sizeId = st.size || this.props.size || 'p25';
+
+    var R = function (seed) {
+      var s = seed >>> 0;
+      return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+    };
+    var n0 = function (v) { return Math.round(v).toLocaleString('en-US'); };
+    var usd = function (v) { return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var usd0 = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+    var sgnUsd = function (v) { return (v >= 0 ? '+' : '−') + usd(Math.abs(v)); };
+    var pct1 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%'; };
+    var C = { green: '#34C77B', red: '#F0555A', amber: '#F2A93B', blue: '#5AA2FF', purple: '#B08CFF', pink: '#F9A8D4', muted: '#9BA6B5', teal: '#5CE0D2' };
+    var ANIM = { up: 'pulseG 1.1s ease-in-out infinite', down: 'pulseR 1.1s ease-in-out infinite', exit: 'pulseP 1.3s ease-in-out infinite' };
+    var GRADE = { A: '#34C77B', B: '#8FD9AE', C: '#F2C94C', D: '#F0555A' };
+    var GTINT = { A: 'rgba(52,199,123,0.16)', B: 'rgba(143,217,174,0.14)', C: 'rgba(242,201,76,0.14)', D: 'rgba(240,85,90,0.16)' };
+    // minutes since the newest headline (placeholder data, matches the News & Catalysts window)
+    var NEWS_AGE = { ABCD: 11, LMNO: 14, QRST: 20, CDEF: 27, WXYZ: 40, HIJK: 72, XQRB: 81, GHIJ: 90, KLMN: 104, IJKL: 118, BCDE: 122, MNOP: 150, STUV: 167, EFGH: 191, NOPQ: 210 };
+    var FRESH_MIN = 60;
+    var newsBadge = function (sym, g) {
+      if (!g) return { nLetter: '–', nColor: '#4A5566', nBorder: 'transparent', nBg: 'transparent', nOpacity: '1', nTitle: 'No news' };
+      var age = NEWS_AGE[sym] != null ? NEWS_AGE[sym] : 900;
+      var fresh = age < FRESH_MIN;
+      return { nLetter: g, nColor: GRADE[g], nBorder: GRADE[g], nBg: fresh ? GTINT[g] : 'transparent', nOpacity: fresh ? '1' : '0.4',
+        nTitle: 'News grade ' + g + (fresh ? ' · fresh (' + age + ' min old)' : ' · older than 1 hour'),
+        nAge: age < 60 ? age + 'm' : (age < 600 ? Math.floor(age / 60) + 'h' : 'old') };
+    };
+    var withNews = function (o, sym, g) { var n = newsBadge(sym, g); for (var k in n) o[k] = n[k]; return o; };
+
+    // sym, side, price, chg, volume, float, trades, ai, stale, l2, jump, signal, news grade, shortable, state, evidence, rvol, vwap%, halted
+    var fixed = [
+      ['ABCD', 'L', 2.14, 32.1, 14837426, 6243718, 38427, 'GO', 0, 1, '', 'up', 'A', 0, 'Acceleration', 'asks consumed, trades ×4', 18.2, 4.1, 0],
+      ['WXYZ', 'L', 1.87, 24.6, 9247813, 11428550, 24713, 'CAU', 0, 2, '28', '', 'C', 0, 'Healthy pullback', 'bids rebuilding', 12.7, 1.3, 0],
+      ['LMNO', 'S', 3.06, 19.3, 7438992, 4817206, 19886, 'GO', 0, 3, '', 'down', 'D', 1, 'Breakdown', 'bids pulled, support lost', 9.8, -2.6, 0],
+      ['QRST', 'L', 1.42, 21.0, 11104622, 8105411, 29340, 'GO', 0, 0, '', 'up', 'B', 0, 'Breakout', 'trades accelerating', 15.4, 2.2, 0],
+      ['EFGH', 'L', 2.61, 16.0, 5812074, 15734920, 13220, 'GO', 1, 0, '', '', 'B', 0, 'Continuation', 'higher lows holding', 6.3, 1.8, 0],
+      ['BCDE', 'L', 0.87, 41.8, 22406115, 3912480, 51207, 'CAU', 0, 0, '', '', 'C', 0, 'Exhaustion', 'buying fading', 24.9, 6.4, 0],
+      ['CDEF', 'L', 64.20, 7.9, 3118904, 41207339, 28611, 'GO', 0, 0, '', 'up', 'B', 1, 'Breakout', 'above high of day', 4.2, 0.9, 0],
+      ['DEFG', 'L', 4.35, 18.2, 6021377, 9870112, 15904, 'GO', 0, 0, '', '', '', 1, 'Reacceleration', 'second push starting', 7.7, 1.1, 0],
+      ['MNOP', 'S', 3.05, -14.6, 8733201, 18440925, 21076, 'GO', 0, 0, '', '', 'D', 1, 'Continuation', 'lower highs', 8.1, -3.4, 1],
+      ['FGHI', 'L', 1.12, 12.7, 4905338, 7301556, 11482, 'GO', 1, 0, '', '', '', 0, 'Consolidation', 'tight range', 5.5, 0.4, 0],
+      ['GHIJ', 'L', 12.93, 9.4, 2640117, 24118070, 9733, 'CAU', 0, 0, '', '', 'C', 1, 'Exhaustion', 'momentum fading', 3.9, 0.7, 0],
+      ['HIJK', 'L', 0.54, 27.3, 131772904, 12650443, 1523418, 'NO', 0, 0, '', '', 'D', 0, 'Failed breakout', 'rejected at 0.58', 21.3, -1.9, 0],
+      ['IJKL', 'L', 7.81, 11.1, 3402558, 5904221, 10106, 'GO', 0, 0, '', '', 'B', 1, 'Exhaustion', 'volume fading', 6.8, 0.6, 0],
+      ['KLMN', 'L', 118.40, 4.6, 5977230, 162408955, 61338, 'GO', 0, 0, '', '', 'A', 1, 'Continuation', 'steady bid', 2.1, 0.8, 0],
+      ['NOPQ', 'L', 2.28, 13.9, 3876015, 6772810, 9245, 'GO', 0, 0, '', '', 'A', 0, 'Healthy pullback', 'selling light', 5.9, 0.5, 0],
+      ['OPQR', 'L', 1.66, 10.4, 4110327, 13905114, 8871, 'CAU', 0, 0, '', '', 'C', 0, 'Consolidation', 'range 1.61–1.68', 4.4, -0.2, 0],
+      ['PQRS', 'S', 22.47, -9.8, 4215640, 38106722, 17093, 'GO', 0, 0, '', '', 'D', 1, 'True reversal', 'support broke', 3.6, -2.9, 0],
+      ['RSTU', 'L', 3.49, 8.8, 2944781, 4420316, 7512, 'GO', 0, 0, '', '', '', 0, 'Consolidation', 'quiet', 3.1, 0.3, 0],
+      ['STUV', 'L', 0.93, 15.2, 9630442, 21870550, 16284, 'GO', 1, 0, '', '', 'C', 0, 'Reacceleration', 'bids stepping up', 9.2, 1.5, 0],
+      ['TUVW', 'L', 5.12, 7.4, 1907215, 9211807, 5960, 'GO', 0, 0, '', '', 'A', 1, 'Continuation', 'holding VWAP', 2.7, 0.2, 0]
+    ];
+    var names = ['UVWX', 'VWXY', 'XYZA', 'YZAB', 'ZABC', 'ABDE', 'BCEF', 'CDFG', 'DEGH', 'EFHI', 'FGIJ', 'GHJK', 'HIKL', 'IJLM', 'JKMN', 'KLNO', 'LMOP', 'MNPQ', 'NOQR', 'OPRS', 'PQST', 'QRTU', 'RSUV', 'STVW', 'TUWX', 'UVXY', 'VWYZ', 'WXZA', 'XYAB'];
+    var states = ['Consolidation', 'Continuation', 'Healthy pullback', 'Acceleration', 'Reacceleration', 'Breakout'];
+    var grades = ['', 'B', '', 'C', '', '', 'A', '', 'D', ''];
+    var g = R(7);
+    var gen = names.map(function (s, i) {
+      var rank = 21 + i;
+      var r1 = g(), r2 = g(), r3 = g(), r4 = g(), r5 = g(), r6 = g(), r7 = g();
+      var price = rank % 9 === 0 ? 80 + r1 * 70 : (rank % 5 === 0 ? 9 + r1 * 40 : 0.6 + r1 * 5.4);
+      var isShort = rank === 31 || rank === 44;
+      var chg = (isShort ? -1 : 1) * (3 + r2 * 9 * (1 - i / 40));
+      var vol = 900000 + r3 * 3600000 * (1 - i / 45);
+      var flt = price > 50 ? 60000000 + r4 * 200000000 : 2000000 + r4 * 45000000;
+      var trades = vol / (220 + r5 * 260);
+      var ai = rank % 11 === 0 ? 'NO' : (rank % 6 === 0 ? 'CAU' : 'GO');
+      var rv = 1.2 + r6 * 6;
+      var vw = (isShort ? -1 : 1) * (r7 * 2.2) - (r7 < 0.2 ? 0.8 : 0);
+      return [s, isShort ? 'S' : 'L', Math.round(price * 100) / 100, Math.round(chg * 10) / 10, Math.round(vol), Math.round(flt), Math.round(trades), ai, rank % 4 === 0 ? 1 : 0, 0, '', '', grades[i % grades.length], price > 5 ? 1 : 0, states[i % states.length], '', Math.round(rv * 10) / 10, Math.round(vw * 10) / 10, 0];
+    });
+    var all = fixed.concat(gen).concat([['JKLM', 'L', 0.92, 7.0, 2104338, 22514003, 5640, 'GO', 0, 0, '', '', '', 0, 'Consolidation', 'quiet', 1.9, -0.3, 0]]);
+    var outside = { XQRB: ['XQRB', 'L', 6.72, 3.1, 1204556, 18300441, 3902, 'GO', 0, 0, '', '', 'C', 1, 'Consolidation', 'quiet', 1.8, 0.4, 0] };
+    var rankOf = {}; all.forEach(function (a, i) { rankOf[a[0]] = i + 1; });
+    rankOf.XQRB = 212;
+    var bySym = {}; all.forEach(function (a) { bySym[a[0]] = a; }); bySym.XQRB = outside.XQRB;
+
+    // positions, in the order they were opened
+    var posList = [
+      { sym: 'WXYZ', side: 'LONG', qty: 800, avg: 1.79, last: 1.87, read: 'Healthy pullback — engine holding', by: 'ENGINE', warn: false, halted: false, trend: 'pullback', seed: 23 },
+      { sym: 'GHIJ', side: 'LONG', qty: 300, avg: 12.40, last: 12.93, read: 'EXIT? Exhaustion — engine would exit', by: 'YOU', warn: true, halted: false, trend: 'fade', seed: 41 },
+      { sym: 'MNOP', side: 'SHORT', qty: 400, avg: 3.12, last: 3.05, read: 'Continuation — lower highs', by: 'YOU', warn: false, halted: true, trend: 'down', seed: 53 },
+      { sym: 'IJKL', side: 'LONG', qty: 200, avg: 7.60, last: 7.81, read: 'EXIT? Volume fading — engine would exit', by: 'YOU', warn: true, halted: false, trend: 'fade', seed: 61 }
+    ];
+    if (autoOn) posList.push({ sym: 'ABCD', side: 'LONG', qty: 500, avg: 2.13, last: 2.14, read: 'Acceleration — engine holding', by: 'ENGINE', warn: false, halted: false, trend: 'up', seed: 11 });
+    var held = {}, total = 0;
+    posList.forEach(function (p) {
+      p.pnl = (p.side === 'LONG' ? (p.last - p.avg) : (p.avg - p.last)) * p.qty;
+      total += p.pnl;
+      held[p.sym] = p;
+    });
+    var realized = -60;
+    var dayPnl = total + realized;
+    var equityV = 5000 + dayPnl;
+    var bp = autoOn ? 1253.40 : 2318.40;
+
+    // order size presets (mix of % of equity and a fixed dollar amount)
+    var presets = [
+      { id: 'p10', label: '10%', amt: equityV * 0.10, desc: '10% of equity' },
+      { id: 'p25', label: '25%', amt: equityV * 0.25, desc: '25% of equity' },
+      { id: 'p50', label: '50%', amt: equityV * 0.50, desc: '50% of equity' },
+      { id: 'd2000', label: '$2,000', amt: 2000, desc: 'fixed amount' },
+      { id: 'cap', label: 'FULL CAP', amt: bp, desc: 'the most the limits allow' }
+    ];
+    var cur = presets.filter(function (z) { return z.id === sizeId; })[0] || presets[1];
+    var amt = Math.min(cur.amt, bp);
+    var sizes = presets.map(function (z) {
+      var on = z.id === cur.id;
+      var capOn = on && z.id === 'cap';
+      return { label: z.label, pressed: on ? 'true' : 'false', bg: capOn ? '#2E2612' : (on ? '#24324A' : '#161D28'), border: capOn ? '#F2A93B' : (on ? '#5AA2FF' : '#2E3A4A'), fg: capOn ? '#F6C46A' : (on ? '#FFFFFF' : '#C9D1DB'),
+        pick: function () { self.setState({ size: z.id }); } };
+    });
+    var isCap = cur.id === 'cap';
+    // per-stock hard caps (placeholder): liquidity, position cap, cash-only, short margin (starting values, tuned in testing)
+    var CAPS = { LMNO: { amt: 1000, why: 'liquidity (wide spread, thin book)' } };
+    // protected price ceiling for an entry (placeholder: about 4.5% above the price; real rule is dynamic, capped by your max slippage)
+    var ceilFor = function (price) { return Math.ceil(price * 1.045 * 100) / 100; };
+    var sizeInfo = function (sym, price) {
+      var c = CAPS[sym], a2 = amt, lim = false;
+      if (c && c.amt < amt) { a2 = c.amt; lim = !isCap; }
+      var ceil = ceilFor(price);
+      var n = Math.max(1, Math.floor(a2 / ceil));
+      return { n: n, lim: lim, capAmt: c ? c.amt : null, why: c ? c.why : '', ceil: ceil,
+        tip: (lim ? cur.label + ' = ' + usd0(amt) + ' → LIMITED TO ' + usd0(c.amt) + ' by ' + c.why : (isCap ? 'FULL CAP for ' + sym + ' = ' + usd0(a2) : cur.label + ' = ' + usd0(amt))) + ' · ' + n.toLocaleString('en-US') + ' sh, fills no higher than ' + usd(ceil) };
+    };
+    var sharesFor = function (price, sym) { return sizeInfo(sym || '', price).n; };
+    var shLabel = function (sym, price) { return sizeInfo(sym, price).n.toLocaleString('en-US') + ' sh'; };
+
+    var btnStyle = function (enabled, kind) {
+      var pal = { buy: ['#16784A', '#22A366'], sell: ['#A8262B', '#D0454A'], short: ['#5E36A8', '#7E57CC'], cover: ['#1D5AA8', '#3D7BD0'] }[kind];
+      return { bg: enabled ? pal[0] : '#19202A', border: enabled ? pal[1] : '#2A3340', fg: enabled ? '#FFFFFF' : '#7C8898', cursor: enabled ? 'pointer' : 'not-allowed' };
+    };
+    var mkBtn = function (label, sub, kind, enabled, locked, sym, lim, tip) {
+      var s = btnStyle(enabled, kind);
+      return { label: label, sub: sub, locked: locked, disabled: !enabled, bg: s.bg, border: s.border, fg: s.fg, cursor: s.cursor,
+        subBg: lim ? '#2E2210' : 'transparent', subFg: lim ? '#F2A93B' : 'inherit', subBorder: lim ? 'rgba(242,169,59,0.75)' : 'transparent', subPad: lim ? '0 3px' : '0',
+        tip: tip || '', aria: label + ' ' + sym + (lim ? ', size limited' : '') + (enabled ? '' : ', unavailable') };
+    };
+
+    // engine-owned position: normal click does nothing; hold about 1 s = OVERRIDE EXIT (closes only this position)
+    var ovrBtn = function (label, sub, sym, noLock) {
+      return { label: label, sub: sub, locked: !noLock, disabled: false, bg: '#1C1316', border: '#7A3035', fg: '#F0A5A8', cursor: 'pointer',
+        subBg: 'transparent', subFg: 'inherit', subBorder: 'transparent', subPad: '0',
+        tip: 'Engine\'s position. Hold about 1 s to OVERRIDE EXIT ' + sym + ': closes only this position; AUTO and everything else keep running.',
+        aria: 'Override exit ' + sym + ', hold about 1 second' };
+    };
+    // four fixed buttons for a Level 2 panel
+    var panelBtns = function (sym, price, shortable) {
+      var p = held[sym];
+      var si = sizeInfo(sym, price), sh = si.n.toLocaleString('en-US') + ' sh';
+      if (p && p.by === 'ENGINE') {
+        return [mkBtn('BUY', 'in position', 'buy', false, false, sym), ovrBtn('OVERRIDE', 'hold 1 s', sym, true), mkBtn('SHORT', '—', 'short', false, false, sym), mkBtn('COVER', '—', 'cover', false, false, sym)];
+      }
+      if (p) {
+        var isL = p.side === 'LONG', q = p.qty.toLocaleString('en-US') + ' sh';
+        return [mkBtn('BUY', 'in position', 'buy', false, false, sym), mkBtn('SELL/EXIT', isL ? q : '—', 'sell', isL && !p.halted, false, sym), mkBtn('SHORT', '—', 'short', false, false, sym), mkBtn('COVER', isL ? '—' : q, 'cover', !isL && !p.halted, false, sym)];
+      }
+      return [
+        mkBtn(autoOn ? 'BUY' : 'BUY ' + sym, autoOn ? 'locked' : sh, 'buy', !autoOn, autoOn, sym, !autoOn && si.lim, si.tip),
+        mkBtn('SELL/EXIT', '—', 'sell', false, false, sym),
+        mkBtn('SHORT', autoOn ? 'locked' : (shortable ? sh : 'no borrow'), 'short', !autoOn && !!shortable, autoOn, sym, !autoOn && !!shortable && si.lim, si.tip),
+        mkBtn('COVER', '—', 'cover', false, false, sym)
+      ];
+    };
+
+    var aiList = { GO: { t: 'GO', c: C.green, b: 'rgba(52,199,123,0.45)' }, CAU: { t: 'CAU', c: C.amber, b: 'rgba(242,169,59,0.5)' }, NO: { t: 'NO', c: C.red, b: 'rgba(240,85,90,0.5)' } };
+    var aiLong = { GO: { t: 'GO', c: C.green, b: 'rgba(52,199,123,0.45)' }, CAU: { t: 'CAUTION', c: C.amber, b: 'rgba(242,169,59,0.5)' }, NO: { t: 'NO-GO', c: C.red, b: 'rgba(240,85,90,0.5)' } };
+
+    // placeholder spreads (dollars); color by % of price: gray <= 1%, amber 1-2%, red > 2% (starting values)
+    // starting values, tuned in testing
+    var SPREAD = { ABCD: 0.01, WXYZ: 0.01, LMNO: 0.04, QRST: 0.01, EFGH: 0.02, BCDE: 0.004, CDEF: 0.05, DEFG: 0.03, MNOP: 0.02, FGHI: 0.01, GHIJ: 0.04, HIJK: 0.015, IJKL: 0.03, KLMN: 0.06, NOPQ: 0.02, OPQR: 0.03, PQRS: 0.15, RSTU: 0.05, STUV: 0.006, TUVW: 0.03, XQRB: 0.03, JKLM: 0.009 };
+    var sprFor = function (a) {
+      var v = SPREAD[a[0]];
+      if (v == null) { var h = 0; for (var i = 0; i < a[0].length; i++) h = (h * 31 + a[0].charCodeAt(i)) % 97; v = a[2] < 1 ? 0.002 + (h % 5) * 0.001 : Math.max(0.01, Math.round(a[2] * (0.002 + (h % 7) * 0.0012) * 100) / 100); }
+      var pct = v / a[2] * 100;
+      var lvl = pct > 2 ? 2 : (pct > 1 ? 1 : 0);
+      return { spr: '$' + v.toFixed(a[2] < 1 ? 3 : 2), sprColor: lvl === 2 ? '#0B0E13' : (lvl === 1 ? C.amber : '#C9D1DB'), sprWeight: lvl ? '700' : '400',
+        sprBorder: lvl === 2 ? C.red : (lvl === 1 ? C.amber : 'transparent'), sprBg: lvl === 2 ? C.red : 'transparent',
+        sprTitle: (lvl ? 'WIDE · ' : 'Spread ') + pct.toFixed(2) + '% of price' };
+    };
+    var rowObj = function (a, rank, inMine) {
+      var m = aiList[a[7]];
+      return Object.assign(withNews({
+        rank: rank, sym: a[0], side: a[1], sideColor: a[1] === 'L' ? C.green : C.purple,
+        price: usd(a[2]), chg: pct1(a[3]), chgColor: a[3] >= 0 ? C.green : C.red,
+        vol: n0(a[4]), flt: n0(a[5]), trades: n0(a[6]),
+        rvol: a[16].toFixed(1) + 'x', vwap: usd(a[2] / (1 + a[17] / 100)), vwapColor: a[17] >= 0 ? C.green : C.red,
+        ai: m.t, aiColor: m.c, aiBorder: m.b, aiOpacity: a[8] ? '0.5' : '1', aiBorderStyle: a[8] ? 'dashed' : 'solid',
+        l2: a[9] ? 'L2·' + a[9] : '',
+        jump: a[10], hasJump: !!a[10],
+        hasSig: !!a[11], sigGlyph: a[11] === 'down' ? '▼' : '▲', sigColor: a[11] === 'down' ? C.red : C.green, anim: a[11] ? ANIM[a[11]] : 'none',
+        star: !!(inMine && mineSet[a[0]]), halted: !!a[18],
+        bg: a[0] === sel ? '#1E2836' : (a[9] ? 'rgba(90,162,255,0.08)' : 'transparent'),
+        pick: function () { self.setState({ sel: a[0] }); }
+      }, a[0], a[12]), sprFor(a));
+    };
+    // My list: a stock with an active blink moves to the top of this section only
+    var mine = ['GHIJ', 'KLMN', 'CDEF', 'IJKL', 'XQRB'];
+    var mineSet = {}; mine.forEach(function (m) { mineSet[m] = true; });
+    // My List in rank order (best first); a stock with an active signal goes to the top while the signal lasts
+    var byRank = function (x, y) { return rankOf[x] - rankOf[y]; };
+    var mineSorted = mine.filter(function (m) { return !!bySym[m][11]; }).sort(byRank).concat(mine.filter(function (m) { return !bySym[m][11]; }).sort(byRank));
+    var mineRows = mineSorted.map(function (m) { return rowObj(bySym[m], rankOf[m], false); });
+    var rows = all.map(function (a, i) { return rowObj(a, i + 1, true); });
+
+    // mini charts
+    var mkCandles = function (d, N, step, bw, top, ph, volBottom, volH) {
+      var r = R(d.seed), closes = [], i;
+      for (i = 0; i < N; i++) {
+        var t = i / (N - 1), base, span = d.hi - d.lo;
+        if (d.trend === 'up') base = t < 0.7 ? d.lo + span * 0.2 + (r() - 0.5) * span * 0.15 : d.lo + span * 0.2 + Math.pow((t - 0.7) / 0.3, 1.6) * (d.last - d.lo - span * 0.2);
+        else if (d.trend === 'pullback') base = t < 0.65 ? d.lo + span * 0.05 + (t / 0.65) * span * 0.85 + (r() - 0.5) * span * 0.08 : d.lo + span * 0.9 - ((t - 0.65) / 0.35) * (d.lo + span * 0.9 - d.last) + (r() - 0.5) * span * 0.06;
+        else if (d.trend === 'down') base = t < 0.6 ? d.hi - span * 0.15 + (r() - 0.5) * span * 0.12 : d.hi - span * 0.15 - Math.pow((t - 0.6) / 0.4, 1.3) * (d.hi - span * 0.15 - d.last) + (r() - 0.5) * span * 0.05;
+        else if (d.trend === 'fade') base = t < 0.75 ? d.lo + (t / 0.75) * span * 0.95 + (r() - 0.5) * span * 0.08 : d.lo + span * 0.95 - ((t - 0.75) / 0.25) * (d.lo + span * 0.95 - d.last) + (r() - 0.5) * span * 0.04;
+        else base = (d.lo + d.hi) / 2 + (r() - 0.5) * span * 0.7;
+        closes.push(base);
+      }
+      closes[N - 1] = d.last;
+      var bars = [], prev = closes[0], maxV = 0;
+      for (i = 0; i < N; i++) {
+        var o = prev, c = closes[i];
+        var amp = Math.max((d.hi - d.lo) * 0.01, Math.abs(c - o) * 0.6);
+        var hi = Math.max(o, c) + r() * amp, lo = Math.min(o, c) - r() * amp;
+        var v = 20000 + r() * 40000 + Math.abs(c - o) / (d.hi - d.lo) * 400000;
+        maxV = Math.max(maxV, v);
+        bars.push({ o: o, c: c, h: hi, l: lo, v: v });
+        prev = c;
+      }
+      var pMin = Math.min.apply(null, bars.map(function (b) { return b.l; }));
+      var pMax = Math.max.apply(null, bars.map(function (b) { return b.h; }));
+      var Y = function (p) { return top + (pMax - p) / (pMax - pMin) * ph; };
+      d._Y = Y;
+      var cumPV = 0, cumV = 0;
+      return bars.map(function (b, k) {
+        cumPV += ((b.h + b.l + b.c) / 3) * b.v; cumV += b.v;
+        var up = b.c >= b.o, bx = 4 + k * step;
+        var t0 = Y(Math.max(b.o, b.c)), b0 = Y(Math.min(b.o, b.c));
+        var vh = Math.max(1, b.v / maxV * volH);
+        return {
+          bx: bx, bw: bw, wx: bx + Math.floor(bw / 2), wy: Y(b.h).toFixed(1), wh: Math.max(1, Y(b.l) - Y(b.h)).toFixed(1),
+          by: t0.toFixed(1), bh: Math.max(1, b0 - t0).toFixed(1), col: up ? '#2FB36E' : '#D9474C',
+          vy: (volBottom - vh).toFixed(1), vh: vh.toFixed(1), vcol: up ? 'rgba(47,179,110,0.45)' : 'rgba(217,71,76,0.45)',
+          dy: (Y(cumPV / cumV) - 1).toFixed(1), cy: Y(b.c)
+        };
+      });
+    };
+    var mkBook = function (d) {
+      var r = R(d.seed + 5), out = [], k;
+      var sz = function () { return n0(Math.round((800 + r() * 14000) / 100) * 100); };
+      for (k = 4; k >= 0; k--) out.push({ bid: '', bcol: C.green, ask: (d.bigAsk === k ? n0(d.bigAskSize) : sz()), px: (d.ask + k * 0.01).toFixed(2), pcol: C.red, bg: 'transparent',
+        bBorder: 'transparent', bWeight: '400', aBorder: d.bigAsk === k ? '#E7EAEE' : 'transparent', aWeight: d.bigAsk === k ? '700' : '400' });
+      out.push({ bid: 'spread', bcol: C.muted, ask: '', px: (d.ask - d.bid).toFixed(2), pcol: C.muted, bg: '#1A2230', bBorder: 'transparent', bWeight: '400', aBorder: 'transparent', aWeight: '400' });
+      for (k = 0; k < 5; k++) out.push({ bid: (d.bigBid === k ? n0(d.bigBidSize) : sz()), bcol: C.green, ask: '', px: (d.bid - k * 0.01).toFixed(2), pcol: C.green, bg: 'transparent',
+        bBorder: d.bigBid === k ? '#E7EAEE' : 'transparent', bWeight: d.bigBid === k ? '700' : '400', aBorder: 'transparent', aWeight: '400' });
+      return out;
+    };
+    var mkPrints = function (d, n) {
+      var r = R(d.seed + 9), out = [], ms = 18412, k;
+      var pAsk = d.trend === 'up' ? 0.8 : (d.trend === 'down' ? 0.25 : 0.5);
+      for (k = 0; k < n; k++) {
+        var atAsk = r() < pAsk;
+        var sec = Math.floor(ms / 1000), mss = ms % 1000;
+        var big = d.bigPrint === k;
+        if (big) atAsk = d.bigPrintAtAsk;
+        out.push({ time: '42:' + String(sec).padStart(2, '0') + '.' + String(mss).padStart(3, '0'), px: (atAsk ? d.ask : d.bid).toFixed(2), size: big ? n0(d.bigPrintSize) : n0(Math.round((100 + r() * 4900) / 100) * 100), col: atAsk ? C.green : C.red,
+          w: big ? '700' : '400', bg: big ? (atAsk ? 'rgba(52,199,123,0.14)' : 'rgba(240,85,90,0.14)') : 'transparent' });
+        ms -= Math.floor(40 + r() * 380);
+      }
+      return out;
+    };
+
+    // Level 2 panels
+    var panelDefs = [
+      { sym: 'ABCD', rank: 1, slot: 1, trend: 'up', seed: 11, lo: 1.84, hi: 2.15, last: 2.14, bid: 2.13, ask: 2.14, chg: 32.1, sig: 'up',
+        sideLabel: 'LONG', sideColor: C.green, state: 'Acceleration', stateColor: C.green, evidence: 'asks consumed, trades ×4',
+        ai: 'GO', aiText: 'context supports the setup · 40 s', grade: 'A', note: 'Vol 14,837,426', noteColor: C.muted, shortable: false, marker: true,
+        bidPct: 64, bigBid: 1, bigBidSize: 48000, bigPrint: 2, bigPrintSize: 25000, bigPrintAtAsk: true, risk: 2.02 },
+      { sym: 'WXYZ', rank: 2, slot: 2, trend: 'pullback', seed: 23, lo: 1.52, hi: 2.00, last: 1.87, bid: 1.86, ask: 1.87, chg: 24.6, sig: '',
+        sideLabel: 'LONG', sideColor: C.green, state: 'Healthy pullback', stateColor: C.blue, evidence: 'bids rebuilding',
+        ai: 'CAU', aiText: 'offering risk flagged · 2 min', grade: 'C', note: 'Swapped in · was #30 · replaced JKLM', noteColor: C.blue, shortable: false, marker: false,
+        bidPct: 55, risk: 1.72 },
+      { sym: 'LMNO', rank: 3, slot: 3, trend: 'down', seed: 37, lo: 2.98, hi: 3.30, last: 3.06, bid: 3.05, ask: 3.06, chg: 19.3, sig: 'down',
+        sideLabel: 'SHORT', sideColor: C.purple, state: 'Breakdown', stateColor: C.red, evidence: 'bids pulled, support lost',
+        ai: 'GO', aiText: 'dilution filing supports the short · 5 min', grade: 'D', note: 'Vol 7,438,992', noteColor: C.muted, shortable: true, marker: false,
+        bidPct: 31, bigAsk: 1, bigAskSize: 52000, bigPrint: 1, bigPrintSize: 30000, bigPrintAtAsk: false, pinned: true }
+    ];
+    var panels = panelDefs.map(function (d) {
+      var p = held[d.sym];
+      var candles = mkCandles(d, 40, 6.2, 4, 14, 54, 91, 18);
+      var am = aiLong[d.ai], mc = candles[33];
+      var pos, posColor;
+      if (p) { pos = p.side + ' ' + p.qty.toLocaleString('en-US') + ' @ ' + usd(p.avg) + ' ' + sgnUsd(p.pnl) + ' · ' + (p.by === 'ENGINE' ? "engine's" : 'yours'); posColor = p.by === 'ENGINE' ? C.teal : C.green; }
+      else {
+        var psi = sizeInfo(d.sym, d.last);
+        if (psi.lim && !autoOn) { pos = 'No position · SIZE LIMITED TO ' + usd0(psi.capAmt); posColor = C.amber; }
+        else { pos = 'No position'; posColor = C.muted; }
+      }
+      var pinned = !!d.pinned && !autoOn;
+      var engineHeld = !!(p && p.by === 'ENGINE');
+      var riskY = engineHeld && d.risk ? d._Y(d.risk) : 0;
+      var note = d.note, noteColor = d.noteColor;
+      if (d.pinned && autoOn) { note = 'Pin released · AUTO ON'; noteColor = C.amber; }
+      return Object.assign(withNews({
+        sym: d.sym, rank: d.rank, slot: d.slot, price: usd(d.last), chg: pct1(d.chg),
+        frame: pinned ? '#8A6320' : '#263852',
+        pinLabel: pinned ? 'PINNED' : 'PIN', pinPressed: pinned ? 'true' : 'false',
+        pinBorder: pinned ? '#F2C94C' : '#2E3A4A', pinBg: pinned ? 'rgba(242,201,76,0.16)' : 'transparent', pinFg: pinned ? '#F2C94C' : '#9BA6B5',
+        pinOpacity: autoOn ? '0.4' : '1', pinTitle: autoOn ? 'Pinning works in AUTO OFF only' : (pinned ? 'Pinned: this panel keeps ' + d.sym + ' until you unpin it' : 'Keep this stock in this panel (AUTO OFF only)'),
+        hasRisk: engineHeld && !!d.risk, riskY: riskY.toFixed(1), riskLabelY: (riskY + 2).toFixed(1), riskText: 'RISK LINE $' + (d.risk || 0).toFixed(2),
+        bidPct: d.bidPct, askPct: 100 - d.bidPct, noteTitle: note,
+        sideLabel: d.sideLabel, sideColor: d.sideColor,
+        hasSig: !!d.sig, sigText: d.sig === 'down' ? '▼ strong down' : '▲ strong up', sigColor: d.sig === 'down' ? C.red : C.green, anim: d.sig ? ANIM[d.sig] : 'none',
+        note: note, noteColor: noteColor,
+        candles: candles, book: mkBook(d), prints: mkPrints(d, 11),
+        hasMarker: d.marker, mx: mc.bx - 2, my: (mc.cy - 5).toFixed(1),
+        markerText: autoOn ? 'Engine bought here · $2.13' : 'Engine would have bought here',
+        state: d.state, stateColor: d.stateColor, evidence: d.evidence,
+        aiLabel: am.t, aiColor: am.c, aiBorder: am.b, aiText: d.aiText,
+        pos: pos, posColor: posColor,
+        btns: panelBtns(d.sym, d.last, d.shortable)
+      }, d.sym, bySym[d.sym][12]), sprFor(bySym[d.sym]));
+    });
+
+    // cards: Selected first, then YOUR positions, a divider, then the ENGINE'S positions (each group in the order opened)
+    var STOPS = { GHIJ: 12.10 };                 // Jonathan's optional stops (placeholder)
+    var RISK = { WXYZ: 1.72, ABCD: 2.02 };       // engine risk lines (placeholder)
+    var WORKING = { QRST: { qty: 921, px: 1.43 } }; // Jonathan's working entry orders (placeholder)
+    var cardFrom = function (a, p, isSel) {
+      var d = { seed: p ? p.seed : (rankOf[a[0]] * 7 + 3), trend: p ? p.trend : (a[11] === 'up' ? 'up' : 'flat'), lo: a[2] * 0.9, hi: a[2] * 1.03, last: a[2], bid: a[2] - 0.01, ask: a[2] };
+      if (p && p.trend === 'down') { d.lo = a[2] * 0.98; d.hi = a[2] * 1.08; }
+      var m = aiList[a[7]];
+      var candles = mkCandles(d, 30, 6, 4, 4, 36, 52, 11);
+      var owner, ownerColor, posText, posColor, read, readColor, readAnim, btns;
+      var hasStop = false, canAddStop = false, isEngine = false, hasStatus = false, stopText = '', riskText = '', statusText = '';
+      var hasLine = false, lineY = 0, lineColor = '#F2C94C';
+      if (p) {
+        var isL = p.side === 'LONG', q = p.qty.toLocaleString('en-US') + ' sh';
+        owner = p.by === 'ENGINE' ? "ENGINE'S" : 'YOURS'; ownerColor = p.by === 'ENGINE' ? C.teal : '#E7EAEE';
+        var pnlPct = p.pnl / (p.avg * p.qty) * 100;
+        posText = p.qty.toLocaleString('en-US') + ' @ ' + usd(p.avg) + '  ' + sgnUsd(p.pnl) + ' ' + pct1(pnlPct);
+        posColor = p.pnl >= 0 ? C.green : C.red;
+        read = p.read; readColor = p.warn ? '#FBCFE8' : '#C9D1DB'; readAnim = p.warn ? ANIM.exit : 'none';
+        if (p.by === 'ENGINE') {
+          btns = [ovrBtn('OVERRIDE EXIT', "hold 1 s · engine's position", a[0])];
+          isEngine = true; riskText = RISK[a[0]] ? usd(RISK[a[0]]) : '—';
+          if (RISK[a[0]]) { hasLine = true; lineY = d._Y(RISK[a[0]]).toFixed(1); lineColor = C.teal; }
+        } else {
+          if (p.halted) btns = [mkBtn('HALTED', '2:40 elapsed', isL ? 'sell' : 'cover', false, false, a[0])];
+          else btns = [mkBtn(isL ? 'SELL/EXIT' : 'COVER', q, isL ? 'sell' : 'cover', true, false, a[0])];
+          if (STOPS[a[0]]) { hasStop = true; stopText = usd(STOPS[a[0]]); hasLine = true; lineY = d._Y(STOPS[a[0]]).toFixed(1); }
+          else canAddStop = true;
+        }
+      } else {
+        owner = 'SELECTED'; ownerColor = C.blue;
+        posText = 'No position'; posColor = C.muted;
+        read = 'Engine: ' + a[14] + (a[15] ? ' — ' + a[15] : ''); readColor = '#C9D1DB'; readAnim = 'none';
+        var si = sizeInfo(a[0], a[2]), sh = si.n.toLocaleString('en-US') + ' sh';
+        var wk = autoOn ? null : WORKING[a[0]];
+        if (si.lim && !autoOn) { posText = 'No position · LIMITED TO ' + usd0(si.capAmt); posColor = C.amber; }
+        if (wk) { hasStatus = true; statusText = 'WORKING ' + si.n.toLocaleString('en-US') + ' @ ≤ ' + usd(si.ceil); }
+        btns = [
+          mkBtn('BUY ' + a[0], autoOn ? 'locked' : (wk ? 'order working' : sh), 'buy', !autoOn && !wk, autoOn, a[0], !autoOn && !wk && si.lim, si.tip),
+          mkBtn('SHORT', autoOn ? 'locked' : (wk ? 'order working' : (a[13] ? sh : 'no borrow')), 'short', !autoOn && !!a[13] && !wk, autoOn, a[0], !autoOn && !wk && !!a[13] && si.lim, si.tip)
+        ];
+      }
+      return Object.assign(withNews({
+        isCard: true, isDivider: false,
+        sym: a[0], side: a[1] === 'L' && !(p && p.side === 'SHORT') ? 'LONG' : 'SHORT', sideColor: (p ? p.side === 'LONG' : a[1] === 'L') ? C.green : C.purple,
+        owner: owner, ownerColor: ownerColor,
+        price: usd(a[2]), chg: pct1(a[3]), chgColor: a[3] >= 0 ? C.green : C.red,
+        ai: m.t, aiColor: m.c, aiBorder: m.b,
+        rankTag: '#' + rankOf[a[0]] + (a[9] ? ' · L2·' + a[9] : ''),
+        anim: a[11] ? ANIM[a[11]] : 'none',
+        candles: candles, hasLine: hasLine, lineY: lineY, lineColor: lineColor,
+        halted: !!(p && p.halted),
+        pos: posText, posColor: posColor, read: read, readColor: readColor, readAnim: readAnim,
+        hasStop: hasStop, stopText: stopText, canAddStop: canAddStop, isEngine: isEngine, riskText: riskText, hasStatus: hasStatus, statusText: statusText,
+        prints: mkPrints(d, 2), btns: btns,
+        border: isSel ? '#2F5C94' : (p && p.warn ? '#9D4B7C' : '#232B38'), borderStyle: p && p.halted ? 'dashed' : 'solid'
+      }, a[0], a[12]), sprFor(a));
+    };
+    var cards = [];
+    if (!held[sel]) cards.push(cardFrom(bySym[sel], null, true));
+    posList.filter(function (p) { return p.by !== 'ENGINE'; }).forEach(function (p) { cards.push(cardFrom(bySym[p.sym], p, p.sym === sel)); });
+    var engineCards = posList.filter(function (p) { return p.by === 'ENGINE'; });
+    if (engineCards.length) cards.push({ isDivider: true, isCard: false });
+    engineCards.forEach(function (p) { cards.push(cardFrom(bySym[p.sym], p, p.sym === sel)); });
+    var realCards = cards.filter(function (k) { return k.isCard; });
+    var hiddenWarn = realCards.slice(4).filter(function (k) { return k.readAnim !== 'none'; })[0];
+
+    var stress = this.props.stress || '';
+    if (stress) live = true;
+    var V = {
+      frame: live ? 'inset 0 0 0 3px #E5484D' : 'none',
+      envLabel: live ? 'LIVE — REAL MONEY' : 'PAPER',
+      envBg: live ? '#5A1216' : '#1B2433', envFg: live ? '#FFB3B5' : '#A9C7FF', envBorder: live ? '#E5484D' : '#3E5470',
+      autoBg: autoOn ? '#0D3533' : '#1A212C', autoBorder: autoOn ? '#1FA79B' : '#3A4556', autoFg: autoOn ? C.teal : '#E7EAEE',
+      autoLabel: autoOn ? 'AUTO ON — ENGINE CAN TRADE' : 'AUTO OFF — YOU TRADE',
+      autoAction: autoOn ? 'STOP AUTO' : 'Turn AUTO on',
+      actSub: autoOn ? 'one click' : 'hold 2 s',
+      actBg: autoOn ? '#A8262B' : '#223044', actBorder: autoOn ? '#D0454A' : '#3E5470',
+      toggleAuto: function () { self.setState({ autoOn: !autoOn }); },
+      toggleLive: function () { self.setState({ live: !live }); },
+      toggleMenu: function () { self.setState({ menuOpen: !menuOpen }); },
+      menuOpen: menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
+      menuBtnBg: menuOpen ? '#24324A' : '#161D28', menuBtnBorder: menuOpen ? '#5AA2FF' : '#2E3A4A',
+      alertTag: 'INFO', alertTagFg: '#C9D1DB', alertTagBg: '#232B38', alertBg: '#0E131B', alertBorder: '#232B38', alertFg: '#C9D1DB',
+      alertTime: autoOn ? '07:51:12' : '07:42:16',
+      alertText: autoOn ? 'Engine bought ABCD · 500 sh @ $2.13 · engine\'s position' : 'WXYZ jumped from #30 to #2 and took Level 2 slot 2 · XQRB (#212) stays in My list because you pinned it',
+      alertHistory: 'Today\'s alerts (14) ▸',
+      lossLabel: 'LOSS LIMIT', lossLabelColor: '#9BA6B5', lossPct: 0, softPct: 50, lossColor: '#5AA2FF', lossText: '$0 / $600',
+      lossTitle: 'Today\'s loss (closed + open) vs the hard limit. Soft limit $300 (tick): AUTO pauses. Hard limit $600: no new entries, exits OK. Today\'s high +$233 · given back $0.',
+      equity: usd0(equityV), dayPnl: sgnUsd(dayPnl) + ' · ' + (dayPnl >= 0 ? '+' : '−') + Math.abs(dayPnl / 5000 * 100).toFixed(2) + '%', cash: usd0(bp), totalBp: usd0(bp * 2),
+      sizes: sizes,
+      sizeAmt: isCap ? '= up to ' + usd0(amt) : '= ' + usd0(amt),
+      sizeNote: autoOn ? 'Not used while AUTO is on · the engine sizes its own trades' : (isCap ? 'the most the limits allow · lower for some stocks' : cur.desc + ' · used by every BUY and SHORT button'),
+      sizeBarBorder: isCap && !autoOn ? 'rgba(242,169,59,0.75)' : '#232B38',
+      sizeOpacity: autoOn ? '0.55' : '1',
+      rows: rows, mineRows: mineRows, panels: panels, cards: cards,
+      stripCount: realCards.length > 4 ? '4 of ' + realCards.length + ' shown · slide for more' : realCards.length + ' shown',
+      edgeShow: !!hiddenWarn, edgeSym: hiddenWarn ? hiddenWarn.sym : '',
+      edgeMarker: '',
+      hasAutoBtn: true, pnlColor: dayPnl >= 0 ? C.green : C.red,
+      hLabel: 'HEALTHY', hFg: '#7FE0A8', hDot: C.green, hBg: '#161D28', hBorder: '#2E3A4A'
+    };
+    // fit test: the longest top-bar states at once (LIVE, long AUTO text, bad health, big negative P&L, limits)
+    if (stress === 'blocked') Object.assign(V, {
+      autoLabel: 'AUTO BLOCKED — ALPACA', autoFg: '#FFB3B5', autoBg: '#1A212C', autoBorder: '#6B2A2E', hasAutoBtn: false,
+      equity: '$18,765', dayPnl: '−$1,234.56 · −6.17%', pnlColor: C.red, cash: '$12,346', totalBp: '$24,691',
+      lossLabel: 'HARD LIMIT', lossLabelColor: '#FF8A8D', lossPct: 100, lossColor: C.red, lossText: '$1,234 / $1,200',
+      hLabel: 'NOT SAFE TO TRADE', hFg: '#FFB3B5', hDot: C.red, hBg: '#2A1114', hBorder: '#A8262B',
+      alertTag: 'CRITICAL', alertTagFg: '#FFFFFF', alertTagBg: '#D0454A', alertBg: '#3A1114', alertBorder: '#A8262B', alertFg: '#FFD4D5', alertTime: '10:05:22',
+      alertText: 'ALPACA EXECUTION UNAVAILABLE · NOT SAFE TO TRADE · AUTO blocked, pending engine entries cancelled · your positions are untouched · +1 more: HARD LIMIT — NEW ENTRIES BLOCKED · exits OK'
+    });
+    if (stress === 'paused') Object.assign(V, {
+      autoLabel: 'AUTO PAUSED — GAVE BACK $500', autoFg: C.amber, autoBg: '#2A2010', autoBorder: '#8A6A2E', autoAction: 'Resume AUTO', actSub: 'hold 2 s', actBg: '#223044', actBorder: '#3E5470',
+      equity: '$18,765', dayPnl: '+$1,234.56 · +6.17%', cash: '$12,346', totalBp: '$24,691',
+      lossLabel: 'SOFT LIMIT', lossLabelColor: C.amber, lossPct: 53, lossColor: C.amber, lossText: '$640 / $1,200',
+      hLabel: 'DEGRADED', hFg: C.amber, hDot: C.amber, hBg: '#161D28', hBorder: '#8A6A2E',
+      alertTag: 'ATTENTION', alertTagFg: '#1A1206', alertTagBg: '#F2A93B', alertBg: '#261D0E', alertBorder: '#6B4A16', alertFg: '#F6D59A', alertTime: '11:12:40',
+      alertText: 'GAVE BACK $500 FROM TODAY\'S HIGH +$1,734.56 · AUTO PAUSED · you can still trade manually'
+    });
+    return V;
+  }
+}
+</script>
+</body>
+</html>

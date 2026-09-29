@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pop-up trade card — in News &amp; Catalysts</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.gr{width:22px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;border:1px solid}
+.gA{color:#34C77B;border-color:#34C77B}.gB{color:#8BBEFF;border-color:#5AA2FF}.gC{color:#F2C94C;border-color:#C9A94A}.gD{color:#F0555A;border-color:#F0555A}
+.dim{opacity:.45}
+.nrow.sel .tk{outline:2px solid #5AA2FF;outline-offset:2px;border-radius:2px}
+.two{display:flex;flex-direction:column;line-height:1.15}
+.two small{font-size:9.5px;color:var(--dim)}
+.nrow{display:grid;grid-template-columns:70px 64px 30px 92px 1fr 86px;column-gap:8px;align-items:center;min-height:38px;border-bottom:1px solid var(--row);padding:2px 8px}
+.nrow.sel{background:#1B2638;box-shadow:inset 3px 0 0 #5AA2FF}
+.tk{color:#E7EAEE;font-weight:700;text-decoration:underline;text-decoration-color:#56627A;text-underline-offset:3px}
+.hl{font-size:12.5px;line-height:1.25}
+.ail{font-size:10.5px;color:var(--dim)}
+.fl{height:26px;padding:0 10px;border-radius:5px;border:1px solid #2E3A4A;background:#161D28;font-size:11.5px;display:flex;align-items:center;white-space:nowrap;color:var(--text)}
+.fl.on{border-color:#5AA2FF;background:#24324A}
+.li{font-size:12px;line-height:1.5;color:var(--soft)}
+.nrow.sub{min-height:28px;background:#121923;border-bottom:1px solid var(--row)}
+.nrow.sub .hl{font-size:11.5px;color:var(--soft)}
+.rel{color:#B9C6DA;border-color:#4A5A72;background:#18202C}
+.wrow{display:grid;grid-template-columns:56px 110px 1fr 70px;column-gap:8px;align-items:center;min-height:28px;border-bottom:1px solid var(--row);font-size:11.5px}
+</style>
+<script src="thinbar.js"></script>
+<script src="card.js"></script>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const H = [];
+H.push(thinBar({name:'News & Catalysts'}));
+
+const cardHTML = `<div class="tcard" style="left:196px;top:150px">
+ <div class="tch"><span class="lbl">TRADE CARD</span><span class="tkb up">ABCD</span><b class="g" style="font-size:12px">▲ strong up</b><span class="mu" style="font-size:11px">#1 · L2·1</span><span class="chip you" style="height:17px;font-size:9.5px">YOURS</span><div style="flex-grow:1"></div><span class="bl" style="font-size:11px;text-decoration:underline">Full page ↗</span><span class="x">✕</span></div>
+ <div class="tcb">
+  <div class="pr"><span class="p">$2.15</span><span class="mono g" style="font-size:12.5px">+32.7%</span><span class="mini g" style="border-color:#1F6B45">LONG setup</span><div style="flex-grow:1"></div><span class="mini" style="color:#34C77B;border-color:#1F6B45">NEWS A · 11m</span><span class="mono so" style="font-size:11px">SPR $0.01</span><span class="mini" style="color:#34C77B;border-color:#1F6B45">AI GO · 40 s</span></div>
+  ${miniChart({seed:11,from:1.62,to:2.15,jump:0.78,lines:[[2.15,'#E7EAEE','YOUR ENTRY $2.15','5 3']],marker:[44,2.12,'Engine would have bought here · $2.12'],labels:['06:50','07:05','07:20','07:31','07:42']})}
+  <div class="ln">Engine <b class="g">Acceleration</b> · asks consumed, trades ×4 · <span class="dm">○ would have bought $2.12 · AUTO off</span></div>
+  <div class="ln">AI <span class="mini" style="color:#34C77B;border-color:#1F6B45;height:16px">GO</span> context supports the setup · supply deal is real · 40 s</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px"><span class="chip you" style="height:17px;font-size:9.5px">YOURS</span><span class="mono">300 @ $2.15</span><span class="mono so">+$0.00 · 0.0%</span><div style="flex-grow:1"></div><span class="btn" style="height:22px;font-size:10.5px;border-style:dashed">+ STOP</span></div>
+  <div class="stl" style="border-color:#3E5470;background:#111A28"><b class="bl">PARTIAL 300 / 521</b><span class="so">· WORKING ≤ $2.24 · size limited by cash</span><span class="sb">CANCEL</span></div>
+  <div class="szb"><span class="lab" style="margin-right:2px">SIZE</span><span class="o">10%</span><span class="o on">25%</span><span class="o">50%</span><span class="o">$2,000</span><span class="o">FULL CAP</span><span class="mono nw" style="font-size:11px;margin-left:3px">= $1,308</span><span class="dm nw" style="font-size:9.5px;margin-left:auto">same size everywhere</span></div>
+  <div class="bb4"><span class="bb b-dis">BUY ABCD<small>order working</small></span><span class="bb b-sell">SELL/EXIT<small>300 sh · one click</small></span><span class="bb b-dis">SHORT<small>off · long-only</small></span><span class="bb b-dis">COVER<small>—</small></span></div>
+  <div class="tfoot">Same card and rules as the main window. Buy = the second click, here. Closing it (✕ / Esc) never cancels an order. One card at a time (another ticker replaces it); drag the header to move it. Buttons lock ~0.5 s after opening (TEST).</div>
+ </div></div>`;
+
+const own = o => o==='Y'?'<span class="chip you" style="height:16px;font-size:9px;padding:0 4px;margin-left:4px">YOURS</span>':o==='E'?'<span class="chip eng" style="height:16px;font-size:9px;padding:0 4px;margin-left:4px">ENGINE\'S</span>':o==='R'?'<span class="chip rel" style="height:16px;font-size:9px;padding:0 4px;margin-left:4px">RELATED</span>':'';
+const N = [
+ ['07:31:04','11m','ABCD','A','Newswire','ABCD signs supply agreement with national distributor','AI: named partner, new revenue, not promotional','+22.2%','Y',0,1],
+ ['07:28:40','14m','LMNO','D','SEC 424B5','LMNO files prospectus supplement for share offering','AI: dilution — new shares will be sold','−9.8%','',0],
+ ['07:22:10','20m','QRST','B','Newswire','QRST expands distribution to two new states','AI: real but modest · <b class="am">SOURCE CONFLICT</b>: the 8-K lists one new state','+6.1%','',0],
+ ['07:15:02','27m','CDEF','B','Newswire','CDEF raises full-year guidance','AI: positive, partly expected','+2.3%','',0],
+ ['07:10:15','32m','UVWX','B','Newswire','UVWX (outside your lists) raises full-year chip demand outlook','<b style="color:#B9C6DA">RELATED → CDEF, KLMN</b> · same sector (semiconductors) · AI: sector-wide demand signal','+5.2%','R',0],
+ ['07:05:02','37m','WXYZ','D','SEC 424B5','WXYZ prospectus supplement — possible share offering','AI: dilution risk; contradiction: buying still steady · 2 sources = one event, counted once','+1.6%','E',0,0,'PRIMARY'],
+ ['SUB','07:06:40','WXYZ','','Newswire','WXYZ files for possible share offering — the same 424B5, reported by Benzinga','','','',0,0,'UPDATE'],
+ ['06:58:12','44m','ABCD','B','Newswire','ABCD to present at small-cap conference','AI: some visibility, no new facts','+30.3%','Y',0],
+ ['06:47:30','55m','QRST','B','FDA','QRST receives FDA clearance for device update','AI: real, but a minor product change','+8.0%','',0],
+ ['06:30:15','1h 12m','HIJK','D','Newswire','HIJK announces reverse stock split','AI: often a sign of weakness','−12.4%','',1],
+ ['06:21:40','1h 21m','XQRB','C','Newswire','XQRB names new chief financial officer','AI: neutral, little effect on the business','+0.4%','',1],
+ ['06:12:05','1h 30m','GHIJ','C','Newswire','GHIJ to present at investor conference','AI: routine, little new information','+15.6%','Y',1],
+ ['05:58:30','1h 44m','KLMN','A','Newswire','KLMN reports quarterly revenue above expectations','AI: substantive earnings surprise','−3.1%','',1],
+ ['05:12:20','2h 30m','MNOP','D','SEC 8-K','MNOP discloses notice of delisting deficiency','AI: listing at risk','+4.4%','',1],
+ ['04:12:45','3h 30m','NOPQ','A','FDA','NOPQ receives FDA approval for lead product','AI: major, clear catalyst','+41.0%','',1],
+ ['Yest.','16:40','LMNO','D','SEC S-1','LMNO registration statement for new shares','AI: dilution coming','−14.2%','',1],
+];
+const rows = N.map(n=>n[0]==='SUB'?`<div class="nrow sub"><span class="mono dm" style="font-size:11px">${n[1]}</span><span class="dm nw" style="font-size:10.5px">↳ same event</span><span></span><span class="two"><span class="dm" style="font-size:10.5px">${n[4]}</span><small style="color:#8BBEFF">${n[11]}</small></span><span><div class="hl ell">${n[5]}</div></span><span class="r dm" style="font-size:10.5px">counted once</span></div>`:`<div class="nrow ${n[10]?'sel':''}"><span class="two"><span class="mono" style="font-size:11px">${n[0]}</span><small>${n[0]==='Yest.'?n[1]:n[1]+' ago'}</small></span>
+ <span><span class="tk">${n[2]}</span>${own(n[8])}</span><span class="gr g${n[3]} ${n[9]?'dim':''}">${n[3]}</span>${n[11]?`<span class="two"><span class="dm" style="font-size:10.5px">${n[4]}</span><small style="color:#8BBEFF">${n[11]}</small></span>`:`<span class="dm" style="font-size:10.5px">${n[4]}</span>`}
+ <span><div class="hl ell">${n[5]}</div><div class="ail ell">${n[6]}</div></span><span class="mono r ${n[7].startsWith('−')?'rd':'g'}" style="font-size:11.5px">${n[7]}</span></div>`).join('');
+const heads = `<section class="panel" style="flex-grow:1;gap:5px">
+ <div class="ptitle"><b>HEADLINES AND FILINGS</b><span>newest first · click a ticker = trade card · double-click = Stock detail</span></div>
+ <div style="display:flex;gap:5px;align-items:center"><span class="fl on">Ranked 50 + My list + ALL OPEN POSITIONS</span><span class="fl">Open positions</span><span class="fl">All market</span><span class="fl" style="width:84px;color:var(--dim)">⌕ ticker</span>
+  <span style="width:6px"></span><span class="fl" style="color:#34C77B">A</span><span class="fl" style="color:#8BBEFF">B</span><span class="fl" style="color:#F2C94C">C</span><span class="fl" style="color:#F0555A">D</span>
+  <span style="width:6px"></span><span class="fl">News</span><span class="fl">SEC</span><span class="fl">FDA</span></div>
+ <div style="display:flex;gap:12px;font-size:10.5px;color:var(--dim);align-items:center">
+  <span><b class="g">A</b> very good · <b class="bl">B</b> good · <b class="ye">C</b> not that good · <b class="rd">D</b> bad — bright under ~1 h, then dim</span><div style="flex-grow:1"></div>
+  <span>Benzinga <b class="g">live</b> · SEC EDGAR checked <b class="so">07:41</b> · openFDA <b class="so">06:00</b></span></div>
+ <div class="th" style="grid-template-columns:70px 64px 30px 92px 1fr 86px;column-gap:8px"><span>TIME</span><span>STOCK</span><span>NEWS</span><span>SOURCE</span><span>HEADLINE · AI's one-line reason</span><span class="r">MOVE SINCE</span></div>
+ <div>${rows}</div>
+ <div class="note" style="margin-top:auto">Filters change only what you see: the engine still watches market-wide news, and the AI gets summaries of the relevant items only — outside news only when it is RELATED to a stock you monitor. TIME = published. MOVE SINCE starts at the first tradable price after the platform <b>received</b> the item. Reports of one event are grouped (PRIMARY + UPDATE) and counted once; SOURCE CONFLICT only when sources truly disagree.</div>
+</section>`;
+
+const sel = `<section class="panel" style="flex:0 0 auto;gap:5px">
+ <div class="ptitle"><b>SELECTED</b><span>published 07:31:04 · received 07:31:07.180 · Newswire (Benzinga)</span></div>
+ <div style="display:flex;gap:8px;align-items:center"><span class="gr gA">A</span><span class="so" style="font-size:12px">very good news</span><span class="tk" style="margin-left:6px">ABCD</span>${own('Y')}</div>
+ <div style="font-size:16px;font-weight:700;line-height:1.25">ABCD signs supply agreement with national distributor</div>
+ <div class="sec"><span>WHY THE AI GRADED IT A</span></div>
+ <div class="li">• Names a real partner and a start date · • adds new revenue, not just plans<br>• Not promotional wording · • SEC: no S-1 / S-3 / 424B found in the last 90 days (checked 07:41)</div>
+ <div class="sec"><span>MARKET MOVEMENT SINCE HEADLINE</span><span class="dm" style="letter-spacing:0;font-weight:400">facts, not causation or prediction</span></div>
+ <div class="li">+22.2% from $1.76 (first tradable price after received 07:31:07) → $2.15 · volume since 8.1 million · rank #9 → #1 · engine: Acceleration since 07:41:40 · Level 2 slot 1</div>
+ <div class="sec"><span>CONTRADICTIONS · OTHER NEWS ON ABCD</span></div>
+ <div class="li">None. · <span class="gr gB" style="width:18px;height:16px;font-size:10px">B</span> 06:58:12 small-cap conference · <span class="gr gC" style="width:18px;height:16px;font-size:10px">C</span> yesterday 16:05 quarterly report (10-Q)</div>
+ <div class="note">The grade is about the news only: never blocks a trade by itself and is separate from the rank. Bright for about 1 hour, then dim (display only).</div>
+ <div style="display:flex;gap:6px;margin-top:2px"><span class="btn pri" style="height:30px">Open ABCD page</span><span class="btn" style="height:30px">Read full text ↗</span><span class="btn" style="height:30px">Ask AI about this headline ↗</span></div>
+</section>`;
+
+const W = [
+ ['LMNO','424B5 · today 07:28','Selling new shares now',''],
+ ['WXYZ','424B5 · today 07:05','Prospectus supplement — possible offering','E'],
+ ['HIJK','Reverse split · 06:30','Fewer shares; often a sign of weakness',''],
+ ['MNOP','8-K · today 05:12','Delisting notice — listing at risk',''],
+ ['LMNO','S-1 · yesterday','Registered new shares to sell',''],
+ ['WXYZ','S-3 · yesterday','Shelf: can sell shares later','E'],
+];
+const watch = `<section class="panel" style="flex-grow:1;gap:4px">
+ <div class="ptitle"><b>DILUTION AND FILING WATCH</b><span>last 90 days (TEST) · SEC checked 07:41</span></div>
+ <div class="th" style="grid-template-columns:56px 110px 1fr 70px;column-gap:8px;padding:0"><span>STOCK</span><span>FILING</span><span>WHAT IT MEANS</span><span>YOU</span></div>
+ ${W.map(w=>`<div class="wrow" style="${w[3]?'background:rgba(240,85,90,.06)':''}"><span class="tk">${w[0]}</span><span class="rd" style="font-size:11px">${w[1]}</span><span class="so">${w[2]}</span><span>${w[3]?own(w[3]):'<span class="dm">—</span>'}</span></div>`).join('')}
+ <div class="note">Offerings, shelves, reverse splits and delisting notices for the Ranked 50, My list and all open positions (yours and the engine\'s) — so none is missed. Rows for stocks you or the engine hold are tinted. If the SEC source is down: "SEC CHECK UNAVAILABLE since …".</div>
+</section>`;
+
+H.push(`<div class="content"><div class="col" style="flex:1.72">${heads}</div><div class="col" style="flex:1">${sel}${watch}</div></div>`);
+document.getElementById('win').innerHTML = H.join('') + cardHTML;
+fitBar(document.querySelector('header.tb'));
+</script>
+</body>
+</html>

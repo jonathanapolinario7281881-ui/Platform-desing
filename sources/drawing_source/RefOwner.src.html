@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Who owns a position</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+body{width:1536px;padding:18px 22px 26px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+h1{font-size:20px;margin:0 0 4px}
+.sub{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+h2{font-size:12px;letter-spacing:.1em;color:var(--muted);margin:16px 0 8px;font-weight:700}
+.rule{border:1px solid #5AA2FF;background:#111A28;border-radius:9px;padding:10px 14px;font-size:15px;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th{font-size:9.5px;letter-spacing:.07em;color:var(--muted);text-align:left;font-weight:700;background:#161D28;padding:6px 10px}
+td{padding:7px 10px;border-top:1px solid var(--row);vertical-align:top;line-height:1.4;color:var(--soft)}
+td b{color:var(--text)}
+.grid{display:grid;gap:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--soft)}
+.box b{color:var(--text)}
+.tl{display:grid;grid-template-columns:64px 1fr;column-gap:10px;row-gap:6px;font-size:12px;line-height:1.4}
+.tl .t{font-family:'IBM Plex Mono',monospace;color:var(--blue)}
+.g2{font-size:9.5px;padding:1px 6px}
+</style>
+</head>
+<body>
+<h1>Who owns a position — reference page (v4, replaces File 9 v3 §7)</h1>
+<p class="sub">One of the most important rules of the platform, from Jonathan's answers and the settled v4 decisions (sections 3, 4, 5g, 5h, 7a, 7b of the decision log).</p>
+<div class="rule">Whoever opened a position owns it. Switching AUTO on or off never hands a position from one owner to the other.</div>
+
+<h2>THE FOUR LABELS</h2>
+<table>
+<tr><th style="width:230px">LABEL</th><th>WHAT IT MEANS</th><th style="width:420px">WHO CAN CLOSE IT</th></tr>
+<tr><td><span class="chip you">YOURS</span></td><td>You opened it with BUY or SHORT (AUTO off). No automatic exit is attached; the pink EXIT? is information only. Your optional <b>+ STOP</b> can be added after entry.</td><td><b>You</b> — SELL/EXIT or COVER, one click, also while AUTO is on (phone: hold 1 s). Also your stop, FLATTEN ALL, or a forced liquidation by the broker. The engine never trades it.</td></tr>
+<tr><td><span class="chip eng">ENGINE'S</span></td><td>The engine opened it in AUTO ON. It shows its RISK LINE (where the trade's idea is proven wrong — not a promised exit price). Switching AUTO off never makes it sell: the engine keeps managing it and opens nothing new.</td><td><b>The engine</b>. You: <b>OVERRIDE EXIT</b> (hold 1 s, desk only) for that one position, or FLATTEN ALL. Exit button locked 🔒 for you otherwise.</td></tr>
+<tr><td><span class="chip wh">WOULD-HAVE</span></td><td>A trade the engine would have taken while AUTO was off. Not a real position — no money, no orders. Used in Review (Journal, Replay, You vs Engine).</td><td>Nobody — it only exists in Review.</td></tr>
+<tr><td><span class="chip you">YOURS · OPENED OUTSIDE PLATFORM</span></td><td>Found at Alpaca but not opened by the platform (e.g. bought in the Alpaca app, perhaps during "Manual backup: use Alpaca directly").</td><td><b>You</b>, like any of yours. The engine never adopts or manages it.</td></tr>
+</table>
+
+<h2>THE CONTROLS</h2>
+<table>
+<tr><th style="width:230px">CONTROL</th><th style="width:130px">GESTURE</th><th>WHAT IT DOES</th><th style="width:380px">WHAT IT NEVER DOES</th><th style="width:170px">WHERE</th></tr>
+<tr><td><b>STOP AUTO</b></td><td>one click (phone: hold 1 s)</td><td>Stops new engine entries and cancels the engine's pending entries (only the unfilled rest; filled shares stay the engine's).</td><td>Never closes a position; engine exits and protective orders keep working.</td><td>Every window, phone</td></tr>
+<tr><td><b>CANCEL ALL ENTRIES (n)</b></td><td>one click</td><td>Cancels every unfilled BUY/SHORT — yours and the engine's. Shows when 2+ entries are working.</td><td>Never touches positions, exits or stops. A cancelled entry isn't resubmitted unless a genuinely new trigger appears.</td><td>Strip header, Positions &amp; Orders</td></tr>
+<tr><td><b>CANCEL ENGINE ENTRY</b></td><td>hold 1 s</td><td>Cancels one working engine entry (its unfilled shares). Logged as your intervention; "ENGINE RE-ENTRY PAUSED · same setup".</td><td>Never sells the filled part (it stays the engine's).</td><td>Card, strip, Stock detail, P&amp;O</td></tr>
+<tr><td><b>OVERRIDE EXIT</b></td><td>hold 1 s</td><td>Closes one engine position. AUTO and the other engine positions keep running; same-setup re-entry paused until you release it or a genuinely new setup appears.</td><td>Not a day block; never available on the phone.</td><td>Card, strip, panels, Stock detail, P&amp;O</td></tr>
+<tr><td><b>FLATTEN ALL</b></td><td>hold 1 s</td><td>Freezes entries, cancels waiting orders, closes every position (yours and the engine's), retries, reconciles with Alpaca, reports the true result.</td><td>Never reports false success ("FLATTEN INCOMPLETE — 1 POSITION PENDING · ABCD · HALTED"). AUTO stays off until you turn it on.</td><td>Every window, phone</td></tr>
+<tr><td><b>+ STOP</b></td><td>click, then move / ×</td><td>Your optional stop on your own position ("STOP $1.95", line on the chart).</td><td>Never on by default; doesn't guarantee its price (gaps, halts, outside 9:30–4:00).</td><td>Your cards, Stock detail</td></tr>
+</table>
+
+<div class="grid" style="grid-template-columns:1fr 1.15fr;margin-top:16px">
+<div>
+<h2 style="margin-top:0">SAFETY RULES — NEW RISK VS YOUR POSITIONS</h2>
+<div class="box">
+<b>Hard controls may block new risk, but never close your positions on their own.</b> A position of yours closes only by your exit, your stop, FLATTEN ALL, or a forced liquidation by the broker (shown as <b>"CLOSED BY ALPACA · MARGIN"</b> in the strip, Positions &amp; Orders, the alert history and Review).<br><br>
+<b>Soft loss limit / give-back</b> — AUTO pauses; your manual trading stays allowed; Resume AUTO in the main window.<br>
+<b>Hard loss limit</b> — all new entries blocked, yours too (v3's open question, now settled); exits always allowed; no resume that day.<br>
+<b>Intraday margin call</b> — AUTO and your BUY/SHORT blocked; exits available; the engine sells only what it needs of its own; for yours a cure button "EST. SELL x TO CURE MARGIN" that runs only on your click.<br>
+<b>Disconnects</b> — never sell your positions; the engine's positions follow the fail-safe decided in reliability testing (OPEN).<br><br>
+The engine still knows about your positions: they use buying power and count toward account limits, so it sizes its own trades with them. It never trades them.
+</div>
+</div>
+<div>
+<h2 style="margin-top:0">EXAMPLE (updated from v3)</h2>
+<div class="box"><div class="tl">
+<span class="t">10:00</span><span>AUTO is on. The engine holds WXYZ <span class="chip eng g2">ENGINE'S</span> and has an entry working in NOPQ.</span>
+<span class="t">10:01</span><span>You press STOP AUTO. The unfilled part of the NOPQ entry is cancelled (filled shares stay the engine's). The engine keeps managing WXYZ; its exit is locked for you. Nothing new opens.</span>
+<span class="t">10:05</span><span>You buy GHIJ and IJKL <span class="chip you g2">YOURS</span>. Their buttons work; the engine never trades them.</span>
+<span class="t">10:12</span><span>You don't like WXYZ any more: hold OVERRIDE EXIT 1 s. Only WXYZ closes; logged as your intervention; the engine won't re-enter WXYZ on the same setup.</span>
+<span class="t">10:30</span><span>You turn AUTO back on (main window, hold 2 s). The engine may open new trades. GHIJ and IJKL stay yours; their SELL/EXIT still work.</span>
+<span class="t">10:45</span><span>Away from the desk, you sell IJKL from the phone (hold 1 s, same protected exit).</span>
+<span class="t">any time</span><span>Emergency: hold FLATTEN ALL 1 s — everything closes; AUTO stays off until you turn it on.</span>
+</div></div>
+</div>
+</div>
+</body>
+</html>

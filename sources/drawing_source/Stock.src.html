@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stock detail — v4 proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.sym{height:44px;padding:0 12px;border-radius:7px;display:flex;align-items:center;font-size:25px;font-weight:700;letter-spacing:.02em}
+.hdr{flex-shrink:0;display:flex;flex-direction:column;gap:6px;padding:7px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.bigbtn{width:150px;height:42px;border-radius:7px;border:1px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:13px;font-weight:700;white-space:nowrap}
+.bigbtn small{font-size:10px;font-weight:500;opacity:.9}
+.b-buy{background:#16784A;border-color:#22A366;color:#fff}
+.b-sell{background:#A8262B;border-color:#D0454A;color:#fff}
+.b-dis{background:#19202A;border-color:#2A3340;color:#7C8898}
+.b-ovr{background:#1C1316;border-color:#7A3035;color:#F0A5A8}
+.szbar{display:flex;align-items:center;gap:4px}
+.sz{height:22px;padding:0 7px;border-radius:4px;border:1px solid #2E3A4A;background:#161D28;font-size:10.5px;display:flex;align-items:center;white-space:nowrap;color:var(--soft)}
+.sz.on{border-color:#5AA2FF;background:#24324A;color:#fff}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);column-gap:10px;row-gap:6px}
+.stat .l{font-size:9.5px;letter-spacing:.06em;color:var(--muted)}
+.stat .v{font-family:'IBM Plex Mono',monospace;font-size:12.5px}
+.bk{display:grid;grid-template-columns:70px 64px 70px 52px;font-family:'IBM Plex Mono',monospace;font-size:11px;height:17px;align-items:center}
+.ts{display:grid;grid-template-columns:96px 1fr 1fr;font-family:'IBM Plex Mono',monospace;font-size:11px;height:17px;align-items:center}
+.li{font-size:11.5px;line-height:1.45;color:var(--soft)}
+.ev{display:grid;grid-template-columns:62px 1fr;column-gap:8px;font-size:11px;min-height:21px;align-items:center;border-bottom:1px solid var(--row)}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const S = (new URLSearchParams(location.search).get('s')) || 'abcd';
+const A = S === 'abcd';
+const H = [];
+const chip = (cls, t) => `<span class="chip ${cls}">${t}</span>`;
+// ---------- thin top bar ----------
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">Stock detail</span>
+<span class="btn" style="width:150px;color:var(--dim);height:28px">⌕ open any ticker…</span>
+<span class="env">PAPER</span>
+${A?'<span class="autop">AUTO OFF — YOU TRADE</span>':'<span class="autop" style="border-color:#1E5A55;background:#0E2422;color:#5CE0D2">AUTO ON — ENGINE CAN TRADE</span><span class="btn" style="height:28px;border-color:#D0454A;color:#FFB3B5;background:#2A1114;font-weight:700">STOP AUTO</span>'}
+<div style="flex-grow:1"></div>
+<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+${A?'<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span><span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>':'<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ QRST strong up</span>'}
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono ${A?'g':'rd'} nw" style="font-size:12.5px">${A?'+$233.00 · +4.66%':'−$24.00 · −0.48%'}</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>`);
+H.push(A ? `<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:42:18</span><span class="ell so" style="font-size:11px">ABCD BUY partly filled · 300 of 521 @ $2.15 · still working, no higher than $2.24 · size limited by cash</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (15) ▸</span></div>`
+ : `<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:17:50</span><span class="ell so" style="font-size:11px">QRST jumped to #2 and took Level 2 slot 3 · WXYZ left the slot · the engine keeps watching WXYZ and manages its position</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (11) ▸</span></div>`);
+
+// ---------- stock header ----------
+const sizeBar = `<div style="display:flex;align-items:center;gap:10px">
+  <div class="szbar"><span class="lab" style="margin-right:3px">ORDER SIZE</span><span class="sz">10%</span><span class="sz on">25%</span><span class="sz">50%</span><span class="sz">$2,000</span><span class="sz" style="color:var(--amber)">FULL CAP</span><span class="mono so" style="font-size:11px;margin-left:4px">= $1,308</span></div>
+  <div class="dm" style="font-size:10px">${A?'same size everywhere · changing it here changes it on every button':'<span class="te">not used while AUTO is on · the engine sizes its own trades</span>'}</div></div>`;
+let btns;
+if (A) btns = `<span class="bigbtn b-dis" style="border-color:#2F5C95;color:#9CC3FF;background:#12223A">order working<small>221 left · ≤ $2.24 · <u>CANCEL</u></small></span>
+  <span class="bigbtn b-sell">SELL/EXIT ABCD<small>300 sh · one click</small></span>
+  <span class="bigbtn b-dis">SHORT<small>shorts off</small></span>
+  <span class="bigbtn b-dis">COVER<small>—</small></span>`;
+else btns = `<span class="bigbtn b-dis">🔒 BUY<small>AUTO ON</small></span>
+  <span class="bigbtn b-ovr">🔒 OVERRIDE EXIT<small>hold 1 s · engine's</small></span>
+  <span class="bigbtn b-dis">🔒 SHORT<small>AUTO ON</small></span>
+  <span class="bigbtn b-dis">COVER<small>—</small></span>`;
+const chipsA = `<span class="chip" style="color:#8CE0B0;border-color:#1F6B45">LONG SETUP</span><span class="chip" style="color:#9CC3FF;border-color:#2F5C95">RANK #1 · ▲ from #38</span><span class="chip" style="color:#9CC3FF;border-color:#2F5C95">L2·1</span><span class="chip" style="color:#E7EAEE;border-color:#56627A">NEWS A · 11m</span><span class="chip" style="color:var(--soft);border-color:#3A4556">SPR $0.01 · 0.5%</span><span class="chip" style="color:var(--green);border-color:#1F6B45">AI GO · 40 s</span><span class="chip you">YOURS · 300 sh</span><span class="chip" style="color:#C9A94A;border-color:#6B5A1E">☆ add to My list</span>`;
+const chipsW = `<span class="chip" style="color:#8CE0B0;border-color:#1F6B45">LONG SETUP</span><span class="chip" style="color:#9CC3FF;border-color:#2F5C95">RANK #5 · ▼ from #4</span><span class="chip" style="color:var(--muted);border-color:#3A4556">NO LEVEL 2 SLOT</span><span class="chip" style="color:#FFB3B5;border-color:#7A3035">NEWS D · 13m</span><span class="chip" style="color:var(--soft);border-color:#3A4556">SPR $0.01 · 0.5%</span><span class="chip" style="color:var(--amber);border-color:#6B4A16">AI CAUTION · 4m · OLD</span><span class="chip eng">ENGINE'S · 700 sh</span><span class="chip" style="color:var(--yellow);border-color:#6B5A1E">★ My list</span>`;
+const hdr = `<div class="hdr">
+ <div style="display:flex;align-items:center;gap:12px">
+  ${A?'<span class="sym" style="background:#16784A;color:#fff;box-shadow:0 0 0 2px #34C77B">ABCD</span>':'<span class="sym" style="background:#0E2422;color:#5CE0D2;border:1px solid #1E5A55">WXYZ</span>'}
+  <div style="display:flex;flex-direction:column;line-height:1.2" class="nw">${A?'<span class="g" style="font-weight:700;font-size:13px">▲ strong up</span><span class="dm" style="font-size:10px">since 07:42:04 · solid after 5 s</span>':'<span class="so" style="font-weight:700;font-size:13px">pullback</span><span class="dm" style="font-size:10px">no active signal</span>'}</div>
+  <span class="mono" style="font-size:26px;font-weight:600">${A?'$2.15':'$1.84'}</span><span class="mono g" style="font-size:15px">${A?'+32.7%':'+18.7%'}</span>
+  <div style="display:flex;gap:5px;flex-wrap:nowrap;margin-left:6px">${A?chipsA:chipsW}</div></div>
+ <div style="display:flex;align-items:center;gap:10px;border-top:1px solid var(--row);padding-top:6px">${sizeBar}<div style="flex-grow:1"></div><div style="display:flex;gap:8px">${btns}</div></div></div>`;
+
+// ---------- chart ----------
+const CW=870, CH=232;
+let bars=[], p0 = A?1.62:1.55;
+const n= A?73:49;
+for (let i=0;i<n;i++){
+  let c;
+  if (A){ if(i<40) c=1.64+Math.sin(i*0.9)*0.02+i*0.002; else if(i<58) c=1.72+(i-40)*0.012+Math.sin(i)*0.01; else c=1.94+(i-58)*0.0135; }
+  else { if(i<21) c=1.56+Math.sin(i*0.8)*0.012+i*0.003; else if(i<31) c=1.62+(i-20)*0.028; else if(i<43) c=1.90-(i-30)*0.013+Math.sin(i)*0.008; else if(i<47) c=1.745+(i-42)*0.012; else c=[1.86,1.84][i-47]; }
+  const o=i?bars[i-1].c:c-0.01; bars.push({o,c,h:Math.max(o,c)+0.012,l:Math.min(o,c)-0.012,v: A?(i>55?40+((i*37)%30):8+((i*13)%10)):(i>28&&i<56?30+((i*17)%25):8+((i*11)%9))});
+}
+const pmin = A?1.56:1.50, pmax = A?2.30:1.98;
+const Y=v=>10+(pmax-v)/(pmax-pmin)*(CH-40), bw=(CW-60)/(A?73:49), X=i=>8+i*bw+bw/2;
+let svg=`<svg width="${CW}" height="${CH+26}" style="display:block">`;
+const grid = A?[1.60,1.80,2.00,2.20]:[1.50,1.60,1.70,1.80,1.90];
+grid.forEach(g=>svg+=`<line x1="0" x2="${CW-52}" y1="${Y(g)}" y2="${Y(g)}" stroke="#1A212C"/><text x="${CW-46}" y="${Y(g)+4}" fill="#7D8899" font-size="10" font-family="IBM Plex Mono">${g.toFixed(2)}</text>`);
+let vw='',pv=0,vv=0; bars.forEach((b,i)=>{pv+=(b.h+b.l+b.c)/3*b.v;vv+=b.v;vw+=(i?'L':'M')+X(i)+','+Y(pv/vv);});
+svg+=`<path d="${vw}" stroke="#B08CFF" fill="none" stroke-width="1.4"/>`;
+bars.forEach((b,i)=>{const up=b.c>=b.o,col=up?'#34C77B':'#F0555A'; svg+=`<line x1="${X(i)}" x2="${X(i)}" y1="${Y(b.h)}" y2="${Y(b.l)}" stroke="${col}"/><rect x="${X(i)-bw*0.33}" y="${Y(Math.max(b.o,b.c))}" width="${bw*0.66}" height="${Math.max(1.5,Math.abs(Y(b.o)-Y(b.c)))}" fill="${col}"/><rect x="${X(i)-bw*0.33}" y="${CH-4-b.v*0.45}" width="${bw*0.66}" height="${b.v*0.45}" fill="${up?'#1F6B45':'#7A2A2E'}"/>`;});
+const flag=(i,letter,col,txt)=>{svg+=`<line x1="${X(i)}" x2="${X(i)}" y1="14" y2="${CH-30}" stroke="${col}" stroke-dasharray="2 3" opacity=".7"/><rect x="${X(i)-8}" y="4" width="16" height="15" rx="3" fill="#121720" stroke="${col}"/><text x="${X(i)}" y="15.5" fill="${col}" font-size="10" font-weight="700" text-anchor="middle" font-family="IBM Plex Sans">${letter}</text>${txt?`<text x="${X(i)+11}" y="15.5" fill="${col}" font-size="9.5" font-family="IBM Plex Sans">${txt}</text>`:''}`;};
+if (A){
+  flag(28,'B','#9CC3FF','06:58'); flag(61,'A','#E7EAEE','07:31');
+  svg+=`<circle cx="${X(72)}" cy="${Y(2.12)}" r="5" fill="none" stroke="#5CE0D2" stroke-width="1.6" stroke-dasharray="2 2"/><line x1="${X(47)}" x2="${X(72)-6}" y1="${Y(2.16)}" y2="${Y(2.12)}" stroke="#5CE0D2" stroke-dasharray="2 3" opacity=".7"/><text x="${X(46)}" y="${Y(2.16)+3}" fill="#5CE0D2" font-size="9.5" text-anchor="end" font-family="IBM Plex Sans">◌ engine would have bought · $2.12 · 07:42:16</text>`;
+  svg+=`<text x="${X(72)-5}" y="${Y(2.15)+22}" fill="#E7EAEE" font-size="12">▲</text><line x1="${X(47)}" x2="${X(72)-8}" y1="${Y(2.105)}" y2="${Y(2.15)+14}" stroke="#E7EAEE" stroke-dasharray="2 3" opacity=".6"/><text x="${X(46)}" y="${Y(2.105)+3}" fill="#E7EAEE" font-size="9.5" text-anchor="end" font-family="IBM Plex Sans">▲ your buy · 300 @ $2.15 · 07:42:18</text>`;
+  svg+=`<line x1="0" x2="${CW-52}" y1="${Y(2.24)}" y2="${Y(2.24)}" stroke="#9CC3FF" stroke-dasharray="3 3"/><text x="6" y="${Y(2.24)-3}" fill="#9CC3FF" font-size="9.5" font-family="IBM Plex Sans">your BUY ceiling $2.24 · 221 sh working</text>`;
+} else {
+  flag(35,'D','#FF9EA1','07:05 · 424B5');
+  svg+=`<text x="${X(46)-5}" y="${Y(1.79)+18}" fill="#5CE0D2" font-size="12">▲</text><line x1="${X(45)}" x2="${X(46)-4}" y1="${Y(1.66)-3}" y2="${Y(1.79)+10}" stroke="#5CE0D2" stroke-dasharray="2 3" opacity=".7"/><text x="${X(45)}" y="${Y(1.66)}" fill="#5CE0D2" font-size="9.5" text-anchor="end" font-family="IBM Plex Sans">▲ engine bought · 700 @ $1.79 · 07:16:12</text>`;
+  svg+=`<line x1="0" x2="${CW-52}" y1="${Y(1.72)}" y2="${Y(1.72)}" stroke="#5CE0D2" stroke-dasharray="6 4"/><text x="6" y="${Y(1.72)-3}" fill="#5CE0D2" font-size="9.5" font-family="IBM Plex Sans">RISK LINE $1.72 · where the engine's idea is proven wrong (not a promised exit)</text>`;
+  svg+=`<rect x="${X(25)-bw/2}" y="22" width="${bw*23}" height="${CH-56}" fill="rgba(92,224,210,.05)"/><text x="${X(25)}" y="${CH-38}" fill="#5CE0D2" font-size="9" font-family="IBM Plex Sans" opacity=".8">in Level 2 slot 3 · 06:55–07:17</text>`;
+}
+(A?['06:30','06:45','07:00','07:15','07:30']:['06:30','06:45','07:00','07:15']).forEach((t,k)=>svg+=`<text x="${8+k*15*bw}" y="${CH+16}" fill="#7D8899" font-size="9.5" font-family="IBM Plex Mono">${t}</text>`);
+svg+='</svg>';
+const chart = `<section class="panel" style="flex-grow:1">
+ <div class="ptitle"><div style="display:flex;gap:4px;align-items:center"><b style="margin-right:8px">CHART</b>${['10s','1m','5m','15m','1h','1D'].map(t=>`<span class="sz ${t==='1m'?'on':''}">${t}</span>`).join('')}</div>
+ <span><span class="pu">— VWAP</span> · <span style="color:#E7EAEE">▲ your trades</span> · <span class="te">▲ engine's</span> · <span class="te">◌ would-have</span> · news flags A–D · ${A?'your stop / ceiling lines':'risk line · Level 2 time'}</span></div>${svg}</section>`;
+
+// ---------- level 2 / T&S ----------
+let book;
+if (A){
+  const asks=[['2.20','9,400','ARCA'],['2.19','9,700','NSDQ'],['2.18','1,700','BATS'],['2.17','31,000','NYSE',1],['2.16','12,700','EDGX'],['2.15','4,100','ARCA']];
+  const bids=[['2.14','14,900','ARCA'],['2.13','7,500','NSDQ'],['2.12','12,700','BATS'],['2.11','7,600','EDGX'],['2.10','42,000','NYSE',1],['2.09','9,900','ARCA']];
+  const box=(t,b)=>b?`<span style="border:1px solid #E7EAEE;border-radius:3px;padding:0 3px;font-weight:600;color:#fff">${t}</span>`:t;
+  const tsl=[['07:42:31.412','2.15','400','g'],['07:42:31.145','2.15','1,500','g'],['07:42:30.096','2.14','2,400','r'],['07:42:29.841','2.15','3,500','g'],['07:42:29.525','2.15','3,900','g'],['07:42:29.352','2.14','4,300','r'],['07:42:28.283','2.15','<b>28,000</b>','g'],['07:42:27.954','2.14','3,100','r'],['07:42:27.824','2.15','2,000','g'],['07:42:26.679','2.14','2,900','r'],['07:42:26.368','2.15','4,600','g'],['07:42:25.072','2.14','3,300','r']];
+  book = `<section class="panel" style="width:590px;flex-shrink:0">
+   <div class="ptitle"><b>LEVEL 2 · SLOT 1 AND TIME &amp; SALES</b><span>book: IBKR · trades: Massive</span></div>
+   <div style="display:flex;align-items:center;gap:8px;font-size:10.5px"><span class="mono g">BIDS 58%</span><div style="flex:1;height:6px;border-radius:3px;background:#7A2A2E"><div style="width:58%;height:6px;border-radius:3px;background:#2FA86A"></div></div><span class="mono rd">ASKS 42%</span><span class="dm nw" style="font-size:9.5px">shown in the book now · not a prediction</span></div>
+   <div style="display:flex;gap:14px;min-height:0">
+    <div><div class="bk mu" style="font-family:'IBM Plex Sans';font-size:9.5px;letter-spacing:.06em"><span class="r" style="padding-right:8px">BID SZ</span><span style="text-align:center">PRICE</span><span>ASK SZ</span><span>VENUE</span></div>
+    ${asks.map(a=>`<div class="bk" style="background:rgba(240,85,90,.06)"><span></span><span style="text-align:center;color:#FF9EA1">${a[0]}</span><span class="rd">${box(a[1],a[3])}</span><span class="dm" style="font-size:9.5px">${a[2]}</span></div>`).join('')}
+    <div class="bk mu" style="font-size:10px"><span></span><span style="text-align:center">spread</span><span>$0.01</span><span></span></div>
+    ${bids.map(a=>`<div class="bk" style="background:rgba(52,199,123,.06)"><span class="r g" style="padding-right:8px">${box(a[1],a[3])}</span><span style="text-align:center;color:#8CE0B0">${a[0]}</span><span></span><span class="dm" style="font-size:9.5px">${a[2]}</span></div>`).join('')}</div>
+    <div style="flex:1;min-width:0"><div class="ts mu" style="font-family:'IBM Plex Sans';font-size:9.5px;letter-spacing:.06em"><span>TIME</span><span class="r">PRICE</span><span class="r">SIZE</span></div>
+    ${tsl.map(t=>`<div class="ts"><span class="mu" style="font-size:10.5px">${t[0]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[1]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[2]}</span></div>`).join('')}</div>
+   </div>
+   <div class="note" style="margin-top:auto"><span class="bl">Slot 1 since 07:41:58 — highest urgency (rank #1, trades ×4).</span> White box = large order showing, not guaranteed support · scroll for deeper levels.</div>
+  </section>`;
+} else {
+  const tsl=[['07:18:30.212','1.84','900','g'],['07:18:29.880','1.84','2,100','g'],['07:18:29.101','1.83','1,500','r'],['07:18:28.664','1.84','3,000','g'],['07:18:27.930','1.83','800','r']];
+  book = `<section class="panel" style="width:590px;flex-shrink:0">
+   <div class="ptitle"><b>QUOTES AND TIME &amp; SALES</b><span>trades and quotes: Massive</span></div>
+   <div style="border:1px dashed #3A4556;border-radius:6px;padding:9px 11px;display:flex;flex-direction:column;gap:5px">
+    <div style="display:flex;align-items:center;gap:8px"><b class="mu" style="letter-spacing:.06em">NO LEVEL 2 SLOT</b><span class="so" style="font-size:11px">left slot 3 at 07:17:50 · QRST (#2) is more urgent now</span></div>
+    <div class="so" style="font-size:11px">The three slots: L2·1 ABCD (#1) · L2·2 NOPQ (#3) · L2·3 QRST (#2). The engine keeps watching WXYZ with trades and quotes and manages its position.</div>
+    <div style="font-size:11.5px"><span class="chip" style="color:var(--green);border-color:#1F6B45">TRADING AVAILABLE</span> <span class="dm" style="font-size:10.5px">Massive and Alpaca healthy · eligible · not halted</span></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="btn" style="height:24px;color:#7C8898;background:#19202A">📌 PIN TO LEVEL 2</span><span class="dm" style="font-size:10.5px">AUTO OFF only · one pin · released when AUTO turns on · never takes a slot showing your position</span></div>
+   </div>
+   <div style="display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin:4px 0"><span>BID <b class="g">$1.83</b> × 6,400</span><span>ASK <b class="rd">$1.84</b> × 3,900</span><span class="mu" style="font-size:11px;align-self:center">NBBO · spread $0.01</span></div>
+   <div class="ts mu" style="font-family:'IBM Plex Sans';font-size:9.5px;letter-spacing:.06em;grid-template-columns:110px 1fr 1fr"><span>TIME</span><span class="r">PRICE</span><span class="r">SIZE</span></div>
+   ${tsl.map(t=>`<div class="ts" style="grid-template-columns:110px 1fr 1fr"><span class="mu" style="font-size:10.5px">${t[0]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[1]}</span><span class="r ${t[3]==='g'?'g':'rd'}">${t[2]}</span></div>`).join('')}
+  </section>`;
+}
+
+// ---------- bottom panels ----------
+const st = (l,v,c) => `<div><div class="l">${l}</div><div class="v ${c||''}">${v}</div></div>`;
+const stats = `<section class="panel" style="flex:0 0 250px"><div class="ptitle"><b>STATS</b><span>full digits</span></div><div class="stat">
+ ${A? st('VOLUME','14,837,426')+st('RVOL','18.2×')+st('TRADES','38,427')+st('FLOAT','6,243,718')+st('SHARES OUT','18,420,000')+st('MKT CAP','$39.6M')+st('VWAP','$2.06','g')+st('HIGH','$2.18')+st('LOW','$1.61')+st('OPEN','$1.66')+st('PREV CLOSE','$1.62')+st('SPREAD','$0.01')
+    : st('VOLUME','9,412,300')+st('RVOL','9.6×')+st('TRADES','21,806')+st('FLOAT','11,880,400')+st('SHARES OUT','24,050,000')+st('MKT CAP','$44.3M')+st('VWAP','$1.71','g')+st('HIGH','$1.91')+st('LOW','$1.49')+st('OPEN','$1.58')+st('PREV CLOSE','$1.55')+st('SPREAD','$0.01')}
+ </div><div class="sec"><span>TRADING FLAGS</span></div>
+ <div class="li" style="font-size:11px">${A?'Marginable: <b>no · cash only</b> · Shortable: <b>no borrow</b><br>SSR: no · Halts today: 0 · Session: pre-market':'Marginable: <b>no · cash only</b> · Shortable: <b>hard to borrow</b><br>SSR: no · Halts today: 0 · Session: pre-market'}</div></section>`;
+const eng = `<section class="panel" style="flex:1"><div class="ptitle"><b>ENGINE VIEW</b><span>live · same engine as AUTO</span></div>
+ ${A?`<div style="font-size:12px">State <b class="g" style="font-size:14px">Acceleration</b> <span class="dm">since 07:41:40 · explosive runner</span></div>
+ <div class="dm" style="font-size:10.5px">Signal strength (confidence, not certainty)</div><div style="height:7px;border-radius:4px;background:#1A212C"><div style="width:82%;height:7px;border-radius:4px;background:#34C77B"></div></div>
+ <div class="sec"><span>WHY IT RANKS #1</span></div>
+ <div class="li">• Relative volume 18.2× and rising<br>• Trades per minute ×4 in 90 s<br>• Asks being taken, bids following up<br>• Spread tight at $0.01 · fake-move risk: low</div>
+ <div class="sec"><span>RANK TODAY</span></div><div class="mono so" style="font-size:11px">#212 06:40 → #38 07:05 → #9 07:31 (news) → #1 07:41</div>
+ <div style="font-size:11px"><span class="te">◌ would have bought $2.12 · 07:42:16</span> <span class="dm">(AUTO off)</span></div>`
+ :`<div style="font-size:12px">State <b class="so" style="font-size:14px">Healthy pullback</b> <span class="dm">since 07:17:58 · re-entry</span></div>
+ <div class="dm" style="font-size:10.5px">Signal strength (confidence, not certainty)</div><div style="height:7px;border-radius:4px;background:#1A212C"><div style="width:54%;height:7px;border-radius:4px;background:#8A96A8"></div></div>
+ <div class="sec"><span>ENGINE'S POSITION</span></div>
+ <div class="li">• Bought 700 @ $1.79 at 07:16:12 · <span class="te">RISK LINE $1.72</span><br>• Holding: pullback on light volume, buyers still above VWAP<br>• Would exit if the pullback turns into a breakdown<br>• Engine manages the exit · you: OVERRIDE EXIT (hold 1 s)</div>
+ <div class="sec"><span>RANK TODAY</span></div><div class="mono so" style="font-size:11px">#48 06:12 → #11 06:55 → #4 07:15 → #5 07:18</div>`}
+ </section>`;
+const ai = `<section class="panel" style="flex:1"><div class="ptitle"><b>AI ANALYSIS</b><span class="bl">Ask AI about ${A?'ABCD':'WXYZ'} ↗</span></div>
+ ${A?`<div style="display:flex;gap:8px;align-items:center"><span class="chip" style="color:var(--green);border-color:#1F6B45">GO</span><span class="so" style="font-size:11.5px">confidence 0.78 · 40 s ago · refreshes on new news or a big move</span></div>
+ <div class="li">• Catalyst looks real (news graded A)<br>• No offering or dilution filing found (SEC, 90 days)<br>• Buying pressure matches the news</div>
+ <div class="sec"><span>RISK FLAGS</span></div><div class="li">• Low float: moves can reverse fast</div>
+ <div class="sec"><span>CONTRADICTIONS</span></div><div class="li">none</div>
+ <div class="note">Evidence: Newswire 07:31:04 · SEC EDGAR search 07:41. Context, not a prediction; it never holds up the engine.</div>`
+ :`<div style="display:flex;gap:8px;align-items:center"><span class="chip" style="color:var(--amber);border-color:#6B4A16">CAUTION</span><span class="chip" style="color:var(--amber);border-color:#6B4A16;border-style:dashed">OLD · 4m</span><span class="so" style="font-size:11.5px">confidence 0.61 · refreshing…</span></div>
+ <div class="li">• 424B5 prospectus supplement filed 07:05 — possible share offering (SEC checked 07:17)<br>• Price still holding above VWAP</div>
+ <div class="sec"><span>RISK FLAGS</span></div><div class="li">• Dilution risk · • Hard to borrow</div>
+ <div class="sec"><span>CONTRADICTIONS</span></div><div class="li">negative filing but steady buying (engine still sees a valid pullback)</div>
+ <div class="note">OLD = older than 3 min (display rule). The engine uses its own freshness rules.</div>`}
+ </section>`;
+const newsA = `<div class="subtabs" style="margin-bottom:2px"><span class="st on">NEWS &amp; FILINGS</span><span class="st">TODAY IN ABCD (9)</span></div>
+ ${[['A','#E7EAEE','ABCD signs supply agreement with national distributor','07:31:04 · 11m · Newswire'],['B','#9CC3FF','ABCD to present at small-cap conference','06:58:12 · 44m · Newswire'],['C','#C9D1DB','Quarterly report filed (10-Q)','yesterday 16:05 · SEC EDGAR']].map(n=>`<div style="display:grid;grid-template-columns:22px 1fr;column-gap:8px;padding:4px 0;border-bottom:1px solid var(--row)"><span class="chip" style="color:${n[1]};border-color:${n[1]};justify-content:center">${n[0]}</span><div><div style="font-size:11.5px">${n[2]}</div><div class="dm" style="font-size:10px">${n[3]}</div></div></div>`).join('')}
+ <div class="li" style="font-size:11px;margin-top:3px">S-1 / S-3 / 424B: <b class="g">none found in last 90 days</b> <span class="dm">(TEST value)</span> · SEC checked 07:41</div>
+ <div class="note">Click a headline for the full story in News &amp; Catalysts. A–D = news quality, never a trade veto by itself.</div>`;
+const todayW = `<div class="subtabs" style="margin-bottom:2px"><span class="st">NEWS &amp; FILINGS (2)</span><span class="st on">TODAY IN WXYZ (7)</span></div>
+ ${[['06:12:04','entered the Ranked 50 · #48'],['06:55:10','Level 2 slot 3 in (replaced EFGH)'],['07:05:02','<span style="color:#FF9EA1">SEC 424B5 filed → NEWS D</span> · AI → CAUTION'],['07:15:40','<span class="g">signal ▲</span> re-entry / 2nd surge · rank #4'],['07:16:12','<span class="te">ENGINE bought 700 @ $1.79</span> · risk line $1.72'],['07:17:50','Level 2 slot 3 out → QRST · still watched'],['07:17:58','pullback · engine: healthy, holding']].map(e=>`<div class="ev"><span class="mono mu" style="font-size:10.5px">${e[0]}</span><span class="so">${e[1]}</span></div>`).join('')}
+ <div class="note">Everything that happened in this stock today: rank, signals, Level 2, news, AI, orders, fills, halts. Full detail in Review.</div>`;
+const news = `<section class="panel" style="flex:1.05">${A?newsA:todayW}</section>`;
+const kv = (l,v) => `<div><div class="l">${l}</div><div class="v" style="font-size:12px">${v}</div></div>`;
+const pos = `<section class="panel" style="flex:0 0 250px"><div class="ptitle"><b>POSITION</b><span>${A?'yours':'engine\'s'}</span></div>
+ <div class="stat" style="grid-template-columns:1fr 1fr">
+ ${A? kv('SHARES · AVG','300 @ $2.15')+kv('P&amp;L','<span class="g">+$0.00</span>')+kv('YOUR STOP','<span style="color:#C9A94A">none · + STOP</span>')+kv('ORDER','<span style="color:#9CC3FF">BUY 221 working</span>')+kv('BUY WITH','cash only')+kv('MARGIN REQ.','100% (&lt; $2.50)')+kv('SHORT','shorts off')+kv('RISK CHECK','<span class="g">OK</span>')
+    : kv('SHARES · AVG','700 @ $1.79')+kv('P&amp;L','<span class="g">+$35.00 · +2.79%</span>')+kv('RISK LINE','<span class="te">$1.72</span>')+kv('ORDERS','none working')+kv('BUY WITH','cash only')+kv('MARGIN REQ.','100% (&lt; $2.50)')+kv('SHORT','shorts off')+kv('RISK CHECK','<span class="g">OK</span>')}
+ </div><div class="sec"><span>TODAY IN THIS STOCK</span></div>
+ <div class="li" style="font-size:11px">${A?'1 trade (this one) · realized $0.00':'1 trade (this one, engine\'s) · realized $0.00'} · <span class="bl">Review ▸</span></div></section>`;
+
+H.push(`<div class="content" style="flex-direction:column">${hdr}
+ <div style="display:flex;gap:8px;flex:0 0 322px;min-height:0">${chart}${book}</div>
+ <div style="display:flex;gap:8px;flex-grow:1;min-height:0">${stats}${eng}${ai}${news}${pos}</div></div>`);
+document.getElementById('win').innerHTML = H.join('').replace(/font-family="IBM Plex (Mono|Sans)"/g, (m,f)=>`style="font-family:'IBM Plex ${f}',sans-serif"`);
+</script>
+</body>
+</html>

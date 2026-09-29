@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings — v4 proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+/*COMMON*/
+<style>
+.nav{width:226px;flex-shrink:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.ng{font-size:9.5px;font-weight:700;letter-spacing:.1em;color:var(--muted);padding:8px 8px 3px}
+.ni{height:28px;display:flex;align-items:center;padding:0 10px;border-radius:6px;font-size:12px;color:var(--soft);border:1px solid transparent}
+.ni.on{background:#24324A;border-color:#5AA2FF;color:#fff}
+.ni.sub{color:var(--soft)}
+.rules{height:30px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:6px;background:#101722;border:1px solid #263852;font-size:11px;color:var(--soft)}
+.bd{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font-size:9.5px;font-weight:700;letter-spacing:.04em;white-space:nowrap;border:1px solid}
+.b-now{color:#9CC3FF;border-color:#2F5C95;background:#12223A}
+.b-safe{color:#F2C27A;border-color:#6B4A16;background:#221A0C}
+.b-lock{color:#AAB6C4;border-color:#3A4556;background:#1A212C}
+.b-test{color:#8A96A8;border-color:#2E3A4A;border-style:dashed}
+.srow{display:grid;grid-template-columns:1fr auto auto;column-gap:10px;align-items:center;min-height:34px;border-bottom:1px solid var(--row);padding:2px 0}
+.srow:last-child{border-bottom:0}
+.lbl{font-size:12px;line-height:1.25}
+.lbl small{display:block;font-size:10px;color:var(--dim)}
+.val{min-width:78px;height:26px;padding:0 9px;border-radius:5px;border:1px solid #2E3A4A;background:#0F141C;font-family:'IBM Plex Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap}
+.tog{display:inline-block;vertical-align:middle;width:36px;height:20px;border-radius:10px;background:#1F6B45;position:relative;flex-shrink:0}
+.tog:after{content:'';position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:7px;background:#E7EAEE}
+.tog.off{background:#2A3340}.tog.off:after{right:auto;left:3px;background:#8A96A8}
+.tog.lk{opacity:.55}
+.tv{border-style:dashed;border-color:#7A6A3A}
+.tv small{font-family:'IBM Plex Sans',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.06em;color:#C9A94A;margin-right:7px}
+.edit{height:32px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:6px;background:#0F141C;border:1px solid #2E3A4A;font-size:11px;color:var(--soft)}
+.pend{border:1px dashed #6B4A16;background:#1D170C;border-radius:6px;padding:6px 9px;font-size:11px;display:flex;align-items:center;gap:8px}
+.envc{flex:1;border-radius:8px;padding:9px 11px;border:1px solid}
+.blk{border:1px solid #3A4556;border-radius:10px;padding:6px;gap:6px;background:#0D1117}
+.blk.live{border-color:#7A2A2E}
+.blk.shr{border-style:dashed}
+.grp{height:24px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 5px;font-size:11px;color:var(--soft);white-space:nowrap}
+.grp b{color:#fff;letter-spacing:.05em;font-size:11.5px}
+.hist{display:grid;grid-template-columns:62px 1fr auto;column-gap:8px;font-size:10.5px;min-height:21px;align-items:center;border-bottom:1px solid var(--row)}
+.lockli{font-size:11px;color:var(--soft);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="win" id="win"></div>
+<script>
+const page = +(new URLSearchParams(location.search).get('page') || 1);
+const H = [];
+H.push(`<header>
+<button class="back"><span style="font-size:16px;line-height:1">←</span><b>MAIN WINDOW</b><kbd>F2</kbd></button>
+<span class="wtitle">Settings</span><span class="env">PAPER</span><span class="autop">AUTO OFF — YOU TRADE</span>
+<div style="flex-grow:1"></div>
+<span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.15"><span class="lab">LIVE ALERTS</span><span style="font-size:9.5px;color:#6E7A8A" class="nw">click one to trade</span></span>
+<span class="sig" style="border:1px solid #2F9E63;background:rgba(52,199,123,.55);color:#EFFFF6">▲ ABCD strong up</span>
+<span class="sig" style="border:1px solid #9D4B7C;background:rgba(244,114,182,.18);color:#FBCFE8">EXIT? GHIJ</span>
+<span style="display:flex;flex-direction:column;line-height:1.15;margin-left:4px"><span class="lab">DAY P&amp;L</span><span class="mono g nw" style="font-size:12.5px">+$233.00 · +4.66%</span></span>
+<span class="health"><span style="width:8px;height:8px;border-radius:4px;background:#34C77B"></span>HEALTHY</span>
+<button class="flat"><b>FLATTEN ALL</b><span>hold 1 s</span></button>
+</header>
+<div class="alert"><span class="atag">INFO</span><span class="mono mu" style="font-size:10.5px">07:43:02</span><span class="ell so" style="font-size:11px">Settings: LIVE hard loss limit raise $600 → $800 scheduled for the next trading day (Mon Sep 28, 4:00 a.m. ET) · PIN confirmed</span><div style="flex-grow:1"></div><span class="bl nw" style="font-size:10.5px">Today's alerts (16) ▸</span></div>`);
+
+const NOW = '<span class="bd b-now">NOW</span>';
+const SAFE = '<span class="bd b-safe">RISKIER → NEXT DAY</span>';
+const LOCK = '<span class="bd b-lock">🔒 LOCKED</span>';
+const TEST = '<span class="bd b-test">NOT SET YET · TESTING</span>';
+const PROP = '<span class="bd b-test">PROPOSED</span>';
+const row = (l, s, v, b) => `<div class="srow"><div class="lbl">${l}${s?`<small>${s}</small>`:''}</div><div>${v}</div><div style="display:flex;justify-content:flex-end;min-width:${b===SAFE?128:60}px">${b||''}</div></div>`;
+const val = (t, c) => `<span class="val ${c||''}">${t}</span>`;
+const tv = (t) => `<span class="val tv"><small>TEST</small>${t}</span>`;
+const tog = (on, lk) => `<span class="tog ${on?'':'off'} ${lk?'lk':''}"></span>`;
+const panel = (title, sub, body, style) => `<section class="panel" style="${style||''}"><div class="ptitle"><b>${title}</b>${sub?`<span>${sub}</span>`:''}</div>${body}</section>`;
+
+// ---------- nav ----------
+const items = [
+ ['TRADING & RISK', [['Trading mode',1],['Loss limits',1],['Leverage & shorts',1],['Hard caps',1],['Order size',1],['Execution',1]]],
+ ['ENGINE & CONNECTIONS', [['Strategies',2],['Versions',2],['AI',2],['Connections',2],['Session hours',2],['Phone',2],['Data & backups',2]]],
+ ['SCREEN & SOUNDS', [['Alerts & sounds',3],['List & display',3],['My list',3]]],
+ ['RECORD', [['Change history',1]]],
+];
+let nav = '<nav class="nav">';
+items.forEach(([g, list]) => { nav += `<div class="ng">${g}</div>`; list.forEach(([n,p],i) => { nav += `<div class="ni ${p===page && (i===0 && g!=='RECORD')?'on':''}">${n}</div>`; }); });
+nav += `<div style="flex-grow:1"></div><div class="note" style="border:1px solid #6B4A16;background:#1D170C;border-radius:6px;padding:7px 8px;color:#F2C27A">Every change is logged. The engine and the AI can never change a setting.</div></nav>`;
+
+const rules = `<div class="rules"><b class="nw" style="color:#fff;letter-spacing:.04em">WHEN A CHANGE COUNTS</b>
+ ${NOW}<span class="nw">at once</span>${SAFE}<span class="nw">LIVE: safer at once · riskier from the next trading day + PIN</span>${LOCK}<span class="nw">safety rule</span><span class="val tv" style="height:20px;min-width:0;font-size:10.5px"><small>TEST</small>$300</span><span class="nw">starting value, set by testing</span><div style="flex-grow:1"></div><span class="dm nw">PAPER: every change at once</span></div>`;
+const editBar = (live, txt) => `<div class="edit"><b class="nw" style="color:#fff;letter-spacing:.04em">EDITING SETTINGS FOR</b><span class="seg"><span class="${live?'':'on'}">PAPER</span><span class="${live?'on':''}" style="${live?'color:#FFB3B5;box-shadow:inset 0 0 0 1px #E5484D;background:#2A1114':'color:#FF9EA1'}">LIVE</span></span><span class="nw">${txt||'two separate sets · changing PAPER never changes LIVE · this switch never changes your trading mode'}</span><div style="flex-grow:1"></div><span class="btn" style="height:24px">Copy PAPER values to LIVE…</span><span class="dm nw">= a LIVE change</span></div>`;
+
+let content = '';
+if (page === 1) {
+  const env = panel('TRADING MODE', 'switching to LIVE: hold + PIN + all start-up checks', `<div style="display:flex;gap:8px">
+    <div class="envc" style="border-color:#5AA2FF;background:#16233A"><div style="font-size:15px;font-weight:700;color:#A9C7FF">PAPER <span class="bd b-now" style="margin-left:4px">ACTIVE</span></div><div class="so" style="font-size:11px;margin-top:3px">Alpaca paper account · same rules as LIVE</div></div>
+    <div class="envc" style="border-color:#7A2A2E;background:#1E0F12"><div style="font-size:15px;font-weight:700;color:#FF9EA1">LIVE — REAL MONEY</div><div class="so" style="font-size:11px;margin-top:3px">hold 2 s + PIN → start-up checks</div></div></div>
+    <div class="note">Checks: Alpaca connected · correct account · market data healthy · risk engine healthy · positions and orders match · clock synced · no critical feed failure. LIVE starts on the smallest size preset; the whole platform gets a red frame.</div>`);
+  const loss = panel('LOSS LIMITS', 'count the whole day: closed + open, same as Day P&L', `
+    ${row('Soft limit','AUTO stops opening trades · you can still trade',tv('$300'),SAFE)}
+    ${row('Hard limit','all new entries blocked (yours too) · exits always work · no Resume AUTO that day',tv('$600'),SAFE)}
+    <div class="pend"><span class="bd b-safe">SCHEDULED</span><span>LIVE hard limit <b class="mono">$600 → $800</b> · from <b>Mon Sep 28, 4:00 a.m. ET</b> · PIN ✓</span><div style="flex-grow:1"></div><span class="btn" style="height:22px;font-size:10.5px">cancel</span></div>
+    ${row('Give-back from today\'s high','AUTO pauses · never blocks you while you are up',tv('$500'),SAFE)}
+    ${row('Recovery before a new soft-limit pause','P&L must come back this far above the soft level',tv('$50'),SAFE)}`, 'flex:0 0 auto');
+  const lev = panel('LEVERAGE & SHORTS', 'LIVE rollout: Phase 1 of 4', `
+    ${row('Leverage','set at Alpaca and in the platform (both must match)',val('1×'),SAFE)}
+    ${row('Short selling','Alpaca long-only · opens only in Phase 3, after the short engine is proven',`<span style="display:flex;gap:8px;align-items:center"><span class="mono mu" style="font-size:11px">OFF</span>${tog(false,true)}</span>`,LOCK)}
+    ${row('Safety reserve (margin)','kept unused; size set in paper and small LIVE tests',val('—'),TEST)}
+    ${row('Intraday margin calls','view only',val('0 — TARGET 0','g'),'')}`, 'flex-grow:1');
+  const caps = panel('HARD CAPS', 'apply to every order, yours and the engine\'s', `
+    ${row('Most in one stock','% of equity · also caps FULL CAP',tv('45% · $2,355'),SAFE)}
+    ${row('Most open positions at once','',tv('6'),SAFE)}
+    ${row('Engine risk per trade (1R)','% of equity the engine may lose if a trade is wrong',tv('0.5% · $26'),SAFE)}
+    ${row('Engine reserve for better setups','',tv('20%'),SAFE)}
+    ${row('Liquidity cap','from each stock\'s own volume · engine side',val('auto'),LOCK)}
+    <div class="note">A change counts for new decisions only: it never rewrites a working order or closes a position (max 6 → 4 while holding 5 = no new entries until below 4).</div>`, 'flex:0 0 auto');
+  const size = panel('ORDER SIZE', 'your BUY / SHORT buttons · the engine sizes its own', `
+    ${[['10%','$523'],['25%','$1,308'],['50%','$2,617'],['$2,000','$2,000']].map(p=>row(`<b>${p[0]}</b>${p[0].includes('%')?' of equity':' fixed'}`,'',`<span style="display:flex;gap:8px;align-items:center"><span class="mono dm" style="font-size:11px">${p[1]} today</span>${tv(p[0])}</span>`,SAFE)).join('')}
+    ${row('<b class="am">FULL CAP</b>','the most the limits allow for that stock',`<span class="mono dm" style="font-size:11px">up to $2,318</span>`,LOCK)}
+    ${row('At start-up','LIVE: smallest preset first · PAPER: remembers the last',val('rule'),LOCK)}
+    <div class="note">Changing sizes never touches an order already working.</div>`, 'flex-grow:1');
+  const exe = panel('EXECUTION', 'how hard an order may chase the price', `
+    ${row('Your max slippage on entries','the ceiling can never pass this',tv('5% · ≤ $0.25'),SAFE)}
+    ${row('Exit boundary (normal exits)','then EXIT NOT FILLED + SELL LOWER TO $x',tv('8%'),SAFE)}
+    ${row('FLATTEN ALL emergency band','wider; set by paper and replay testing',val('—'),TEST)}
+    ${row('Unprotected market orders','protected, price-limited orders only; exact mechanics set by testing',val('prohibited'),LOCK)}`, 'flex:0 0 auto');
+  const hist = panel('CHANGE HISTORY', 'all changes, kept for good', `
+    ${[['07:43:02','<b style="color:#FF9EA1">LIVE</b> · Hard limit $600 → $800','Mon Sep 28'],['07:10:15','<b style="color:#A9C7FF">PAPER</b> · Soft limit $250 → $300','at once'],['Sep 26','<b style="color:#FF9EA1">LIVE</b> · Leverage 1× (Alpaca + platform)','at once']].map(h=>`<div class="hist"><span class="mono mu">${h[0]}</span><span class="so">${h[1]}</span><span class="dm">${h[2]}</span></div>`).join('')}`, 'flex-grow:1');
+  content = `<div class="col" style="flex:1.05">${env}${loss}${lev}</div><div class="col" style="flex:1">${caps}${size}</div><div class="col" style="flex:0.95">${exe}${hist}</div>`;
+}
+if (page === 2) {
+  const strat = panel('STRATEGIES', 'turning one off is always immediate', `
+    ${row('Long engine','',tog(true),SAFE)}
+    ${row('Level 2 strategies','if IBKR Level 2 is down: stays ON and shows <b class="am">UNAVAILABLE — IBKR L2 DOWN</b> · your setting is never changed',tog(true),SAFE)}
+    ${row('Short engine','paper only until proven on its own (Files 6, 8) · Phase 3',`<span class="mono mu" style="font-size:11px">PAPER ONLY</span>`,LOCK)}
+    ${row('AI context check','engine + AI; stays only if it improves results after costs',tog(true),SAFE)}`, 'flex:0 0 auto');
+  const vers = panel('VERSIONS', 'only approved versions can trade', `
+    ${row('Strategy / model','approved Sep 20 · last full test Sep 20',val('v0.3.1'),'')}
+    ${row('Risk config','',val('r12'),'')}
+    ${row('AI prompt set','',val('p4'),'')}
+    <div class="pend" style="border-color:#2F5C95;background:#101A2A"><span class="bd b-now">SHADOW</span><span>Challenger <b class="mono">v0.3.2</b> running since Sep 24 · sees everything, sends no orders · compare in Review</span></div>
+    <div style="display:flex;gap:8px;margin-top:2px"><span class="btn">↩ roll back to v0.3.0</span><span class="btn" style="color:var(--muted)">PROMOTE v0.3.2 · tests + hold 2 s + PIN</span></div>
+    <div class="note">Never automatic: retraining never replaces the live version by itself (File 8).</div>`, 'flex:0 0 auto');
+  const ai = panel('AI', 'context only · no order authority', `
+    ${row('Mark an AI verdict as old after','display only; the engine uses its own freshness rules',tv('3 min'),NOW)}
+    ${row('AI never holds up a fast trigger','',val('rule'),LOCK)}
+    ${row('Ask AI window can place orders','',val('never'),LOCK)}`, 'flex-grow:1');
+  const conn = panel('CONNECTIONS', 'keys live on the server, never shown in full', `
+    <div class="th" style="grid-template-columns:160px 1fr 96px"><span>CONNECTION</span><span>DETAIL</span><span>STATUS</span></div>
+    ${[['ORDERS · ALPACA','paper PA3••••9F2 · orders, fills, cash','g','connected'],['LEVEL 2 · IBKR','logged in · 3 of 3 slots in use','g','connected'],['MARKET DATA · MASSIVE','trades and quotes, all US stocks','g','connected'],['NEWS & FILINGS','Benzinga · SEC EDGAR · openFDA','g','connected'],['AI SERVICE','summaries and context','g','ready']].map(c=>`<div class="tr" style="height:30px;grid-template-columns:160px 1fr 96px;font-size:11px"><b style="font-size:10.5px;letter-spacing:.03em">${c[0]}</b><span class="so">${c[1]}</span><span class="${c[2]}">● ${c[3]}</span></div>`).join('')}
+    <div class="sec"><span>BROKER SETUP</span></div>
+    <div style="display:flex;gap:8px"><div class="envc" style="border-color:#5AA2FF;background:#16233A;padding:6px 9px"><b style="font-size:12px">Hybrid</b> <span class="bd b-now">CURRENT</span><div class="so" style="font-size:10.5px">Alpaca orders &amp; account · IBKR Level 2 · Massive data</div></div><div class="envc" style="border-color:#2E3A4A;padding:6px 9px"><b style="font-size:12px" class="mu">IBKR only</b> <span class="bd b-lock">NOT AUTOMATIC</span><div class="dm" style="font-size:10.5px">review around $60,000, or earlier if IBKR moves your account to the new FINRA rules</div></div></div>
+    <div class="note">One platform: only the broker connector changes. A switch is a LIVE change — PIN, next trading day, no open positions or working orders, the IBKR execution connector passed PAPER testing, and a preflight on the new account (account, cash, permissions, market data, order routing, clock, positions = 0, API health). Money is moved separately, by you.</div>`, 'flex:0 0 auto');
+  const sess = panel('SESSION HOURS', 'Eastern Time · official calendar, holidays and early closes', `
+    <div style="display:flex;gap:18px;font-size:12px"><span><span class="lab">PRE-MARKET</span><br><span class="mono">4:00 a.m.</span></span><span><span class="lab">REGULAR</span><br><span class="mono">9:30–4:00</span></span><span><span class="lab">AFTER-HOURS</span><br><span class="mono">to 8:00 p.m.</span></span><span><span class="lab">OVERNIGHT</span><br><span class="mono mu">OFF</span></span></div>
+    <div class="note">Outside 9:30–4:00 only limit orders (Alpaca). Overnight trading stays off unless you decide otherwise.</div>`, 'flex:0 0 auto');
+  const phone = panel('PHONE', 'settled — see the Phone view', `
+    ${row('Critical alerts to the phone','always sent · can\'t be turned off in LIVE',tog(true,true),LOCK)}
+    ${row('Attention alerts to the phone','e.g. EXIT?, soft limit, give-back',tog(true),NOW)}
+    ${row('Phone: STOP AUTO · FLATTEN ALL · sell your own positions (hold 1 s)','never buys, never turns AUTO on, never switches PAPER/LIVE',val('rule'),LOCK)}
+    <div class="note">The phone's own settings control notification permission; if blocked, the phone view and System Health say so.</div>`, 'flex:0 0 auto');
+  const data = panel('DATA & BACKUPS', '', `
+    ${row('Journal, orders and fills','kept for good, never edited · backed up nightly ✓',val('forever'),LOCK)}
+    ${row('Raw ticks and Level 2 for Replay','how far back Replay can go',val('—'),TEST)}
+    ${row('Export trades and fills','for reconciliation and taxes',`<span class="btn" style="height:24px">⇩ CSV</span>`,'')}`, 'flex-grow:1');
+  content = `<div class="col" style="flex:1">${strat}${vers}${ai}</div><div class="col" style="flex:1.3">${conn}${sess}</div><div class="col" style="flex:0.85">${phone}${data}</div>`;
+}
+if (page === 3) {
+  // Levels are fixed (🔒): shown as a label, never a choice.
+  const lv = l => { const c = l==='Critical'?'color:#FFB3B5;border-color:#7A3035;background:#2A1114':l==='Attention'?'color:#F2C27A;border-color:#6B4A16;background:#221A0C':l==='Signal'?'color:#8CE0B0;border-color:#1F6B45':'color:#AAB6C4;border-color:#3A4556;background:#1A212C'; return `<span class="bd" style="${c}">🔒 ${l.toUpperCase()}</span>`; };
+  const ev = [
+    ['▲ Green strong up · your stocks','Signal','rising chime',true],['▼ Red strong down · your stocks','Signal','falling chime',true],
+    ['EXIT? on a stock you hold','Attention','double beep',true],['Your order filled (buy / exit)','Info','soft click',true],
+    ['Engine\'s fill (AUTO ON)','Info','softer tick',true],['Partial fill · stop triggered','Attention','two notes',true],
+    ['Entry rejected','Attention','low buzz',true],['Soft limit · give-back · AUTO paused','Attention','amber tone',true],
+    ['Exit rejected · EXIT NOT FILLED','Critical','alarm',true,1],['Halt on a stock you hold','Critical','alarm',true,1],
+    ['Hard limit · FLATTEN INCOMPLETE','Critical','alarm',true,1],['NOT SAFE TO TRADE · connection lost','Critical','alarm',true,1],
+    ['Intraday margin call','Critical','alarm',true,1],
+  ];
+  const cols = 'grid-template-columns:1fr 112px 92px 92px 40px';
+  const snd = panel('ALERTS & SOUNDS', 'LIVE set · every event has its own sound; drawn from engine events, never slows the engine', `
+    <div class="th" style="${cols}"><span>EVENT</span><span>LEVEL · FIXED</span><span>SOUND</span><span>VOLUME</span><span>ON</span></div>
+    <div>${ev.map(e=>`<div class="tr" style="height:28px;${cols};font-size:11.5px"><span class="${e[0].startsWith('▲')?'g':e[0].startsWith('▼')?'rd':''}">${e[0].replace('EXIT?','<b style="color:var(--pink)">EXIT?</b>')}</span><span>${lv(e[1])}</span><span class="so" style="font-size:11px">${e[2]}</span><span><span style="display:block;height:5px;border-radius:3px;background:#273142"><span style="display:block;height:5px;width:${e[4]?80:60}%;border-radius:3px;background:#5AA2FF"></span></span></span><span>${e[4]?'<span title="can be turned down, not off, in LIVE">🔒</span>':tog(e[3])}</span></div>`).join('')}</div>
+    <div class="note">🔒 Levels are fixed by the specification: a setting changes an event's sound, never its level. 🔒 Critical sounds: in LIVE they can be turned down but not off; they repeat about every 10 s until SEEN (SEEN stops the sound, not the problem).</div>`, 'flex:0 0 auto');
+  const sig = panel('SIGNAL SOUNDS AND SPREAD WARNING', 'LIVE set', `
+    ${row('Blink sounds for','● stocks that matter to you (My list, the 3 Level 2 panels, Selected, your positions) ○ all Ranked 50',val('yours'),NOW)}
+    ${row('Same stock + same signal sounds at most every','anti-spam; critical sounds always play',tv('60 s'),NOW)}
+    ${row('Spread warning box: amber from · red from','% of price · a warning, so PAPER and LIVE keep their own values',tv('1% · 2%'),NOW)}
+    <div class="note">A change to a LIVE setting here applies at once and is logged under LIVE in the change history.</div>`, 'flex-grow:1');
+  const blink = panel('BLINKS', 'look only', `
+    ${row('New signal blinks for, then stays solid','blinks again only on a genuinely new trigger',tv('5 s'),NOW)}
+    ${row('Reduced Motion','glow instead of pulsing',tog(false),NOW)}`, 'flex:0 0 auto');
+  const disp = panel('LIST & DISPLAY', 'screen only · never changes the engine', `
+    ${row('Ranked 50 re-sorts about every','the engine ranks at full speed',tv('1 s'),NOW)}
+    ${row('Hold the row order while the pointer is over the list','prices and signals stay live',tog(true),NOW)}
+    ${row('NEW tag stays for','',tv('30 s'),NOW)}
+    ${row('NEWS letter stays bright for','',tv('60 min'),NOW)}
+    ${row('Back-to-main-window key','',val('F2'),NOW)}
+    <div class="note">All 14 list columns always show (settled); no column chooser.</div>`, 'flex:0 0 auto');
+  const myl = panel('MY LIST', '5 of 20 · same as ☆ in the list', `
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${['CDEF','GHIJ','KLMN','IJKL','XQRB'].map(t=>`<span class="bd" style="height:22px;font-size:11px;color:var(--yellow);border-color:#6B5A1E;background:#221D0C">★ ${t} ×</span>`).join('')}</div>
+    <div class="btn" style="height:28px;color:var(--dim)">+ add ticker…</div>
+    <div class="note">One My list for PAPER and LIVE, shown in rank order at the top of the list. In AUTO ON the engine may trade them only on valid setups.</div>`, 'flex-grow:1');
+  const sepHead = `<div class="grp"><b>SEPARATE FOR PAPER | LIVE</b><span>follows the switch above · now editing</span><span class="bd" style="color:#FFB3B5;border-color:#7A3035;background:#2A1114">LIVE</span><span class="dm">· anything that protects you</span></div>`;
+  const shrHead = `<div class="grp"><b>SHARED — same in PAPER and LIVE</b><span class="dm">look and preferences · not affected by the switch</span></div>`;
+  content = `<div class="col blk live" style="flex:1.25">${sepHead}${snd}${sig}</div><div class="col blk shr" style="flex:1">${shrHead}${blink}${disp}${myl}</div>`;
+}
+const bar = page===1 ? editBar(true) : page===2 ? editBar(false) : editBar(true, 'on this page: the SEPARATE block follows this switch · changing PAPER never changes LIVE · SHARED settings are the same in both');
+H.push(`<div class="content">${nav}<div class="col" style="flex-grow:1">${bar}${rules}<div style="display:flex;gap:8px;flex-grow:1;min-height:0">${content}</div></div></div>`);
+document.getElementById('win').innerHTML = H.join('');
+</script>
+</body>
+</html>
